@@ -848,6 +848,7 @@ function renderProducts(filtered = products, forceProducts = false) {
         productsGrid.appendChild(section);
     });
 
+    if (typeof renderOffers === 'function') renderOffers();
     if (window.lucide) lucide.createIcons();
 }
 
@@ -5233,14 +5234,8 @@ function renderOffers() {
     
     if (window.offers.length === 0) {
         container.style.display = 'none';
-        return;
-    }
-    
-    const isHome = document.getElementById('homePage')?.classList.contains('active');
-    if (isHome) {
-        container.style.display = 'flex';
     } else {
-        container.style.display = 'none';
+        container.style.display = 'flex';
     }
     container.innerHTML = '';
     
@@ -5268,6 +5263,21 @@ function renderOffers() {
         `;
         container.insertAdjacentHTML('beforeend', cardHTML);
     });
+
+    // Render Discounted Products (Takhfidat)
+    const offersProductsContainer = document.getElementById('offersProductsContainer');
+    if (offersProductsContainer && window.products) {
+        offersProductsContainer.innerHTML = '';
+        const discountedProducts = window.products.filter(p => p.discount > 0);
+        if (discountedProducts.length === 0) {
+            offersProductsContainer.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #64748b; padding: 40px; font-weight: 700;">لا توجد عروض حالياً</p>';
+        } else {
+            discountedProducts.forEach(p => {
+                const card = createProductCardHTML(p);
+                offersProductsContainer.appendChild(card);
+            });
+        }
+    }
     
     if (window.lucide) lucide.createIcons();
 }

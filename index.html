@@ -680,25 +680,7 @@
                     </div>
                 </div>
 
-                <!-- Special Offers Dashboard Section -->
-                <div id="specialOffersSection" style="display: none;">
-                    <div class="section-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 0 15px;">
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <div style="background: linear-gradient(135deg, var(--primary) 0%, #ff8c33 100%); width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 8px 15px rgba(255, 107, 0, 0.15);">
-                                <i data-lucide="flame" style="width: 18px;"></i>
-                            </div>
-                            <div>
-                                <h2 style="font-size: 1.15rem; font-weight: 950; color: #0f172a; margin: 0; letter-spacing: -0.5px;">عروض وتخفيضات</h2>
-                                <p style="font-size: 0.7rem; color: #64748b; margin: 1px 0 0; font-weight: 700;">لفترة محدودة 🛒</p>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- Dynamic Offers Container -->
-                    <div id="offersCardsContainer" style="display: flex; gap: 15px; overflow-x: auto; padding: 5px 15px 20px; margin-bottom: 5px; scroll-snap-type: x mandatory; -ms-overflow-style: none; scrollbar-width: none;">
-                        <!-- Offers will be injected here -->
-                    </div>
-                </div>
 
                 <!-- Featured Stores Section (Horizontal Scroll) -->
                 <div id="featuredStoresSection" style="display: none; padding: 0 15px; margin-bottom: 30px;">
@@ -1959,11 +1941,58 @@
 
 
 
+    <!-- Offers Page -->
+    <div id="offersPage" class="page-section" style="background: #f8fafc; min-height: 100vh; padding-bottom: 90px; direction: rtl; font-family: 'Cairo', sans-serif; display: none;">
+        <!-- Clean Premium Header -->
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 20px; background: white; border-bottom: 1px solid #f1f5f9; position: sticky; top: 0; z-index: 10;">
+            <button onclick="navigateTo('homePage')" style="background: #f1f5f9; border: none; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #475569; cursor: pointer;">
+                <i data-lucide="arrow-right" style="width: 20px; height: 20px;"></i>
+            </button>
+            <h2 style="font-size: 1.1rem; font-weight: 900; color: #0f172a; margin: 0;">العروض والتخفيضات</h2>
+            <div style="width: 38px;"></div>
+        </div>
+
+        <div class="container" style="max-width: 450px; margin: 0 auto; padding: 20px 15px;">
+            <!-- Banners Section -->
+            <div style="margin-bottom: 25px;">
+                <div class="section-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="background: linear-gradient(135deg, var(--primary) 0%, #ff8c33 100%); width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white;">
+                            <i data-lucide="flame" style="width: 18px;"></i>
+                        </div>
+                        <div>
+                            <h2 style="font-size: 1.15rem; font-weight: 950; color: #0f172a; margin: 0;">عروض وتخفيضات مسعودي</h2>
+                            <p style="font-size: 0.7rem; color: #64748b; margin: 1px 0 0; font-weight: 700;">لفترة محدودة 🛒</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="offersCardsContainer" style="display: flex; flex-direction: column; gap: 15px; padding-bottom: 10px;">
+                    <!-- Banners injected dynamically -->
+                </div>
+            </div>
+
+            <!-- Discounted Products Section -->
+            <div>
+                <h3 style="font-size: 1.1rem; font-weight: 900; color: #1e293b; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="percent" style="width: 20px; color: var(--primary);"></i>
+                    منتجات مخفضة
+                </h3>
+                <div id="offersProductsContainer" class="products-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                    <!-- Discounted products injected dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bottom Navigation Bar -->
     <nav class="bottom-nav">
         <div class="nav-item" id="nav-products" onclick="navigateTo('homePage', true)">
             <i data-lucide="layout-grid"></i>
             <span>المنتجات</span>
+        </div>
+        <div class="nav-item" id="nav-offers" onclick="navigateTo('offersPage')">
+            <i data-lucide="percent"></i>
+            <span>العروض</span>
         </div>
         <div class="nav-item nav-cart-center" id="nav-cart" onclick="navigateTo('cartPage')">
             <div class="nav-cart-badge" id="bottomNavCartBadge">0</div>
