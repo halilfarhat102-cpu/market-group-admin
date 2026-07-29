@@ -1166,7 +1166,7 @@ window.navigateTo = (pageId, scrollToProducts = false) => {
     // Hide bottom nav on delivery page, show on all others
     const bottomNav = document.querySelector('.bottom-nav');
     if (bottomNav) {
-        bottomNav.style.display = pageId === 'deliveryPage' ? 'none' : '';
+        bottomNav.style.display = (pageId === 'deliveryPage' || pageId === 'merchantPage') ? 'none' : 'flex';
     }
 
     const navMapping = {
