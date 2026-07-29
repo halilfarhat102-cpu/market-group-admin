@@ -3486,9 +3486,9 @@ function startApp() {
             const splash = document.getElementById('splash-screen');
             if (splash) {
                 splash.classList.add('hidden');
-                setTimeout(() => splash.remove(), 600); // Reduced fade out time
+                setTimeout(() => splash.remove(), 400); // Fast fade out removal
             }
-        }, 400); // Reduced delay drastically from 1800ms for better performance
+        }, 100);
 
     } catch (e) {
         console.error("Initialization error:", e);

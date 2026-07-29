@@ -2446,7 +2446,7 @@ body {
     align-items: center;
     justify-content: center;
     z-index: 999999; /* Increased z-index */
-    transition: opacity 1.3s cubic-bezier(0.5, 0, 0.15, 1), transform 1.3s cubic-bezier(0.5, 0, 0.15, 1), visibility 1.3s;
+    transition: opacity 0.4s cubic-bezier(0.5, 0, 0.15, 1), transform 0.4s cubic-bezier(0.5, 0, 0.15, 1), visibility 0.4s;
     margin: 0;
     padding: 0;
     transform: scale(1);
