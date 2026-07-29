@@ -1,9 +1,6 @@
-const CACHE_NAME = 'masoudi-cache-v4'; // Incremented version - VIP fix
+const CACHE_NAME = 'masoudi-cache-v5';
 const assetsToCache = [
   '/',
-  '/index.html',
-  '/style.css',
-  '/script.js',
   '/logo.png'
 ];
 
