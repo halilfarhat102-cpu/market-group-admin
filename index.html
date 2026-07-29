@@ -980,39 +980,7 @@
                 <div id="vipStatusText" style="display: none; font-size: 0.65rem; font-weight: 800; color: #D4AF37; margin-bottom: 12px;">حساب خاص للمدير</div>
                 
                 <p id="profileUserEmail" style="font-size: 0.85rem; color: rgba(255,255,255,0.9); margin: 0 0 15px; font-weight: 600;"></p>
-                
-                <!-- Centered Loyalty Points Badge -->
-                <div style="display: inline-flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.15); padding: 8px 20px; border-radius: 20px; backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.15); box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);">
-                    <span style="font-size: 0.75rem; font-weight: 800; color: rgba(255,255,255,0.95); margin-left: 6px;">النقاط:</span>
-                    <span id="loyaltyPointsValue" style="font-size: 1.1rem; font-weight: 900; color: #ffeb3b; text-shadow: 0 2px 5px rgba(0,0,0,0.2);">0</span>
-                </div>
-            </div>
-        </div>
 
-        <div class="container" style="max-width: 400px; margin: 0 auto; padding: 40px 15px 0; position: relative; z-index: 2;">
-
-            <!-- Floating Loyalty Card -->
-            <div style="background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 20px; padding: 18px; margin: 0 auto 20px; max-width: 340px; box-shadow: 0 15px 35px rgba(0,0,0,0.1), 0 4px 10px rgba(0,0,0,0.05); border: 1px solid rgba(255,255,255,1);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <div style="background: linear-gradient(135deg, #fde047, #eab308); width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(234, 179, 8, 0.3);">
-                            <i data-lucide="award" style="width: 16px; color: white;"></i>
-                        </div>
-                        <span id="loyaltyLevelName" style="font-size: 0.85rem; font-weight: 900; color: #1e293b;">مستوى برونزي 🏆</span>
-                    </div>
-                </div>
-                
-                <div style="height: 12px; background: #f1f5f9; border-radius: 12px; overflow: hidden; position: relative; box-shadow: inset 0 2px 5px rgba(0,0,0,0.02);">
-                    <div id="loyaltyProgressBar" style="position: absolute; top: 0; right: 0; height: 100%; width: 0%; background: linear-gradient(90deg, #F09819, #FF512F); transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 10px rgba(255, 107, 0, 0.5);"></div>
-                </div>
-                
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; gap: 10px;">
-                    <p id="loyaltyNextLevelDesc" style="font-size: 0.7rem; color: #64748b; margin: 0; text-align: right; font-weight: 800; flex: 1;">جاري الحساب...</p>
-                    <button id="redeemPointsBtn" onclick="redeemLoyaltyPoints()" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 6px 14px; border-radius: 10px; font-size: 0.7rem; font-weight: 900; cursor: pointer; display: none; box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);">
-                        <i data-lucide="refresh-cw" style="width: 12px;"></i> استبدال
-                    </button>
-                </div>
-            </div>
             
             <!-- Premium Compact Glass Wallet Card -->
             <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: 20px; padding: 18px; margin: 0 auto 20px; max-width: 340px; box-shadow: 0 15px 35px rgba(15, 23, 42, 0.3), 0 4px 10px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.08); position: relative; overflow: hidden; color: white;">

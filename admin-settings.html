@@ -170,42 +170,7 @@
                     <button type="submit" class="btn-primary" style="width: auto; padding: 12px 40px; border-radius: 12px;">حفظ مظهر الموقع</button>
                 </form>
             </div>
-            <div class="admin-card" style="background: white; padding: 30px; border-radius: 15px; box-shadow: var(--shadow-sm); margin-bottom: 30px;">
-                <h4 style="margin-bottom: 20px; color: var(--primary);"><i data-lucide="gift"></i> إعدادات نظام النقاط والمكافآت (Loyalty System)</h4>
-                <form id="loyaltyConfigForm" onsubmit="saveLoyaltyConfig(event)">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px;">
-                        <div class="form-group">
-                            <label>النقاط المكتسبة لكل مبلغ شحن (ج.م)</label>
-                            <div style="display: flex; gap: 10px;">
-                                <input type="number" id="loyaltyEarnAmount" placeholder="1000" title="المبلغ المدفوع (مثال 1000 ج.م)" style="width: 50%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
-                                <input type="number" id="loyaltyEarnPoints" placeholder="200" title="النقاط المكتسبة (مثال 200 نقطة)" style="width: 50%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
-                            </div>
-                            <small style="color: #64748b;">مثال: 1000 ج.م تعطيك 200 نقطة</small>
-                        </div>
-                        <div class="form-group">
-                            <label>الحد الأدنى للاستبدال وقيمة المكافأة</label>
-                            <div style="display: flex; gap: 10px;">
-                                <input type="number" id="loyaltyRedeemThreshold" placeholder="200" title="النقاط المطلوبة للاستبدال (مثال 200 نقطة)" style="width: 50%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
-                                <input type="number" id="loyaltyRedeemValue" placeholder="10" title="قيمة المكافأة (مثال 10 ج.م)" style="width: 50%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
-                            </div>
-                            <small style="color: #64748b;">مثال: استبدال 200 نقطة بـ 10 ج.م</small>
-                        </div>
-                        <div class="form-group">
-                            <label>اسم مستوى "تجميع النقاط"</label>
-                            <input type="text" id="loyaltyLevelCollecting" placeholder="جمع النقاط" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
-                        </div>
-                        <div class="form-group">
-                            <label>اسم مستوى "المكافأة الجاهزة"</label>
-                            <input type="text" id="loyaltyLevelReady" placeholder="مكافأة جاهزة" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
-                        </div>
-                        <div class="form-group" style="grid-column: 1 / -1;">
-                            <label>رسالة التهنئة عند امتلاء الشريط</label>
-                            <input type="text" id="loyaltySuccessMessage" placeholder="🎁 مبروك! الشريط ممتلئ، استبدل الآن" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
-                        </div>
-                    </div>
-                    <button type="submit" class="btn-primary" style="width: auto; padding: 12px 40px; border-radius: 12px;">حفظ إعدادات النقاط</button>
-                </form>
-            </div>
+
 
             <div class="admin-card" style="background: white; padding: 30px; border-radius: 15px; box-shadow: var(--shadow-sm); margin-bottom: 30px;">
                 <h4 style="margin-bottom: 20px; color: var(--primary);"><i data-lucide="image"></i> إعدادات البنر المنزلق (Slider)</h4>

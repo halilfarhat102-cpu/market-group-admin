@@ -3306,13 +3306,7 @@ function renderCustomersList(customersArray) {
                     <div style="font-weight: 900; color: #C2410C; font-size: 1rem;">${(u.walletBalance || 0).toLocaleString()} <small>ج.م</small></div>
                 </div>
             </td>
-            <td>
-                <div style="background: #f5f3ff; padding: 8px 12px; border-radius: 12px; border: 1px solid #ddd6fe; display: inline-block; min-width: 95px; text-align: center;">
-                    <div style="font-size: 0.65rem; color: #7c3aed; font-weight: 800; margin-bottom: 2px;">النقاط</div>
-                    <div style="font-weight: 900; color: #6d28d9; font-size: 1rem;">${(u.points || 0).toLocaleString()} <small>نقطة</small></div>
-                    ${lvlBadge}
-                </div>
-            </td>
+
             <td>
                 ${u.location || u.latlng ? 
                     `<a href="${u.location || `https://www.google.com/maps/search/?api=1&query=${u.latlng}`}" target="_blank" style="color:#3b82f6; text-decoration:none; display:flex; align-items:center; gap:5px; font-size:0.8rem; font-weight:700;">
@@ -3324,7 +3318,7 @@ function renderCustomersList(customersArray) {
             <td>
                 <div style="display:flex; gap:8px;">
                     <button onclick="openWalletModal('${u.id}', ${u.walletBalance || 0})" class="btn-action" title="تعديل المحفظة" style="color:#FF6B00; display:flex; align-items:center; justify-content:center; width:35px; height:35px; border-radius:10px; border:1px solid #FFEDD5; background:#FFF7ED; cursor:pointer;"><i data-lucide="wallet" style="width:16px;"></i></button>
-                    <button onclick="openPointsModal('${u.id}', ${u.points || 0})" class="btn-action" title="تعديل النقاط" style="color:#8b5cf6; display:flex; align-items:center; justify-content:center; width:35px; height:35px; border-radius:10px; border:1px solid #ddd6fe; background:#f5f3ff; cursor:pointer;"><i data-lucide="award" style="width:16px;"></i></button>
+
                     
                     ${u.isRegistered ? `
                         <button onclick="toggleMerchantStatus('${u.id}', ${u.isMerchant || false})" class="btn-action" title="${u.isMerchant ? 'إلغاء صفة تاجر' : 'ترقية لتاجر'}" style="color:${u.isMerchant ? '#8b5cf6' : '#94a3b8'}; display:flex; align-items:center; justify-content:center; width:35px; height:35px; border-radius:10px; border:1px solid ${u.isMerchant ? '#ddd6fe' : '#e2e8f0'}; background:${u.isMerchant ? '#f5f3ff' : 'white'}; cursor:pointer;">
