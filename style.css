@@ -3916,3 +3916,34 @@ body {
     }
 }
 
+/* --- Full Screen Pages for Settings and Checkout --- */
+#settingsModal, #checkoutModal {
+    background: var(--bg-light) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    padding: 0 !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    overflow-y: auto !important;
+}
+
+#settingsModal .modal-content, #checkoutModal .modal-content {
+    max-width: 100% !important;
+    width: 100% !important;
+    min-height: 100vh !important;
+    max-height: none !important;
+    height: auto !important;
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: var(--bg-light) !important;
+    padding: 30px 20px 100px !important;
+    backdrop-filter: none !important;
+    animation: slideInRightPage 0.35s cubic-bezier(0.1, 0.76, 0.55, 0.94) !important;
+}
+
+@keyframes slideInRightPage {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
