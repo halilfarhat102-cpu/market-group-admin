@@ -3859,10 +3859,10 @@ body {
 }
 
 .category-icon-wrapper {
-    height: 70px;
-    min-width: 70px;
+    height: 60px;
+    min-width: 60px;
     width: max-content;
-    border-radius: 18px;
+    border-radius: 15px;
     background: #ffffff;
     border: 2px solid #f1f5f9;
     display: flex;
@@ -3875,14 +3875,14 @@ body {
 
 .category-icon-wrapper i,
 .category-icon-wrapper svg {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     color: #64748b;
     transition: all 0.3s;
 }
 
 .category-icon-item span {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 700;
     color: #475569;
     white-space: nowrap;
@@ -3918,17 +3918,17 @@ body {
         padding: 10px 2px;
     }
     .category-icon-wrapper {
-        height: 58px;
-        min-width: 58px;
-        border-radius: 15px;
+        height: 50px;
+        min-width: 50px;
+        border-radius: 12px;
     }
     .category-icon-wrapper i,
     .category-icon-wrapper svg {
-        width: 20px;
-        height: 20px;
+        width: 16px;
+        height: 16px;
     }
     .category-icon-item span {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
     }
 }
 
