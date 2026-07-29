@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>إدارة المتاجر | مسعودي پرو</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="admin.css">
+    <link rel="icon" type="image/png" href="./logo.png">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+</head>
+<body class="admin-body">
+    <div class="admin-container">
+        <!-- Sidebar (Same as other admin pages) -->
+        <aside class="admin-sidebar">
+            <div class="logo" style="margin-bottom: 40px; text-align: center;">
+                <img src="./logo.png" style="width: 80px; height: 80px; border-radius: 20px; margin-bottom: 10px; object-fit: cover; display: block; margin: 0 auto;">
+                <span style="font-size: 0.8rem; color: var(--text-muted); display: block; font-weight: 900;">مسعودي پرو</span>
+            </div>
+            <nav class="admin-nav">
+                <a href="admin.html"><i data-lucide="layout-dashboard"></i> الإحصائيات</a>
+                <a href="admin-products.html"><i data-lucide="package"></i> المنتجات العامة</a>
+                <a href="admin-stores.html" class="active"><i data-lucide="store"></i> إدارة المتاجر</a>
+                <a href="admin-orders.html"><i data-lucide="shopping-bag"></i> الطلبات</a>
+                <a href="admin-customers.html"><i data-lucide="users"></i> العملاء</a>
+                <a href="admin-drivers.html"><i data-lucide="truck"></i> المناديب</a>
+                <a href="admin-settings.html"><i data-lucide="settings"></i> الإعدادات</a>
+                <a href="index.html" style="margin-top: auto; color: var(--primary);"><i data-lucide="external-link"></i> عرض الموقع</a>
+            </nav>
+        </aside>
+
+        <main class="admin-main">
+            <header class="admin-header">
+                <h2>إدارة المتاجر والمحلات</h2>
+                <div class="admin-user-container">
+                    <div class="admin-user">
+                        <img id="adminImg" src="https://ui-avatars.com/api/?name=Admin&background=FF6B00&color=fff">
+                    </div>
+                </div>
+            </header>
+
+            <div class="welcome-card" style="margin-bottom: 30px;">
+                <div class="welcome-content">
+                    <h1>المحلات الافتراضية 🏪</h1>
+                    <p>يمكنك هنا إنشاء وتعديل المحلات والمطاعم التي تظهر في الصفحة الرئيسية.</p>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-primary" id="generateStoresBtn" style="background: #10B981; border: none; padding: 12px 20px; border-radius: 12px; font-weight: 900; cursor: pointer;">توليد من الأقسام ✨</button>
+                    <button class="btn-primary" id="addStoreBtn" style="padding: 12px 20px; border-radius: 12px; display: flex; align-items: center; gap: 8px;">
+                        <i data-lucide="plus-circle" style="width: 18px;"></i> إضافة متجر يدوي
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>المتجر</th>
+                            <th>النوع/القسم</th>
+                            <th>المنتجات</th>
+                            <th>الحالة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminStoresList">
+                        <tr><td colspan="5" style="text-align:center; padding:50px;">جاري تحميل المتاجر...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Store Edit Modal -->
+    <div class="modal-overlay" id="storeModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <h3 id="storeModalTitle">تعديل بيانات المتجر</h3>
+            <form id="storeForm" style="margin-top: 20px; display: grid; grid-template-columns: 1fr; gap: 15px;">
+                <div class="form-group">
+                    <label>اسم المتجر</label>
+                    <input type="text" id="sName" required>
+                </div>
+                <div class="form-group">
+                    <label>نوع النشاط/القسم</label>
+                    <select id="sType" required>
+                        <option value="">جاري تحميل الأقسام...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>اللوجو (Logo)</label>
+                    <input type="file" id="sLogoFile" accept="image/*" onchange="handleAdminFilePreview(this, 'sLogoPreview')">
+                    <input type="hidden" id="sLogoUrl">
+                    <img id="sLogoPreview" style="width: 60px; height: 60px; border-radius: 12px; margin-top: 10px; display: none; object-fit: cover; border: 1px solid #e2e8f0;">
+                </div>
+                <div class="form-group">
+                    <label>صور غلاف المتجر (Cover Images) - حتى 5 صور</label>
+                    <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                        <input type="file" id="sCoverFiles" accept="image/*" multiple onchange="handleAdminMultiCoverPre(this)" style="display: none;">
+                        <button type="button" onclick="document.getElementById('sCoverFiles').click()" style="background: #f8fafc; border: 2px dashed #e2e8f0; color: #64748b; padding: 15px; border-radius: 14px; cursor: pointer; flex: 1; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <i data-lucide="image-plus" style="width: 20px;"></i> اختيار صور الغلاف
+                        </button>
+                    </div>
+                    <div id="sCoverPreviewGrid" style="display: flex; flex-wrap: wrap; gap: 10px; min-height: 50px; padding: 10px; background: #f8fafc; border-radius: 14px; border: 1px solid #f1f5f9; display: none;"></div>
+                </div>
+                <div class="form-group">
+                    <label>وصف مختصر</label>
+                    <textarea id="sDesc" rows="2"></textarea>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" class="btn-primary" style="flex: 1;">حفظ البيانات</button>
+                    <button type="button" class="btn-secondary" id="closeStoreModal" style="flex: 1;">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof initStoreManagement === 'function') {
+                initStoreManagement();
+            }
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

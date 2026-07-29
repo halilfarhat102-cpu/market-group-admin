@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>إدارة الشحن | مسعودي پرو</title>
+    <link rel="stylesheet" href="admin.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;400;600;700;900&swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<body class="admin-body">
+    <div class="admin-container">
+        <aside class="admin-sidebar">
+            <div class="logo" style="margin-bottom: 40px; text-align: center;">
+                <img src="./logo.png" style="width: 80px; height: 80px; border-radius: 20px; margin-bottom: 10px; object-fit: cover; display: block; margin: 0 auto;">
+                <span style="font-size: 0.8rem; color: var(--text-muted); display: block; font-weight: 900;">مسعودي پرو</span>
+            </div>
+            <nav class="admin-nav">
+                <a href="admin.html"><i data-lucide="layout-dashboard"></i> الإحصائيات</a>
+                <a href="admin-products.html"><i data-lucide="package"></i> المنتجات العامة</a>
+                <a href="admin-stores.html"><i data-lucide="store"></i> إدارة المتاجر</a>
+                <a href="admin-merchant-products.html"><i data-lucide="truck"></i> منتجات التجار</a>
+                <a href="admin-orders.html"><i data-lucide="shopping-bag"></i> الطلبات</a>
+                <a href="admin-recharge.html" class="active"><i data-lucide="zap"></i> طلبات الشحن</a>
+                <a href="admin-customers.html"><i data-lucide="users"></i> العملاء</a>
+                <a href="admin-drivers.html"><i data-lucide="truck"></i> المندوبين</a>
+                <a href="admin-users.html"><i data-lucide="shield-check"></i> الصلاحيات</a>
+                <a href="admin-settings.html"><i data-lucide="settings"></i> إعدادات الموقع</a>
+                <a href="index.html" style="margin-top: auto; color: var(--primary);"><i data-lucide="external-link"></i> عرض الموقع</a>
+            </nav>
+        </aside>
+
+        <main class="admin-main">
+            <!-- Mobile Admin Header -->
+            <div class="mobile-admin-header">
+                <div class="logo">مسعودي</div>
+                <button id="toggleSidebar" style="background:none; border:none; color:var(--primary); cursor:pointer;">
+                    <i data-lucide="menu"></i>
+                </button>
+            </div>
+
+            <header class="admin-header">
+                <h2>إدارة طلبات الشحن</h2>
+                <div style="display: flex; gap: 15px; position: relative;">
+                    <button class="premium-bell-btn" onclick="toggleNotifDropdown()">
+                        <div class="bell-container">
+                            <i data-lucide="bell" class="bell-icon"></i>
+                            <span class="bell-dot"></span>
+                        </div>
+                    </button>
+                    <!-- Dropdown -->
+                    <div class="notif-dropdown" id="notifDropdown">
+                        <div style="padding: 15px; background: var(--bg-admin); border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-weight: 900; font-size: 0.9rem;">آخر التنبيهات</span>
+                            <button onclick="clearNotifDot()" style="background: none; border: none; color: var(--primary); font-size: 0.75rem; font-weight: 800; cursor: pointer;">تحديد كقروء</button>
+                        </div>
+                        <div id="notifList" style="max-height: 400px; overflow-y: auto;">
+                            <!-- Items load here -->
+                        </div>
+                    </div>
+                    <div class="admin-user-container">
+                        <div class="admin-user" onclick="toggleUserDropdown()">
+                            <div style="text-align: left;">
+                                <span id="adminName" style="display: block; font-weight: 800; font-size: 0.9rem;">المدير</span>
+                                <span style="font-size: 0.7rem; color: var(--primary); font-weight: 700;">SUPER ADMIN</span>
+                            </div>
+                            <img id="adminImg" src="https://ui-avatars.com/api/?name=Admin&background=FF6B00&color=fff">
+                        </div>
+                        <div class="user-dropdown" id="userDropdown">
+                            <div class="user-dropdown-header">
+                                <span style="font-weight: 900; font-size: 0.85rem; color: var(--text-main);" id="dropdownAdminName">المدير</span>
+                                <span id="dropdownAdminEmail" style="font-size: 0.7rem; color: var(--text-muted);">engyhamid860@gmail.com</span>
+                            </div>
+                            <button class="user-dropdown-item" onclick="window.location.href='admin-settings.html'">
+                                <i data-lucide="settings" style="width: 16px;"></i> الإعدادات
+                            </button>
+                            <button class="user-dropdown-item logout" onclick="logoutAdmin()">
+                                <i data-lucide="log-out" style="width: 16px;"></i> تسجيل الخروج
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-section" style="margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center;">
+                <h3>طلبات الشحن النشطة</h3>
+                <button onclick="loadRechargeRequests()" class="btn-premium-action" style="padding:10px 20px; border-radius:12px; display:flex; align-items:center; gap:8px;">
+                    <i data-lucide="refresh-cw" style="width:16px;"></i> تحديث البيانات
+                </button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="color: var(--primary);"><i data-lucide="clock"></i></div>
+                    <div class="stat-info"><h4>انتظار المراجعة</h4><p id="recharge-pending-count">0</p></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="color: #10B981;"><i data-lucide="check-circle"></i></div>
+                    <div class="stat-info"><h4>شُحنت اليوم</h4><p id="recharge-approved-today">0</p></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="color: #6366F1;"><i data-lucide="zap"></i></div>
+                    <div class="stat-info"><h4>إجمالي الشحن</h4><p id="recharge-total-amount">0</p></div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>العميل</th>
+                            <th>رقم الهاتف</th>
+                            <th>المبلغ</th>
+                            <th>التاريخ</th>
+                            <th>الحالة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminRechargeList">
+                        <!-- Loaded via admin.js -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <nav class="admin-bottom-nav">
+        <a href="admin.html">
+            <i data-lucide="layout-dashboard"></i>
+            <span>الرئيسية</span>
+        </a>
+        <a href="admin-products.html">
+            <i data-lucide="package"></i>
+            <span>المنتجات</span>
+        </a>
+        <a href="admin-orders.html">
+            <i data-lucide="shopping-bag"></i>
+            <span>الطلبات</span>
+        </a>
+        <a href="admin-recharge.html" class="active">
+            <i data-lucide="zap"></i>
+            <span>الشحن</span>
+        </a>
+        <a href="admin-customers.html">
+            <i data-lucide="users"></i>
+            <span>العملاء</span>
+        </a>
+        <a href="admin-drivers.html">
+            <i data-lucide="truck"></i>
+            <span>المناديب</span>
+        </a>
+    </nav>
+
+    <script src="admin.js"></script>
+    <script>
+        lucide.createIcons();
+        // Custom stat counters for recharge
+        async function updateRechargeStats() {
+            try {
+                const snap = await db.collection('rechargeRequests').get();
+                let pending = 0, approvedToday = 0, totalAmt = 0;
+                const today = new Date().setHours(0,0,0,0);
+
+                snap.forEach(doc => {
+                    const r = doc.data();
+                    if (r.status === 'pending') pending++;
+                    if (r.status === 'approved') {
+                        totalAmt += (r.amount || 0);
+                        if (r.approvedAt && r.approvedAt.toDate().getTime() > today) approvedToday++;
+                    }
+                });
+
+                document.getElementById('recharge-pending-count').textContent = pending;
+                document.getElementById('recharge-approved-today').textContent = approvedToday;
+                document.getElementById('recharge-total-amount').textContent = totalAmt.toLocaleString();
+            } catch(e) {}
+        }
+        
+        // Initial load
+        window.addEventListener('load', () => {
+            if(window.loadRechargeRequests) loadRechargeRequests();
+            updateRechargeStats();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if the user is an admin
+    function isAdmin() {
+      return request.auth != null && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.token.email)) ||
+        request.auth.token.email == "engyhamid860@gmail.com"
+      );
+    }
+
+    // Helper function to check if the user is an approved driver
+    function isApprovedDriver() {
+      return request.auth != null && 
+        exists(/databases/$(database)/documents/drivers/$(request.auth.uid)) && 
+        get(/databases/$(database)/documents/drivers/$(request.auth.uid)).data.isApproved == true;
+    }
+
+    // --- Users Collection ---
+    match /users/{userId} {
+      // Allow users to read their own data
+      allow read: if request.auth != null && request.auth.uid == userId || isAdmin();
+      
+      // Allow creation of own profile (registration)
+      allow create: if request.auth != null && request.auth.uid == userId;
+      
+      // Allow updates to own profile BUT protect sensitive fields
+      allow update: if (request.auth != null && request.auth.uid == userId && (
+                       !request.resource.data.diff(resource.data).affectedKeys().hasAny(['walletBalance', 'points', 'referralCode', 'isMerchant', 'role']) ||
+                       (
+                         // Allow loyalty redemption: points go DOWN, walletBalance goes UP
+                         !request.resource.data.diff(resource.data).affectedKeys().hasAny(['referralCode', 'isMerchant', 'role']) &&
+                         request.resource.data.points < resource.data.points &&
+                         request.resource.data.walletBalance > resource.data.walletBalance
+                       )
+                     )) || isAdmin();
+      
+      // Allow admin to query (list) users by email for merchant assignment
+      allow list: if isAdmin();
+    }
+
+    // --- Orders Collection ---
+    match /orders/{orderId} {
+      // Admins can do anything
+      allow read, write: if isAdmin();
+      
+      // Users can read their own orders, and approved drivers can read pending/assigned orders
+      allow read: if request.auth != null && (
+        resource.data.userId == request.auth.uid || 
+        isApprovedDriver()
+      );
+      
+      // Users can create orders
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      
+      // Approved drivers can update orders to accept them or complete them
+      allow update: if request.auth != null && (
+        (isApprovedDriver() && (resource.data.status == 'pending' || resource.data.driverId == request.auth.uid))
+      );
+      
+      allow delete: if false;
+    }
+
+    // --- Products Collection ---
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /merchantProducts/{productId} {
+      allow read: if true;
+      // Merchants or admins can write (handled by admin panel logic, but rule protects it)
+      allow write: if isAdmin();
+    }
+
+    // --- Wallet Transactions (Audit Log) ---
+    match /walletTransactions/{transId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid || isAdmin();
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // --- Recharges (Audit Log) ---
+    match /recharges/{rechargeId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid || isAdmin();
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+    
+    // --- Recharge Requests ---
+    match /rechargeRequests/{reqId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid || isAdmin();
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /categories/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /offers/{offerId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /merchants/{merchantId} {
+      allow read: if true;
+      // Admin can do anything
+      allow write: if isAdmin();
+      // Merchants can create or update ONLY their own store
+      allow create: if request.auth != null && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if request.auth != null && resource.data.ownerUid == request.auth.uid;
+    }
+
+    // --- Drivers Collection ---
+    match /drivers/{driverId} {
+      // Allow public creation (for signing up)
+      allow create: if request.auth != null && request.auth.uid == driverId;
+      // Allow driver to read/update own profile
+      allow read, update: if (request.auth != null && request.auth.uid == driverId) || isAdmin();
+      // Allow admins to manage
+      allow write: if isAdmin();
+      allow read: if isAdmin();
+    }
+
+    // --- Admins Collection ---
+    match /admins/{email} {
+      allow read: if request.auth != null && (request.auth.token.email == email || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

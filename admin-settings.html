@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>إعدادات الموقع | مسعودي</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="admin.css">
+    <link rel="icon" type="image/png" href="./logo.png">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+</head>
+<body class="admin-body">
+    <div class="admin-container">
+        <aside class="admin-sidebar">
+            <div class="logo" style="margin-bottom: 40px; text-align: center;">
+                <img src="./logo.png" style="width: 80px; height: 80px; border-radius: 20px; margin-bottom: 10px; object-fit: cover; display: block; margin: 0 auto;">
+                <span style="font-size: 0.8rem; color: var(--text-muted); display: block; font-weight: 900;">مسعودي پرو</span>
+            </div>
+            <nav class="admin-nav">
+                <a href="admin.html"><i data-lucide="layout-dashboard"></i> الإحصائيات</a>
+                <a href="admin-products.html"><i data-lucide="package"></i> المنتجات العامة</a>
+                <a href="admin-stores.html"><i data-lucide="store"></i> إدارة المتاجر</a>
+                <a href="admin-merchant-products.html"><i data-lucide="truck"></i> منتجات التجار</a>
+                <a href="admin-orders.html"><i data-lucide="shopping-bag"></i> الطلبات</a>
+                <a href="admin-recharge.html"><i data-lucide="zap"></i> طلبات الشحن</a>
+                <a href="admin-customers.html"><i data-lucide="users"></i> العملاء</a>
+                <a href="admin-drivers.html"><i data-lucide="truck"></i> المندوبين</a>
+                <a href="admin-users.html"><i data-lucide="shield-check"></i> الصلاحيات</a>
+                <a href="admin-settings.html" class="active"><i data-lucide="settings"></i> إعدادات الموقع</a>
+                <a href="index.html" style="margin-top: auto; color: var(--primary);"><i data-lucide="external-link"></i> عرض الموقع</a>
+            </nav>
+        </aside>
+
+        <main class="admin-main">
+            <!-- Mobile Admin Header -->
+            <div class="mobile-admin-header">
+                <div class="logo">مسعودي</div>
+                <button id="toggleSidebar" style="background:none; border:none; color:var(--primary); cursor:pointer;">
+                    <i data-lucide="menu"></i>
+                </button>
+            </div>
+
+            <header class="admin-header">
+                <h2>إعدادات الموقع</h2>
+                <div style="display: flex; gap: 15px; position: relative;">
+                    <button class="premium-bell-btn" onclick="toggleNotifDropdown()">
+                        <div class="bell-container">
+                            <i data-lucide="bell" class="bell-icon"></i>
+                            <span class="bell-dot"></span>
+                        </div>
+                    </button>
+                    <!-- Dropdown -->
+                    <div class="notif-dropdown" id="notifDropdown">
+                        <div style="padding: 15px; background: var(--bg-admin); border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-weight: 900; font-size: 0.9rem;">آخر التنبيهات</span>
+                            <button onclick="clearNotifDot()" style="background: none; border: none; color: var(--primary); font-size: 0.75rem; font-weight: 800; cursor: pointer;">تحديد كقروء</button>
+                        </div>
+                        <div id="notifList" style="max-height: 400px; overflow-y: auto;">
+                            <!-- Items load here -->
+                        </div>
+                    </div>
+                    <div class="admin-user-container">
+                        <div class="admin-user" onclick="toggleUserDropdown()">
+                            <div style="text-align: left;">
+                                <span id="adminName" style="display: block; font-weight: 800; font-size: 0.9rem;">المدير</span>
+                                <span style="font-size: 0.7rem; color: var(--primary); font-weight: 700;">SUPER ADMIN</span>
+                            </div>
+                            <img id="adminImg" src="https://ui-avatars.com/api/?name=Admin&background=FF6B00&color=fff">
+                        </div>
+                        <div class="user-dropdown" id="userDropdown">
+                            <div class="user-dropdown-header">
+                                <span style="font-weight: 900; font-size: 0.85rem; color: var(--text-main);" id="dropdownAdminName">المدير</span>
+                                <span id="dropdownAdminEmail" style="font-size: 0.7rem; color: var(--text-muted);">engyhamid860@gmail.com</span>
+                            </div>
+                            <button class="user-dropdown-item" onclick="window.location.href='admin-settings.html'">
+                                <i data-lucide="settings" style="width: 16px;"></i> الإعدادات
+                            </button>
+                            <button class="user-dropdown-item logout" onclick="logoutAdmin()">
+                                <i data-lucide="log-out" style="width: 16px;"></i> تسجيل الخروج
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Site Customizer -->
+            <div class="admin-card" style="background: white; padding: 30px; border-radius: 15px; box-shadow: var(--shadow-sm); margin-bottom: 30px;">
+                <h4 style="margin-bottom: 20px; color: var(--primary);"><i data-lucide="palette"></i> مظهر الموقع (Site Customizer)</h4>
+                <form id="siteConfigForm" onsubmit="saveSiteConfig(event)">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                        <div class="form-group">
+                            <label>اللون الأساسي للموقع</label>
+                            <input type="color" id="primaryColor" style="height: 50px; cursor: pointer; width: 100%; border: none; padding: 0;">
+                        </div>
+                        <div class="form-group">
+                            <label>رابط الشعار (Logo URL)</label>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <input type="text" id="siteLogo" placeholder="رابط صورة الشعار..." style="flex: 1; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
+                                <label class="btn-primary" style="padding: 0; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 10px; cursor: pointer; flex-shrink: 0; background: var(--secondary);" title="رفع شعار محلي">
+                                    <i data-lucide="upload-cloud" style="width: 20px;"></i>
+                                    <input type="file" accept="image/*" onchange="uploadLocalBanner(this, 'siteLogo', 'siteLogoPreview')" style="display: none;">
+                                </label>
+                            </div>
+                            <div id="siteLogoPreview" style="display: none; border-radius: 10px; overflow: hidden; border: 1.5px solid #e2e8f0; height: 80px; position: relative; margin-top: 5px; background: #f8fafc;">
+                                <img src="" style="width: 100%; height: 100%; object-fit: contain; padding: 5px;">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>عنوان الترحيب الرئيسي</label>
+                            <input type="text" id="welcomeTitle" placeholder="مثلاً: أهلاً بكم في مسعودي" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
+                        </div>
+                        <div class="form-group">
+                            <label>النص الفرعي للترحيب</label>
+                            <input type="text" id="welcomeSub" placeholder="مثلاً: اكتشف عروضنا الحصرية" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
+                        </div>
+                        <div class="form-group">
+                            <label>أيقونة الموقع (Favicon)</label>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <input type="text" id="siteFavicon" placeholder="رابط صورة مربعة..." style="flex: 1; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
+                                <label class="btn-primary" style="padding: 0; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 10px; cursor: pointer; flex-shrink: 0; background: var(--secondary);" title="رفع أيقونة محلية">
+                                    <i data-lucide="upload-cloud" style="width: 20px;"></i>
+                                    <input type="file" accept="image/*" onchange="uploadLocalBanner(this, 'siteFavicon', 'siteFaviconPreview')" style="display: none;">
+                                </label>
+                            </div>
+                            <div id="siteFaviconPreview" style="display: none; width: 60px; height: 60px; border-radius: 10px; overflow: hidden; border: 1.5px solid #e2e8f0; position: relative; margin-top: 5px; background: #f8fafc;">
+                                <img src="" style="width: 100%; height: 100%; object-fit: contain; padding: 2px;">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>أيقونة البداية (Startup/Splash)</label>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <input type="text" id="startupIcon" placeholder="رابط أيقونة شاشة التحميل..." style="flex: 1; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
+                                <label class="btn-primary" style="padding: 0; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 10px; cursor: pointer; flex-shrink: 0; background: var(--secondary);" title="رفع أيقونة محلية">
+                                    <i data-lucide="upload-cloud" style="width: 20px;"></i>
+                                    <input type="file" accept="image/*" onchange="uploadLocalBanner(this, 'startupIcon', 'startupIconPreview')" style="display: none;">
+                                </label>
+                            </div>
+                            <div id="startupIconPreview" style="display: none; width: 80px; height: 80px; border-radius: 15px; overflow: hidden; border: 1.5px solid #e2e8f0; position: relative; margin-top: 5px; background: #f8fafc;">
+                                <img src="" style="width: 100%; height: 100%; object-fit: contain; padding: 5px;">
+                            </div>
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label>مفتاح الذكاء الاصطناعي (Gemini API Key)</label>
+                            <input type="password" id="geminiApiKey" placeholder="أدخل مفتاح Gemini API هنا لتفعيل الأسئلة الحرة..." style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
+                            <small style="color: #64748b; margin-top: 5px; display: block;">مطلوب لكي يستطيع المساعد الذكي الإجابة على أي سؤال عام.</small>
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1; background: #fff7ed; padding: 15px; border-radius: 12px; border: 1px solid #ffedd5;">
+                            <label style="color: var(--primary); font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                                <i data-lucide="layout-grid" style="width: 18px;"></i> شكل عرض الأقسام (Category Layout)
+                            </label>
+                            <div style="display: flex; gap: 20px; margin-top: 10px;">
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="radio" name="categoryLayout" value="scroll" checked style="accent-color: var(--primary);">
+                                    <span style="font-size: 0.85rem; font-weight: 700;">شريط متحرك (Scroll)</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="radio" name="categoryLayout" value="grid" style="accent-color: var(--primary);">
+                                    <span style="font-size: 0.85rem; font-weight: 700;">شبكة مربعات (Grid)</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary" style="width: auto; padding: 12px 40px; border-radius: 12px;">حفظ مظهر الموقع</button>
+                </form>
+            </div>
+            <div class="admin-card" style="background: white; padding: 30px; border-radius: 15px; box-shadow: var(--shadow-sm); margin-bottom: 30px;">
+                <h4 style="margin-bottom: 20px; color: var(--primary);"><i data-lucide="gift"></i> إعدادات نظام النقاط والمكافآت (Loyalty System)</h4>
+                <form id="loyaltyConfigForm" onsubmit="saveLoyaltyConfig(event)">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                        <div class="form-group">
+                            <label>النقاط المكتسبة لكل مبلغ شحن (ج.م)</label>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="number" id="loyaltyEarnAmount" placeholder="1000" title="المبلغ المدفوع (مثال 1000 ج.م)" style="width: 50%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
+                                <input type="number" id="loyaltyEarnPoints" placeholder="200" title="النقاط المكتسبة (مثال 200 نقطة)" style="width: 50%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
+                            </div>
+                            <small style="color: #64748b;">مثال: 1000 ج.م تعطيك 200 نقطة</small>
+                        </div>
+                        <div class="form-group">
+                            <label>الحد الأدنى للاستبدال وقيمة المكافأة</label>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="number" id="loyaltyRedeemThreshold" placeholder="200" title="النقاط المطلوبة للاستبدال (مثال 200 نقطة)" style="width: 50%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
+                                <input type="number" id="loyaltyRedeemValue" placeholder="10" title="قيمة المكافأة (مثال 10 ج.م)" style="width: 50%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
+                            </div>
+                            <small style="color: #64748b;">مثال: استبدال 200 نقطة بـ 10 ج.م</small>
+                        </div>
+                        <div class="form-group">
+                            <label>اسم مستوى "تجميع النقاط"</label>
+                            <input type="text" id="loyaltyLevelCollecting" placeholder="جمع النقاط" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
+                        </div>
+                        <div class="form-group">
+                            <label>اسم مستوى "المكافأة الجاهزة"</label>
+                            <input type="text" id="loyaltyLevelReady" placeholder="مكافأة جاهزة" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label>رسالة التهنئة عند امتلاء الشريط</label>
+                            <input type="text" id="loyaltySuccessMessage" placeholder="🎁 مبروك! الشريط ممتلئ، استبدل الآن" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary" style="width: auto; padding: 12px 40px; border-radius: 12px;">حفظ إعدادات النقاط</button>
+                </form>
+            </div>
+
+            <div class="admin-card" style="background: white; padding: 30px; border-radius: 15px; box-shadow: var(--shadow-sm); margin-bottom: 30px;">
+                <h4 style="margin-bottom: 20px; color: var(--primary);"><i data-lucide="image"></i> إعدادات البنر المنزلق (Slider)</h4>
+                <form id="sliderSettingsForm">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 10px;">
+                        <div class="form-group">
+                            <label>ارتفاع البنر - كمبيوتر (px)</label>
+                            <input type="number" id="bannerHeightDesktop" value="240" min="100" max="800" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
+                        </div>
+                        <div class="form-group">
+                            <label>ارتفاع البنر - موبايل (px)</label>
+                            <input type="number" id="bannerHeightMobile" value="280" min="80" max="500" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                        <div class="form-group">
+                            <label>عرض البنر - كمبيوتر (px)</label>
+                            <input type="number" id="bannerWidthDesktop" value="1000" min="300" max="1400" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
+                        </div>
+                        <div class="form-group">
+                            <label>عرض البنر - موبايل (%)</label>
+                            <input type="number" id="bannerWidthMobile" value="100" min="50" max="100" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
+                        </div>
+                    </div>
+                    <button type="button" onclick="saveBannerDimensions()" class="btn-primary" style="background: var(--secondary); margin-bottom: 30px; width: auto; padding: 10px 25px; font-size: 0.85rem; border-radius: 12px;">
+                        <i data-lucide="save" style="width:14px; margin-left:5px;"></i> حفظ المقاسات فقط
+                    </button>
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label>مدة التغيير (بالثواني)</label>
+                        <input type="number" id="sliderDuration" value="5" min="1" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
+                    </div>
+                    <div style="display: grid; gap: 20px;">
+                        <!-- Slider settings custom premium cards -->
+                        <div style="background: var(--bg-soft); padding: 18px; border-radius: 16px; border: 1px solid rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 10px;">
+                            <h5 style="margin: 0; font-weight: 800; font-size: 0.9rem; color: var(--primary);">الشريحة الأولى</h5>
+                            <div style="display: flex; flex-direction: column; gap: 6px;">
+                                <label style="font-size: 0.72rem; font-weight: 800; color: #64748b; display: block;">صورة البنر (رابط أو رفع محلي)</label>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <input type="text" id="bannerImg1" placeholder="رابط الصورة المباشر..." style="flex: 1; padding: 10px; border-radius: 10px; border: 1.5px solid #e2e8f0; font-size: 0.85rem;">
+                                    <label class="btn-primary" style="padding: 0; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 10px; cursor: pointer; flex-shrink: 0; background: var(--secondary);" title="رفع صورة محلية">
+                                        <i data-lucide="upload-cloud" style="width: 18px;"></i>
+                                        <input type="file" accept="image/*" onchange="uploadLocalBanner(this, 'bannerImg1', 'bannerPreview1')" style="display: none;">
+                                    </label>
+                                </div>
+                                <div id="bannerPreview1" style="display: none; border-radius: 10px; overflow: hidden; border: 1.5px solid #e2e8f0; height: 110px; position: relative; margin-top: 5px;">
+                                    <img src="" style="width: 100%; height: 100%; object-fit: cover;">
+                                </div>
+                            </div>
+                            <div>
+                                <label style="font-size: 0.72rem; font-weight: 800; color: #64748b; display: block; margin-bottom: 4px;">العنوان الرئيسي</label>
+                                <input type="text" id="bannerTitle1" placeholder="العنوان الرئيسي..." style="width: 100%; padding: 10px; border-radius: 10px; border: 1.5px solid #e2e8f0; font-size: 0.85rem;">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.72rem; font-weight: 800; color: #64748b; display: block; margin-bottom: 4px;">الوصف الفرعي</label>
+                                <input type="text" id="bannerSub1" placeholder="الوصف الفرعي..." style="width: 100%; padding: 10px; border-radius: 10px; border: 1.5px solid #e2e8f0; font-size: 0.85rem;">
+                            </div>
+                        </div>
+
+                        <div style="background: var(--bg-soft); padding: 18px; border-radius: 16px; border: 1px solid rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 10px;">
+                            <h5 style="margin: 0; font-weight: 800; font-size: 0.9rem; color: var(--primary);">الشريحة الثانية</h5>
+                            <div style="display: flex; flex-direction: column; gap: 6px;">
+                                <label style="font-size: 0.72rem; font-weight: 800; color: #64748b; display: block;">صورة البنر (رابط أو رفع محلي)</label>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <input type="text" id="bannerImg2" placeholder="رابط الصورة المباشر..." style="flex: 1; padding: 10px; border-radius: 10px; border: 1.5px solid #e2e8f0; font-size: 0.85rem;">
+                                    <label class="btn-primary" style="padding: 0; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 10px; cursor: pointer; flex-shrink: 0; background: var(--secondary);" title="رفع صورة محلية">
+                                        <i data-lucide="upload-cloud" style="width: 18px;"></i>
+                                        <input type="file" accept="image/*" onchange="uploadLocalBanner(this, 'bannerImg2', 'bannerPreview2')" style="display: none;">
+                                    </label>
+                                </div>
+                                <div id="bannerPreview2" style="display: none; border-radius: 10px; overflow: hidden; border: 1.5px solid #e2e8f0; height: 110px; position: relative; margin-top: 5px;">
+                                    <img src="" style="width: 100%; height: 100%; object-fit: cover;">
+                                </div>
+                            </div>
+                            <div>
+                                <label style="font-size: 0.72rem; font-weight: 800; color: #64748b; display: block; margin-bottom: 4px;">العنوان الرئيسي</label>
+                                <input type="text" id="bannerTitle2" placeholder="العنوان الرئيسي..." style="width: 100%; padding: 10px; border-radius: 10px; border: 1.5px solid #e2e8f0; font-size: 0.85rem;">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.72rem; font-weight: 800; color: #64748b; display: block; margin-bottom: 4px;">الوصف الفرعي</label>
+                                <input type="text" id="bannerSub2" placeholder="الوصف الفرعي..." style="width: 100%; padding: 10px; border-radius: 10px; border: 1.5px solid #e2e8f0; font-size: 0.85rem;">
+                            </div>
+                        </div>
+
+                        <div style="background: var(--bg-soft); padding: 18px; border-radius: 16px; border: 1px solid rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 10px;">
+                            <h5 style="margin: 0; font-weight: 800; font-size: 0.9rem; color: var(--primary);">الشريحة الثالثة</h5>
+                            <div style="display: flex; flex-direction: column; gap: 6px;">
+                                <label style="font-size: 0.72rem; font-weight: 800; color: #64748b; display: block;">صورة البنر (رابط أو رفع محلي)</label>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <input type="text" id="bannerImg3" placeholder="رابط الصورة المباشر..." style="flex: 1; padding: 10px; border-radius: 10px; border: 1.5px solid #e2e8f0; font-size: 0.85rem;">
+                                    <label class="btn-primary" style="padding: 0; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 10px; cursor: pointer; flex-shrink: 0; background: var(--secondary);" title="رفع صورة محلية">
+                                        <i data-lucide="upload-cloud" style="width: 18px;"></i>
+                                        <input type="file" accept="image/*" onchange="uploadLocalBanner(this, 'bannerImg3', 'bannerPreview3')" style="display: none;">
+                                    </label>
+                                </div>
+                                <div id="bannerPreview3" style="display: none; border-radius: 10px; overflow: hidden; border: 1.5px solid #e2e8f0; height: 110px; position: relative; margin-top: 5px;">
+                                    <img src="" style="width: 100%; height: 100%; object-fit: cover;">
+                                </div>
+                            </div>
+                            <div>
+                                <label style="font-size: 0.72rem; font-weight: 800; color: #64748b; display: block; margin-bottom: 4px;">العنوان الرئيسي</label>
+                                <input type="text" id="bannerTitle3" placeholder="العنوان الرئيسي..." style="width: 100%; padding: 10px; border-radius: 10px; border: 1.5px solid #e2e8f0; font-size: 0.85rem;">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.72rem; font-weight: 800; color: #64748b; display: block; margin-bottom: 4px;">الوصف الفرعي</label>
+                                <input type="text" id="bannerSub3" placeholder="الوصف الفرعي..." style="width: 100%; padding: 10px; border-radius: 10px; border: 1.5px solid #e2e8f0; font-size: 0.85rem;">
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary" style="margin-top: 25px; width: 100%;">حفظ إعدادات البنر</button>
+                </form>
+            </div>
+
+            <!-- Category Management -->
+            <div class="admin-card" style="background: white; padding: 30px; border-radius: 15px; box-shadow: var(--shadow-sm); margin-bottom: 30px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h4 style="margin: 0; color: var(--primary);"><i data-lucide="tag"></i> إدارة الفئات</h4>
+                    <button type="button" onclick="generateStoreCategories(event)" class="btn-primary" style="background: #10B981; padding: 8px 20px; font-size: 0.8rem; display: flex; align-items: center; gap: 8px; border-radius: 12px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
+                        <i data-lucide="sparkles" style="width: 14px;"></i>
+                        توليد أقسام المتاجر العامة
+                    </button>
+                </div>
+                
+                <style>
+                .icon-picker-btn {
+                    background: white;
+                    border: 1.5px solid #e2e8f0;
+                    border-radius: 10px;
+                    height: 42px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    color: #64748b;
+                }
+                .icon-picker-btn:hover {
+                    border-color: var(--primary);
+                    color: var(--primary);
+                    background: #FFF1E730;
+                }
+                .icon-picker-btn.active {
+                    border-color: var(--primary);
+                    color: var(--primary);
+                    background: #FFF1E7;
+                    box-shadow: 0 4px 10px rgba(255, 107, 0, 0.15);
+                }
+                .icon-picker-btn i {
+                    width: 20px;
+                    height: 20px;
+                }
+                </style>
+                
+                <form id="addCategoryForm" style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 25px; background: #f8fafc; padding: 20px; border-radius: 15px; border: 1.5px dashed #cbd5e1;">
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        <div style="flex: 2; min-width: 200px;">
+                            <label style="font-size: 0.8rem; font-weight: 800; color: #475569; display: block; margin-bottom: 6px;">اسم الفئة (عربي)</label>
+                            <input type="text" id="catName" placeholder="مثلاً: سوبر مارکت" oninput="suggestCategoryInfo(this.value)" required style="width: 100%; padding: 12px; border-radius: 10px; border: 1.5px solid #e2e8f0; background: white; font-family: 'Cairo', sans-serif;">
+                        </div>
+                        <div style="flex: 1; min-width: 150px;">
+                            <label style="font-size: 0.8rem; font-weight: 800; color: #475569; display: block; margin-bottom: 6px;">معرف الفئة (Slug)</label>
+                            <input type="text" id="catId" placeholder="مثلاً: supermarket" required style="width: 100%; padding: 12px; border-radius: 10px; border: 1.5px solid #e2e8f0; background: white;">
+                        </div>
+                        <div style="flex: 1; min-width: 150px;">
+                            <label style="font-size: 0.8rem; font-weight: 800; color: #475569; display: block; margin-bottom: 6px;">رمز الأيقونة المحدد</label>
+                            <input type="text" id="catIcon" value="tag" readonly required style="width: 100%; padding: 12px; border-radius: 10px; border: 1.5px solid #e2e8f0; background: #f1f5f9; cursor: not-allowed; font-weight: 700; color: var(--primary);">
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="flex: 1;">
+                            <label style="font-size: 0.8rem; font-weight: 800; color: #475569; display: block; margin-bottom: 8px;">صورة الفئة (اختياري - بدلاً من الأيقونة)</label>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <label style="flex-shrink: 0; background: white; border: 1.5px solid #e2e8f0; width: 45px; height: 45px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--primary);">
+                                    <input type="file" id="catImageFile" accept="image/*" style="display: none;" onchange="previewImage(this, 'catImagePreview')">
+                                    <i data-lucide="image-plus" style="width: 20px;"></i>
+                                </label>
+                                <img id="catImagePreview" style="display: none; width: 45px; height: 45px; border-radius: 10px; object-fit: cover; border: 1.5px solid #e2e8f0;">
+                                <input type="text" id="catImageUrl" placeholder="رابط صورة خارجي..." style="flex: 1; padding: 10px; border-radius: 10px; border: 1.5px solid #e2e8f0; background: white; font-size: 0.8rem;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary" style="padding: 12px 30px; font-weight: 800; border-radius: 12px; align-self: flex-start; min-width: 150px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <i data-lucide="plus-circle" style="width: 18px;"></i> إضافة الفئة الجديدة
+                    </button>
+                </form>
+                
+                <div id="categoriesList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
+                    <!-- Categories will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Payment Settings -->
+            <div class="admin-card" style="background: white; padding: 30px; border-radius: 15px; box-shadow: var(--shadow-sm); margin-bottom: 30px;">
+                <h4 style="margin-bottom: 20px; color: var(--primary);"><i data-lucide="credit-card"></i> إعدادات استلام الأموال</h4>
+                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 20px;">هذه الأرقام هي التي ستظهر للعملاء في صفحة الدفع عند اختيار "فودافون كاش" أو "انستا باي".</p>
+                
+                <form id="paymentSettingsForm" onsubmit="savePaymentConfig(event)">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 25px;">
+                        <div class="form-group">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 700;">رقم فودافون كاش (للطلبات)</label>
+                            <input type="text" id="vodafoneCashNumber" placeholder="010XXXXXXXX" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
+                        </div>
+                        <div class="form-group">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 700; color:var(--primary);">رقم استقبال أموال المحفظة</label>
+                            <input type="text" id="rechargeNumber" placeholder="رقم شحن المحفظة..." style="width: 100%; padding: 12px; border-radius: 10px; border: 2px solid var(--primary);">
+                        </div>
+                        <div class="form-group">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 700;">رقم / عنوان انستا باي (InstaPay)</label>
+                            <input type="text" id="instapayNumber" placeholder="رقم الهاتف أو العنوان..." style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
+                        </div>
+                        <div class="form-group">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 700;">رقم واتساب الاستلام</label>
+                            <input type="text" id="whatsappSupportNumber" placeholder="012XXXXXXXX" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary" style="width: auto; padding: 12px 40px; border-radius: 12px;">حفظ إعدادات الدفع</button>
+                </form>
+            </div>
+
+
+            <!-- Delivery Settings -->
+            <div class="admin-card" style="background: white; padding: 30px; border-radius: 15px; box-shadow: var(--shadow-sm); margin-bottom: 30px;">
+                <h4 style="margin-bottom: 20px; color: var(--primary);"><i data-lucide="truck"></i> إعدادات التوصيل الذكي</h4>
+                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 20px;">يتم احتساب سعر التوصيل تلقائياً بناءً على المسافة بين موقع المتجر وموقع العميل.</p>
+                
+                <form id="deliverySettingsForm" onsubmit="saveDeliverySettings(event)">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px;">
+                        <div class="form-group">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 700;">سعر الكيلومتر الواحد (ج.م)</label>
+                            <input type="number" id="pricePerKm" placeholder="15" step="0.1" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
+                        </div>
+                        <div class="form-group">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 700;">خط العرض للمتجر (Lat)</label>
+                            <input type="text" id="storeLat" placeholder="30.0444" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
+                        </div>
+                        <div class="form-group">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 700;">خط الطول للمتجر (Lng)</label>
+                            <input type="text" id="storeLng" placeholder="31.2357" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit" class="btn-primary" style="width: auto; padding: 12px 40px; border-radius: 12px;">حفظ إعدادات التوصيل</button>
+                        <button type="button" onclick="getCurrentAdminLocation()" class="btn-primary" style="width: auto; padding: 12px 20px; border-radius: 12px; background: #64748b;">تحديد موقع المتجر الحالي</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Policies Management -->
+            <div class="admin-card" style="background: white; padding: 30px; border-radius: 15px; box-shadow: var(--shadow-sm); margin-bottom: 30px;">
+                <h4 style="margin-bottom: 20px; color: var(--primary);"><i data-lucide="scroll-text"></i> إدارة سياسات المتجر</h4>
+                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 20px;">قم بتعديل نصوص سياسة الشحن والاسترجاع التي تظهر للعملاء.</p>
+                
+                <form id="policySettingsForm" onsubmit="savePolicySettings(event)">
+                    <div style="display: flex; flex-direction: column; gap: 20px; margin-bottom: 25px;">
+                        <div class="form-group">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 700;">سياسة الشحن والتوصيل</label>
+                            <textarea id="shippingPolicy" rows="5" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft); font-family: 'Cairo', sans-serif;" placeholder="اكتب بنود سياسة الشحن هنا..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 700;">سياسة الاسترجاع والاستبدال</label>
+                            <textarea id="returnPolicy" rows="5" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft); font-family: 'Cairo', sans-serif;" placeholder="اكتب بنود سياسة الاسترجاع هنا..."></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary" style="width: auto; padding: 12px 40px; border-radius: 12px;">حفظ السياسات</button>
+                </form>
+            </div>
+
+            <!-- Security Settings -->
+            <div class="admin-card" style="background: white; padding: 30px; border-radius: 15px; box-shadow: var(--shadow-sm); margin-bottom: 80px; border: 2px solid #fee2e2;">
+                <h4 style="margin-bottom: 20px; color: #ef4444;"><i data-lucide="shield-check"></i> الحماية والأمان (Security)</h4>
+                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 25px;">تحكم في طبقات الحماية الإضافية للوحة التحكم لمنع أي وصول غير مصرح به.</p>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+                    <!-- PIN Management -->
+                    <div style="background: #f8fafc; padding: 25px; border-radius: 20px; border: 1px solid #e2e8f0;">
+                        <h5 style="margin-bottom: 15px; font-weight: 800; display: flex; align-items: center; gap: 10px;">
+                            <i data-lucide="key" style="width: 18px; color: #ef4444;"></i>
+                            تغيير رمز PIN الرئيسي
+                        </h5>
+                        <p style="font-size: 0.75rem; color: #64748b; margin-bottom: 20px;">هذا الرمز يستخدم كبديل للبصمة عند الدخول من أجهزة لا تدعمها.</p>
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label style="font-size: 0.8rem; font-weight: 700;">رمز PIN الجديد (4 أرقام على الأقل)</label>
+                            <input type="password" id="newAdminPin" placeholder="****" maxlength="8" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #cbd5e1; text-align: center; font-size: 1.2rem; letter-spacing: 5px;">
+                        </div>
+                        <button onclick="updateMasterPin()" class="btn-primary" style="background: #ef4444; width: 100%; border-radius: 12px; padding: 12px;">حفظ الرمز الجديد</button>
+                    </div>
+
+                    <!-- Security Info -->
+                    <div style="background: #f0f9ff; padding: 25px; border-radius: 20px; border: 1px solid #e0f2fe;">
+                        <h5 style="margin-bottom: 15px; font-weight: 800; display: flex; align-items: center; gap: 10px; color: #0369a1;">
+                            <i data-lucide="info" style="width: 18px;"></i>
+                            معلومات الحماية الحالية
+                        </h5>
+                        <ul style="font-size: 0.8rem; color: #0c4a6e; line-height: 1.8; padding-right: 20px;">
+                            <li>قفل بصمة الإصبع مفعل تلقائياً للأجهزة المدعومة.</li>
+                            <li>نظام "بصمة الجهاز" يمنع الاحتيال في الدعوات.</li>
+                            <li>يتم تسجيل جميع العمليات المالية في سجل التدقيق.</li>
+                            <li>الجلسة تنتهي تلقائياً عند إغلاق المتصفح.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modern Offers Management -->
+            <div class="admin-card" style="background: white; padding: 30px; border-radius: 15px; box-shadow: var(--shadow-sm); margin-bottom: 30px;">
+                <h4 style="margin-bottom: 20px; color: var(--primary);"><i data-lucide="sparkles"></i> إدارة كروت العروض الحصرية</h4>
+                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 20px;">استبدل النص التقليدي التفاعلي بكروت ذكية تُبرز أفضل منتجاتك بتصميم حديث ومبهج للعين.</p>
+                
+                <form id="addOfferForm" onsubmit="saveAdminOffer(event)" style="background: #f8fafc; padding: 20px; border-radius: 16px; border: 1px dashed #cbd5e1; margin-bottom: 25px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                        <div class="form-group">
+                            <label style="font-weight: 700; font-size: 0.85rem;">العنوان الرئيسي</label>
+                            <input type="text" id="offerTitle" placeholder="مثال: خصم 50% على الفواكه" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                        </div>
+                        <div class="form-group">
+                            <label style="font-weight: 700; font-size: 0.85rem;">الوصف الفرعي</label>
+                            <input type="text" id="offerSubtitle" placeholder="مثال: طازج يومياً لفترة محدودة" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                        </div>
+                        <div class="form-group">
+                            <label style="font-weight: 700; font-size: 0.85rem;">نص الزر</label>
+                            <input type="text" id="offerActionText" placeholder="مثال: تسوق الآن" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                        </div>
+                        <div class="form-group">
+                            <label style="font-weight: 700; font-size: 0.85rem;">ارتباط الكارت (اختر متجر)</label>
+                            <select id="offerActionLink" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; background: white;">
+                                <option value="">جاري تحميل المتاجر...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label style="font-weight: 700; font-size: 0.85rem;">لون وتصميم الكارت</label>
+                            <select id="offerTheme" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; background: white;">
+                                <option value="primary">البرتقالي مسعودي (افتراضي)</option>
+                                <option value="purple">بنفسجي ملكي</option>
+                                <option value="green">أخضر طازج</option>
+                                <option value="blue">أزرق سماوي</option>
+                                <option value="rose">وردي نابض</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label style="font-weight: 700; font-size: 0.85rem;">أيقونة Lucide</label>
+                            <input type="text" id="offerIcon" value="percent" placeholder="percent, gift, flame..." required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label style="font-weight: 700; font-size: 0.85rem;">صورة الكارت (اختياري)</label>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <input type="text" id="offerImageLink" placeholder="رابط الصورة المباشر..." style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.85rem;">
+                                <label class="btn-primary" style="padding: 0; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 10px; cursor: pointer; flex-shrink: 0; background: var(--secondary);" title="رفع صورة محلية">
+                                    <i data-lucide="upload-cloud" style="width: 18px;"></i>
+                                    <input type="file" accept="image/*" onchange="uploadLocalBanner(this, 'offerImageLink', 'offerImagePreview')" style="display: none;">
+                                </label>
+                            </div>
+                            <div id="offerImagePreview" style="display: none; border-radius: 10px; overflow: hidden; border: 1.5px solid #e2e8f0; height: 110px; position: relative; margin-top: 5px;">
+                                <img src="" style="width: 100%; height: 100%; object-fit: cover;">
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <button type="submit" class="btn-primary" style="padding: 10px 25px; border-radius: 8px; width: auto;"><i data-lucide="plus"></i> إضافة الكارت</button>
+                        <button type="button" id="cancelOfferEditBtn" onclick="cancelOfferEdit()" class="btn-primary" style="padding: 10px 25px; border-radius: 8px; width: auto; background: #64748b; display: none;"><i data-lucide="x"></i> إلغاء التعديل</button>
+                    </div>
+                </form>
+
+                <div id="adminOffersListContainer" style="display: flex; flex-direction: column; gap: 15px;">
+                    <!-- Offers generated dynamically here -->
+                    <div style="text-align: center; color: #94a3b8; font-size: 0.9rem; padding: 20px;">جاري تحميل العروض...</div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Admin Bottom Navigation (Mobile) -->
+    <nav class="admin-bottom-nav">
+        <a href="admin.html">
+            <i data-lucide="layout-dashboard"></i>
+            <span>الإحصائيات</span>
+        </a>
+        <a href="admin-products.html">
+            <i data-lucide="package"></i>
+            <span>المنتجات</span>
+        </a>
+        <a href="admin-orders.html">
+            <i data-lucide="shopping-bag"></i>
+            <span>الطلبات</span>
+        </a>
+        <a href="admin-customers.html">
+            <i data-lucide="users"></i>
+            <span>العملاء</span>
+        </a>
+        <a href="admin-drivers.html">
+            <i data-lucide="truck"></i>
+            <span>المناديب</span>
+        </a>
+        <a href="admin-users.html">
+            <i data-lucide="shield-check"></i>
+            <span>الصلاحيات</span>
+        </a>
+        <a href="admin-settings.html" class="active">
+            <i data-lucide="settings"></i>
+            <span>الإعدادات</span>
+        </a>
+    </nav>
+
+    <script src="admin.js?v=2.0.1"></script>
+    <script>lucide.createIcons();</script>
+
+    <!-- Offer Products Modal -->
+    <div class="modal-overlay" id="offerProductsModal" style="display: none; z-index: 1000;">
+        <div class="modal-content" style="max-width: 600px; padding: 30px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; color: var(--primary);">تحديد منتجات العرض</h3>
+                <button type="button" onclick="document.getElementById('offerProductsModal').style.display='none'" style="background: none; border: none; cursor: pointer; color: #64748b;">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 20px;">اختر المنتجات التي ستظهر في صفحة العرض المخصصة. سيتم إزالتها من العروض الأخرى إن وجدت.</p>
+            
+            <input type="text" id="offerProductsSearch" placeholder="ابحث عن منتج..." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 15px;" onkeyup="if(window.filterOfferProductsList) window.filterOfferProductsList()">
+            
+            <div id="offerProductsList" style="max-height: 350px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
+                <p style="text-align: center; color: #94a3b8; padding: 20px;">جاري تحميل المنتجات...</p>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="button" id="saveOfferProductsBtn" onclick="if(window.saveOfferProducts) window.saveOfferProducts()" class="btn-primary" style="flex: 1; border-radius: 8px; position: relative;">حفظ تشكيلة العرض</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

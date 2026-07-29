@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>تواصل معنا | متجر مسعودي</title>
+    <meta name="description" content="تواصل مع فريق متجر مسعودي - نحن هنا لمساعدتك دائماً">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&family=Alexandria:wght@100..900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="logo.png">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <style>
+        /* ===== Contact Page Styles ===== */
+        .contact-page-wrapper {
+            min-height: 100vh;
+            padding-top: 100px;
+            background: var(--bg);
+        }
+
+        /* Hero Banner */
+        .contact-hero {
+            background: linear-gradient(135deg, #FF6B00 0%, #FF8C00 50%, #FFB347 100%);
+            padding: 80px 20px 120px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .contact-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.06'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .contact-hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 900;
+            color: white;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .contact-hero p {
+            font-size: 1.15rem;
+            color: rgba(255,255,255,0.88);
+            font-weight: 500;
+            max-width: 550px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* Main content area */
+        .contact-main {
+            max-width: 1200px;
+            margin: -60px auto 80px;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 1.6fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        /* Info Panel */
+        .contact-info-panel {
+            background: var(--white);
+            border-radius: 28px;
+            padding: 40px 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+            border: 1px solid var(--bg-soft);
+        }
+
+        .contact-info-panel h3 {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .contact-info-panel > p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 35px;
+            line-height: 1.7;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            padding: 18px;
+            border-radius: 18px;
+            background: var(--bg-soft);
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .contact-item:hover {
+            background: var(--primary-glow);
+            transform: translateX(-5px);
+        }
+
+        .contact-item-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #FF6B00, #FF8C42);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            flex-shrink: 0;
+            box-shadow: 0 8px 20px rgba(255,107,0,0.25);
+        }
+
+        .contact-item-text small {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .contact-item-text strong {
+            font-size: 0.92rem;
+            font-weight: 800;
+            color: var(--text);
+            direction: ltr;
+            display: block;
+        }
+
+        /* Social Row */
+        .social-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .social-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 14px;
+            border: 1.5px solid var(--bg-soft);
+            background: var(--white);
+            color: var(--text);
+            font-size: 0.8rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .social-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255,107,0,0.12);
+        }
+
+        /* Form Panel */
+        .contact-form-panel {
+            background: var(--white);
+            border-radius: 28px;
+            padding: 45px 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+            border: 1px solid var(--bg-soft);
+        }
+
+        .contact-form-panel h3 {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .contact-form-panel > p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 35px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .form-field label {
+            font-weight: 800;
+            font-size: 0.85rem;
+            color: var(--text);
+        }
+
+        .form-field input,
+        .form-field textarea,
+        .form-field select {
+            padding: 16px 18px;
+            border-radius: 14px;
+            border: 1.5px solid var(--bg-soft);
+            background: var(--bg-soft);
+            font-family: 'Cairo', sans-serif;
+            font-size: 0.9rem;
+            color: var(--text);
+            transition: all 0.3s;
+            outline: none;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .form-field input:focus,
+        .form-field textarea:focus,
+        .form-field select:focus {
+            border-color: var(--primary);
+            background: var(--white);
+            box-shadow: 0 0 0 4px rgba(255,107,0,0.08);
+        }
+
+        .form-field textarea {
+            resize: none;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #FF6B00, #FF8C42);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 1rem;
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(255,107,0,0.3);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(255,107,0,0.4);
+        }
+
+        .submit-btn:active { transform: translateY(0); }
+
+        /* Success message */
+        .form-success {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .form-success .success-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #10B981, #059669);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            box-shadow: 0 15px 30px rgba(16,185,129,0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .contact-main { grid-template-columns: 1fr; }
+            .contact-form-panel { padding: 30px 20px; }
+        }
+        @media (max-width: 600px) {
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar scrolled" id="navbar">
+        <div class="container">
+            <div class="logo" onclick="location.href='index.html'">
+                <img src="./logo.png" alt="مسعودي" style="height: 50px; vertical-align: middle;">
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">الرئيسية</a></li>
+                <li><a href="index.html#products">المنتجات</a></li>
+                <li><a href="offers.html">العروض</a></li>
+                <li><a href="contact.html" class="active">تواصل معنا</a></li>
+            </ul>
+            <div class="nav-icons">
+                <button class="nav-icon" id="themeToggle"><i data-lucide="moon"></i></button>
+                <button class="nav-icon" onclick="location.href='index.html'">
+                    <i data-lucide="shopping-cart"></i>
+                </button>
+                <button class="nav-icon" id="userBtn">
+                    <i data-lucide="user"></i>
+                    <div id="userProfile" style="display: none; align-items: center; gap: 8px;">
+                        <img id="userImg" src="" alt="Profile" style="width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--primary);">
+                    </div>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="contact-page-wrapper">
+
+        <!-- Hero -->
+        <div class="contact-hero">
+            <h1>💬 تواصل معنا</h1>
+            <p>فريقنا جاهز دائماً للإجابة على استفساراتك ومساعدتك في أي وقت تشاء</p>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="contact-main">
+
+            <!-- Info Panel -->
+            <div class="contact-info-panel">
+                <h3>معلومات التواصل</h3>
+                <p>اختر الوسيلة المناسبة لك وسنرد عليك في أقرب وقت ممكن.</p>
+
+                <a href="mailto:halilfathat102@gmail.com" class="contact-item">
+                    <div class="contact-item-icon">
+                        <i data-lucide="mail" style="width:22px; height:22px;"></i>
+                    </div>
+                    <div class="contact-item-text">
+                        <small>البريد الإلكتروني</small>
+                        <strong>halilfathat102@gmail.com</strong>
+                    </div>
+                </a>
+
+                <a href="https://wa.me/201000000000" target="_blank" class="contact-item">
+                    <div class="contact-item-icon" style="background: linear-gradient(135deg, #25D366, #128C7E);">
+                        <i data-lucide="message-circle" style="width:22px; height:22px;"></i>
+                    </div>
+                    <div class="contact-item-text">
+                        <small>واتساب</small>
+                        <strong>+20 100 000 0000</strong>
+                    </div>
+                </a>
+
+                <div class="contact-item" style="cursor: default;">
+                    <div class="contact-item-icon" style="background: linear-gradient(135deg, #6366F1, #4F46E5);">
+                        <i data-lucide="clock" style="width:22px; height:22px;"></i>
+                    </div>
+                    <div class="contact-item-text">
+                        <small>ساعات العمل</small>
+                        <strong>السبت - الخميس، ٩ص – ١١م</strong>
+                    </div>
+                </div>
+
+                <div class="contact-item" style="cursor: default;">
+                    <div class="contact-item-icon" style="background: linear-gradient(135deg, #F59E0B, #D97706);">
+                        <i data-lucide="map-pin" style="width:22px; height:22px;"></i>
+                    </div>
+                    <div class="contact-item-text">
+                        <small>الموقع</small>
+                        <strong>مصر، القاهرة</strong>
+                    </div>
+                </div>
+
+                <!-- Social -->
+                <div class="social-row">
+                    <a href="#" class="social-btn">
+                        <i data-lucide="instagram" style="width:16px;"></i> إنستجرام
+                    </a>
+                    <a href="#" class="social-btn">
+                        <i data-lucide="facebook" style="width:16px;"></i> فيسبوك
+                    </a>
+                    <a href="#" class="social-btn">
+                        <i data-lucide="twitter" style="width:16px;"></i> تويتر
+                    </a>
+                </div>
+            </div>
+
+            <!-- Form Panel -->
+            <div class="contact-form-panel">
+                <h3>أرسل لنا رسالة ✉️</h3>
+                <p>سنرد عليك خلال 24 ساعة على البريد الإلكتروني.</p>
+
+                <form id="contactForm">
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label>الاسم الأول</label>
+                            <input type="text" id="firstName" placeholder="محمد" required>
+                        </div>
+                        <div class="form-field">
+                            <label>الاسم الأخير</label>
+                            <input type="text" id="lastName" placeholder="أحمد">
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label>البريد الإلكتروني</label>
+                        <input type="email" id="contactEmail" placeholder="your@email.com" required>
+                    </div>
+
+                    <div class="form-field">
+                        <label>رقم الهاتف (اختياري)</label>
+                        <input type="tel" id="contactPhone" placeholder="+20 100 000 0000">
+                    </div>
+
+                    <div class="form-field">
+                        <label>موضوع الرسالة</label>
+                        <select id="contactSubject">
+                            <option value="">اختر موضوع...</option>
+                            <option value="order">استفسار عن طلب</option>
+                            <option value="product">استفسار عن منتج</option>
+                            <option value="return">إرجاع أو استبدال</option>
+                            <option value="payment">مشكلة في الدفع</option>
+                            <option value="other">أخرى</option>
+                        </select>
+                    </div>
+
+                    <div class="form-field">
+                        <label>رسالتك</label>
+                        <textarea id="contactMessage" rows="5" placeholder="كيف يمكننا مساعدتك؟ اكتب رسالتك هنا..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        <i data-lucide="send" style="width:18px;"></i>
+                        إرسال الرسالة
+                    </button>
+                </form>
+
+                <!-- Success State -->
+                <div class="form-success" id="formSuccess">
+                    <div class="success-icon">
+                        <i data-lucide="check" style="width:36px; height:36px;"></i>
+                    </div>
+                    <h3 style="font-weight:900; font-size:1.4rem; margin-bottom:10px;">تم الإرسال بنجاح! 🎉</h3>
+                    <p style="color:var(--text-muted);">شكراً لتواصلك معنا. سيرد فريقنا عليك على البريد الإلكتروني خلال 24 ساعة.</p>
+                    <button onclick="resetForm()" style="margin-top:20px; background:var(--primary); color:white; border:none; padding:12px 30px; border-radius:14px; font-family:'Cairo',sans-serif; font-weight:800; cursor:pointer;">
+                        إرسال رسالة أخرى
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Login Modal (Small & Elegant) -->
+    <div class="modal-overlay" id="loginModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 9999; align-items: center; justify-content: center; padding: 15px;">
+        <div class="modal-content" style="background: white; width: 100%; max-width: 320px; border-radius: 28px; padding: 30px 24px; text-align: center; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.15); border: 1px solid rgba(241,245,249,1); animation: slideUp 0.3s ease-out;">
+            <button class="modal-close-btn" onclick="closeLogin()" style="position: absolute; top: 15px; left: 15px; background: transparent; border: none; width: 30px; height: 30px; border-radius: 10px; cursor: pointer; color: #94a3b8; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                <i data-lucide="x" style="width: 18px;"></i>
+            </button>
+            
+            <div style="width: 50px; height: 50px; background: rgba(255,107,0,0.08); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; color: var(--primary);">
+                <i data-lucide="log-in" style="width: 24px;"></i>
+            </div>
+            
+            <h2 style="font-size: 1.25rem; font-weight: 900; color: #0f172a; margin-bottom: 8px;">تسجيل الدخول</h2>
+            <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 25px; line-height: 1.4; font-weight: 600;">تابع باستخدام حساب جوجل للمتابعة</p>
+            
+            <div id="googleBtnContainer" style="display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%;">
+                <!-- Main GSI Rendering Target -->
+                <div id="g_id_signin" style="width: 100%; display: flex; justify-content: center;"></div>
+                
+                <!-- Fallback button -->
+                <button id="gsiFallbackBtn" onclick="firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider())" style="display: flex; width: 100%; padding: 10px; border-radius: 12px; border: 1.5px solid #e2e8f0; background: white; color: #475569; font-weight: 800; font-size: 0.85rem; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: background 0.2s;">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="16">
+                    <span>الدخول عبر جوجل</span>
+                </button>
+                
+                <p style="font-size: 0.65rem; color: #cbd5e1; font-weight: 600; margin-top: 10px;">بالمتابعة أنت توافق على شروط الخدمة</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        lucide.createIcons();
+
+        document.getElementById('contactForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const btn = document.getElementById('submitBtn');
+            const originalHTML = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i data-lucide="loader-2" style="width:18px;" class="spin"></i> جاري الإرسال...';
+            lucide.createIcons();
+
+            const data = {
+                name: (document.getElementById('firstName').value + ' ' + document.getElementById('lastName').value).trim(),
+                email: document.getElementById('contactEmail').value,
+                phone: document.getElementById('contactPhone').value,
+                subject: document.getElementById('contactSubject').value,
+                message: document.getElementById('contactMessage').value,
+                sentAt: new Date().toISOString()
+            };
+
+            try {
+                // Save to Firebase if available
+                if (typeof db !== 'undefined') {
+                    await db.collection('contactMessages').add({
+                        ...data,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+
+                // Show success
+                document.getElementById('contactForm').style.display = 'none';
+                document.getElementById('formSuccess').style.display = 'block';
+                lucide.createIcons();
+
+            } catch (err) {
+                console.error(err);
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+                lucide.createIcons();
+                alert('حدث خطأ، يرجى المحاولة مرة أخرى أو التواصل عبر البريد الإلكتروني مباشرة.');
+            }
+        });
+
+        function resetForm() {
+            document.getElementById('contactForm').reset();
+            document.getElementById('contactForm').style.display = 'flex';
+            document.getElementById('formSuccess').style.display = 'none';
+            document.getElementById('submitBtn').disabled = false;
+            document.getElementById('submitBtn').innerHTML = '<i data-lucide="send" style="width:18px;"></i> إرسال الرسالة';
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "Alias": "masoudi-drive"
+  },
+  "targets": {
+    "masoudi-drive": {
+      "hosting": {
+        "main": [
+          "masoudi-store"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

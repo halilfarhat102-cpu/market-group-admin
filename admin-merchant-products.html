@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>منتجات التجار | مسعودي</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="admin.css">
+    <link rel="icon" type="image/png" href="./logo.png">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+</head>
+<body class="admin-body">
+    <div class="admin-container">
+        <aside class="admin-sidebar">
+            <div class="logo" style="margin-bottom: 40px; text-align: center;">
+                <img src="./logo.png" style="width: 80px; height: 80px; border-radius: 20px; margin-bottom: 10px; object-fit: cover; display: block; margin: 0 auto;">
+                <span style="font-size: 0.8rem; color: var(--text-muted); display: block; font-weight: 900;">مسعودي پرو</span>
+            </div>
+            <nav class="admin-nav">
+                <a href="admin.html"><i data-lucide="layout-dashboard"></i> الإحصائيات</a>
+                <a href="admin-products.html"><i data-lucide="package"></i> المنتجات العامة</a>
+                <a href="admin-stores.html"><i data-lucide="store"></i> إدارة المتاجر</a>
+                <a href="admin-merchant-products.html" class="active"><i data-lucide="truck"></i> منتجات التجار</a>
+                <a href="admin-orders.html"><i data-lucide="shopping-bag"></i> الطلبات</a>
+                <a href="admin-recharge.html"><i data-lucide="zap"></i> طلبات الشحن</a>
+                <a href="admin-customers.html"><i data-lucide="users"></i> العملاء</a>
+                <a href="admin-drivers.html"><i data-lucide="truck"></i> المندوبين</a>
+                <a href="admin-users.html"><i data-lucide="shield-check"></i> الصلاحيات</a>
+                <a href="admin-settings.html"><i data-lucide="settings"></i> إعدادات الموقع</a>
+                <a href="index.html" style="margin-top: auto; color: var(--primary);"><i data-lucide="external-link"></i> عرض الموقع</a>
+            </nav>
+        </aside>
+
+        <main class="admin-main">
+            <!-- Mobile Admin Header -->
+            <div class="mobile-admin-header">
+                <div class="logo">مسعودي</div>
+                <button id="toggleSidebar" style="background:none; border:none; color:var(--primary); cursor:pointer;">
+                    <i data-lucide="menu"></i>
+                </button>
+            </div>
+
+            <header class="admin-header">
+                <h2>منتجات التجار</h2>
+                <div style="display: flex; gap: 15px; position: relative;">
+                    <button class="premium-bell-btn" onclick="toggleNotifDropdown()">
+                        <div class="bell-container">
+                            <i data-lucide="bell" class="bell-icon"></i>
+                            <span class="bell-dot"></span>
+                        </div>
+                    </button>
+                    <!-- Dropdown -->
+                    <div class="notif-dropdown" id="notifDropdown">
+                        <div style="padding: 15px; background: var(--bg-admin); border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-weight: 900; font-size: 0.9rem;">آخر التنبيهات</span>
+                            <button onclick="clearNotifDot()" style="background: none; border: none; color: var(--primary); font-size: 0.75rem; font-weight: 800; cursor: pointer;">تحديد كقروء</button>
+                        </div>
+                        <div id="notifList" style="max-height: 400px; overflow-y: auto;">
+                            <!-- Items load here -->
+                        </div>
+                    </div>
+                    <div class="admin-user-container">
+                        <div class="admin-user" onclick="toggleUserDropdown()">
+                            <div style="text-align: left;">
+                                <span id="adminName" style="display: block; font-weight: 800; font-size: 0.9rem;">المدير</span>
+                                <span style="font-size: 0.7rem; color: var(--primary); font-weight: 700;">SUPER ADMIN</span>
+                            </div>
+                            <img id="adminImg" src="https://ui-avatars.com/api/?name=Admin&background=FF6B00&color=fff">
+                        </div>
+                        <div class="user-dropdown" id="userDropdown">
+                            <div class="user-dropdown-header">
+                                <span style="font-weight: 900; font-size: 0.85rem; color: var(--text-main);" id="dropdownAdminName">المدير</span>
+                                <span id="dropdownAdminEmail" style="font-size: 0.7rem; color: var(--text-muted);">engyhamid860@gmail.com</span>
+                            </div>
+                            <button class="user-dropdown-item" onclick="window.location.href='admin-settings.html'">
+                                <i data-lucide="settings" style="width: 16px;"></i> الإعدادات
+                            </button>
+                            <button class="user-dropdown-item logout" onclick="logoutAdmin()">
+                                <i data-lucide="log-out" style="width: 16px;"></i> تسجيل الخروج
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="welcome-card" style="margin-bottom: 30px;">
+                <div class="welcome-content">
+                    <h1>منتجات الجملة والتجار 📦</h1>
+                    <p>تحكم في المنتجات المخصصة للتجار وأسعار الجملة الحصرية.</p>
+                </div>
+                <button class="btn-primary" id="addMerchantProductBtn" style="padding: 12px 25px; border-radius: 12px; display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="plus-circle" style="width: 18px;"></i> إضافة منتج تجار
+                </button>
+            </div>
+            
+            <div class="table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>المنتج</th>
+                            <th>السعر العادي</th>
+                            <th>سعر التاجر</th>
+                            <th>المخزون</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="merchantProductsList">
+                        <tr><td colspan="5" style="text-align:center; padding:50px;">جاري تحميل منتجات التجار...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Merchant Product Modal -->
+    <div class="modal-overlay" id="merchantProductModal">
+        <div class="modal-content" style="max-width: 700px;">
+            <h3 id="merchantModalTitle">إضافة منتج تجار جديد</h3>
+            <form id="merchantProductForm" style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>اسم المنتج</label>
+                    <input type="text" id="mpName" required>
+                </div>
+                <div class="form-group">
+                    <label>السعر العادي (ج.م)</label>
+                    <input type="number" id="mpPrice" required>
+                </div>
+                <div class="form-group">
+                    <label>سعر التاجر (ج.م)</label>
+                    <input type="number" id="mpMerchantPrice" required>
+                </div>
+                <div class="form-group">
+                    <label>الكمية المتاحة</label>
+                    <input type="number" id="mpStock" value="10" required>
+                </div>
+                <div class="form-group">
+                    <label>الفئة</label>
+                    <select id="mpCategory">
+                        <!-- Categories dynamically loaded -->
+                        <option value="">جاري تحميل الأقسام...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>صورة المنتج (رابط أو رفع محلي)</label>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input type="text" id="mpImage" placeholder="رابط الصورة..." style="flex: 1; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
+                        <label class="btn-primary" style="padding: 0; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 10px; cursor: pointer; flex-shrink: 0; background: var(--secondary);" title="رفع صورة محلية">
+                            <i data-lucide="upload-cloud" style="width: 20px;"></i>
+                            <input type="file" id="mpImageFile" accept="image/*" onchange="previewImage(this, 'mpImagePreview', 'mpImage')" style="display: none;">
+                        </label>
+                    </div>
+                </div>
+                <div id="mpImagePreviewContainer" style="grid-column: span 2; display: none; margin-top: 5px;">
+                    <img id="mpImagePreview" style="width: 80px; height: 80px; border-radius: 12px; object-fit: cover; border: 1.5px solid #e2e8f0;">
+                </div>
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>وصف المنتج (اختياري)</label>
+                    <textarea id="mpDesc" rows="3" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);"></textarea>
+                </div>
+                <div style="grid-column: span 2; display: flex; gap: 10px;">
+                    <button type="submit" class="btn-primary" style="flex: 1;">حفظ المنتج</button>
+                    <button type="button" class="btn-secondary" id="closeMerchantModal" style="flex: 1;">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Bottom Navigation (Mobile) -->
+    <nav class="admin-bottom-nav">
+        <a href="admin.html">
+            <i data-lucide="layout-dashboard"></i>
+            <span>الرئيسية</span>
+        </a>
+        <a href="admin-products.html" class="active">
+            <i data-lucide="package"></i>
+            <span>المنتجات</span>
+        </a>
+        <a href="admin-orders.html">
+            <i data-lucide="shopping-bag"></i>
+            <span>الطلبات</span>
+        </a>
+        <a href="admin-recharge.html">
+            <i data-lucide="zap"></i>
+            <span>الشحن</span>
+        </a>
+        <a href="admin-customers.html">
+            <i data-lucide="users"></i>
+            <span>العملاء</span>
+        </a>
+        <a href="admin-drivers.html">
+            <i data-lucide="truck"></i>
+            <span>المناديب</span>
+        </a>
+    </nav>
+
+    <script src="admin.js"></script>
+    <script>
+        // Specific logic for merchant products management
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof loadMerchantProductsAdmin === 'function') {
+                loadMerchantProductsAdmin();
+            }
+        });
+    </script>
+</body>
+</html>

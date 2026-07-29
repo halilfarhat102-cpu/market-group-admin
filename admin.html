@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>لوحة تحكم مسعودي | الإدارة المتقدمة</title>
+    
+    <!-- Google Fonts: Cairo & Almarai -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="admin.css">
+    <link rel="icon" type="image/png" href="./logo.png">
+    <!-- PDF Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+</head>
+<body class="admin-body">
+
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="logo" style="margin-bottom: 40px; text-align: center; display: flex; flex-direction: column; align-items: center;">
+                <div style="width: 80px; height: 80px; background: white; border-radius: 18px; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(255, 107, 0, 0.2); border: 1px solid rgba(255, 107, 0, 0.1);">
+                    <img src="./logo.png" style="width: 100%; height: 100%; object-fit: contain; padding: 5px;" onerror="this.src='https://ui-avatars.com/api/?name=M&background=ff6b00&color=fff&bold=true'">
+                </div>
+                <span style="font-size: 0.85rem; color: var(--gray-500); font-weight: 700; letter-spacing: 1px;">لوحة الإدارة</span>
+            </div>
+            <nav class="admin-nav">
+                <a href="admin.html" class="active"><i data-lucide="layout-dashboard"></i> الإحصائيات</a>
+                <a href="admin-products.html"><i data-lucide="package"></i> المنتجات العامة</a>
+                <a href="admin-stores.html"><i data-lucide="store"></i> إدارة المتاجر</a>
+                <a href="admin-merchant-products.html"><i data-lucide="truck"></i> منتجات التجار</a>
+                <a href="admin-orders.html"><i data-lucide="shopping-bag"></i> الطلبات</a>
+                <a href="admin-recharge.html"><i data-lucide="zap"></i> طلبات الشحن</a>
+                <a href="admin-customers.html"><i data-lucide="users"></i> العملاء</a>
+                <a href="admin-drivers.html"><i data-lucide="truck"></i> المندوبين</a>
+                <a href="admin-users.html"><i data-lucide="shield-check"></i> الصلاحيات</a>
+                <a href="admin-settings.html"><i data-lucide="settings"></i> إعدادات الموقع</a>
+                <a href="index.html" style="margin-top: auto; color: var(--primary);"><i data-lucide="external-link"></i> عرض الموقع</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <!-- Mobile Admin Header -->
+            <div class="mobile-admin-header">
+                <div class="logo">مسعودي</div>
+                <button id="toggleSidebar" style="background:none; border:none; color:var(--primary); cursor:pointer;">
+                    <i data-lucide="menu"></i>
+                </button>
+            </div>
+
+            <header class="admin-header">
+                <h2 id="tabTitle">الإحصائيات</h2>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div class="admin-user-container">
+                    <div class="admin-user" onclick="toggleUserDropdown()">
+                        <div style="text-align: left;">
+                            <span id="adminName" style="display: block; font-weight: 800; font-size: 0.9rem;">المدير</span>
+                            <span style="font-size: 0.7rem; color: var(--primary); font-weight: 700;">SUPER ADMIN</span>
+                        </div>
+                        <img id="adminImg" src="https://ui-avatars.com/api/?name=Admin&background=FF6B00&color=fff">
+                    </div>
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="user-dropdown-header">
+                            <span style="font-weight: 900; font-size: 0.85rem; color: #1e293b;" id="dropdownAdminName">المدير</span>
+                            <span id="dropdownAdminEmail" style="font-size: 0.7rem; color: #64748b;">engyhamid860@gmail.com</span>
+                        </div>
+                        <button class="user-dropdown-item" onclick="window.location.href='admin-settings.html'">
+                            <i data-lucide="settings" style="width: 16px;"></i> الإعدادات
+                        </button>
+                        <button class="user-dropdown-item logout" onclick="logoutAdmin()">
+                            <i data-lucide="log-out" style="width: 16px;"></i> تسجيل الخروج
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+
+
+        <!-- Customer CRM Section -->
+            <!-- Stats Content -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i data-lucide="trending-up"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4>إجمالي المبيعات</h4>
+                        <p id="totalSales">0 ج.م</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="color: #10B981;">
+                        <i data-lucide="shopping-cart"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4>الطلبات الجديدة</h4>
+                        <p id="newOrders">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="color: #3B82F6;">
+                        <i data-lucide="package"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4>المنتجات</h4>
+                        <p id="totalProducts">0</p>
+                    </div>
+                </div>
+                <div class="stat-card" onclick="window.location.href='admin-drivers.html'" style="cursor: pointer; border: 1.5px solid rgba(255,107,0,0.1); transition: 0.3s;" onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='var(--primary)'" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(255,107,0,0.1)'">
+                    <div class="stat-icon" style="color: #F59E0B;">
+                        <i data-lucide="truck"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4>إدارة المناديب</h4>
+                        <p id="totalDriversStat">---</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Section -->
+            <div class="content-section">
+                <div class="section-header">
+                    <h3>
+                        <i data-lucide="bar-chart-3"></i>
+                        تحليل المبيعات والنشاط اليومي
+                    </h3>
+                    <div style="background: var(--primary-light); color: var(--primary); padding: 5px 15px; border-radius: 50px; font-size: 0.75rem; font-weight: 900;">
+                        تحديث مباشر
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px;">
+                <!-- Recent Orders Preview -->
+                <div class="content-section">
+                    <div class="section-header">
+                        <h3><i data-lucide="clock"></i> آخر الطلبات</h3>
+                        <a href="admin-orders.html" style="color: var(--primary); text-decoration: none; font-size: 0.8rem; font-weight: 900;">مشاهدة الكل</a>
+                    </div>
+                    <div class="table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-id">الرقم</th>
+                                    <th class="col-customer">العميل</th>
+                                    <th class="col-status">الحالة</th>
+                                    <th class="col-total">المجموع</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentOrdersBody">
+                                <!-- Loaded via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Best Sellers Preview -->
+                <div class="content-section">
+                    <div class="section-header">
+                        <h3><i data-lucide="award"></i> الأكثر مبيعاً</h3>
+                    </div>
+                    <div id="bestSellersList" style="display: flex; flex-direction: column; gap: 15px;">
+                        <!-- Loaded via JS -->
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Add/Edit Product Modal -->
+    <div class="modal-overlay" id="productModal">
+        <div class="modal-content" style="max-width: 700px;">
+            <h3 id="modalTitle">إضافة منتج جديد</h3>
+            <form id="productForm" style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>اسم المنتج</label>
+                    <input type="text" id="pName" required>
+                </div>
+                <div class="form-group">
+                    <label>السعر (ج.م)</label>
+                    <input type="number" id="pPrice" required>
+                </div>
+                <div class="form-group">
+                    <label>الخصم (%)</label>
+                    <input type="number" id="pDiscount" value="0">
+                </div>
+                <div class="form-group">
+                    <label>الكمية في المخزون</label>
+                    <input type="number" id="pStock" value="10" required>
+                </div>
+                <div class="form-group">
+                    <label>تمييز المنتج (Tag)</label>
+                    <select id="pTag">
+                        <option value="none">بدون تمييز</option>
+                        <option value="new">منتج جديد ✨</option>
+                        <option value="bestseller">الأكثر مبيعاً 🔥</option>
+                        <option value="limited">كمية محدودة ⏳</option>
+                        <option value="discount">عرض خاص 🏷️</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>الفئة</label>
+                    <select id="pCategory">
+                        <option value="electronics">إلكترونيات</option>
+                        <option value="fashion">أزياء</option>
+                        <option value="home">منزل</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>رابط الصورة</label>
+                    <input type="url" id="pImage" required>
+                </div>
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>الوصف</label>
+                    <textarea id="pDesc" rows="3"></textarea>
+                </div>
+                <div style="grid-column: span 2; display: flex; gap: 10px;">
+                    <button type="submit" class="btn-primary" style="flex: 1;">حفظ المنتج</button>
+                    <button type="button" class="btn-secondary" id="closeProductModal" style="flex: 1;">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div class="modal-overlay" id="orderDetailsModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3>تفاصيل الطلب</h3>
+                <button onclick="document.getElementById('orderDetailsModal').style.display='none'" style="border:none; background:none; cursor:pointer;"><i data-lucide="x"></i></button>
+            </div>
+            <div id="orderContent" style="max-height: 400px; overflow-y: auto;">
+                <!-- Order items injected here -->
+            </div>
+            <div id="orderSummary" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--gray-200);">
+                <!-- Order total and customer info -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Bottom Navigation (Mobile) -->
+    <nav class="admin-bottom-nav">
+        <a href="admin.html" class="active">
+            <i data-lucide="layout-dashboard"></i>
+            <span>الرئيسية</span>
+        </a>
+        <a href="admin-products.html">
+            <i data-lucide="package"></i>
+            <span>المنتجات</span>
+        </a>
+        <a href="admin-orders.html">
+            <i data-lucide="shopping-bag"></i>
+            <span>الطلبات</span>
+        </a>
+        <a href="admin-recharge.html">
+            <i data-lucide="zap"></i>
+            <span>الشحن</span>
+        </a>
+        <a href="admin-customers.html">
+            <i data-lucide="users"></i>
+            <span>العملاء</span>
+        </a>
+        <a href="admin-drivers.html">
+            <i data-lucide="truck"></i>
+            <span>المناديب</span>
+        </a>
+        <a href="admin-users.html">
+            <i data-lucide="shield-check"></i>
+            <span>الصلاحيات</span>
+        </a>
+        <a href="admin-settings.html">
+            <i data-lucide="settings"></i>
+            <span>الإعدادات</span>
+        </a>
+    </nav>
+
+    <script src="admin.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>
