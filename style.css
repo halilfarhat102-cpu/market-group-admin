@@ -2169,13 +2169,7 @@ body {
     padding-bottom: 90px;
 }
 
-.page-section {
-    max-width: 450px !important;
-    margin: 0 auto !important;
-    background: #ffffff !important;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.03);
-    min-height: 100vh;
-}
+
 
 /* --- Ultra-Clean Minimalist Search & Categories --- */
 .filter-bar {
@@ -4065,17 +4059,17 @@ body {
 
 .bottom-nav {
     position: fixed !important;
-    bottom: 15px !important;
+    bottom: 20px !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
     width: 92% !important;
-    max-width: 420px !important;
-    height: 65px !important;
+    max-width: 480px !important;
+    height: 70px !important;
     background: #ffffff !important;
-    border-radius: 16px !important;
+    border-radius: 20px !important;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
     border: 1px solid #e2e8f0 !important;
-    padding: 0 20px !important;
+    padding: 0 25px !important;
     z-index: 10001 !important;
     display: flex !important;
     justify-content: space-between !important;
