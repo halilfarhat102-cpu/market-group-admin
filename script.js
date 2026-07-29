@@ -1171,6 +1171,7 @@ window.navigateTo = (pageId, scrollToProducts = false) => {
 
     const navMapping = {
         'homePage': 'nav-products',
+        'offersPage': 'nav-offers',
         'cartPage': 'nav-cart',
         'listsPage': 'nav-lists',
         'contactPage': 'nav-contact'
