@@ -88,11 +88,7 @@ function initGSI() {
 
         renderGoogleBtn("g_id_signin");
         renderGoogleBtn("g_id_signin_driver");
-        
-        const hasSession = localStorage.getItem('masoudi_has_session') === 'true';
-        if (!hasSession && !window.location.hash.includes('no-gsi-prompt')) {
-            google.accounts.id.prompt(); 
-        }
+
     } catch (err) {
         console.error("GSI Initialization Error:", err);
         const fallback = document.getElementById('gsiFallbackBtn');
