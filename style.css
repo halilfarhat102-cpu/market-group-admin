@@ -4063,21 +4063,19 @@ body {
     }
 }
 
-/* --- Re-design Bottom Nav to be Flat, Edge-to-edge and White like the picture --- */
 .bottom-nav {
     position: fixed !important;
-    bottom: 0 !important;
+    bottom: 15px !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
-    width: 100% !important;
-    max-width: 450px !important;
+    width: 92% !important;
+    max-width: 420px !important;
     height: 65px !important;
     background: #ffffff !important;
-    border-radius: 0 !important;
-    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.04) !important;
-    border: none !important;
-    border-top: 1px solid #e2e8f0 !important;
-    padding: 0 25px !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+    border: 1px solid #e2e8f0 !important;
+    padding: 0 20px !important;
     z-index: 10001 !important;
     display: flex !important;
     justify-content: space-between !important;
