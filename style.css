@@ -2158,15 +2158,18 @@ footer {
 .page-section.active { display: block; }
 @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-html, body {
-    margin: 0;
-    padding: 0;
-    min-height: 100vh;
-    background: linear-gradient(135deg, #ffffff 0%, #fff7ed 50%, #ffedd5 100%) no-repeat fixed;
+html {
+    background: #f1f5f9;
 }
 
 body {
-    padding-bottom: 120px;
+    max-width: 450px !important;
+    margin: 0 auto !important;
+    background: #ffffff !important;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.05);
+    min-height: 100vh;
+    position: relative;
+    padding-bottom: 90px !important;
 }
 
 /* --- Ultra-Clean Minimalist Search & Categories --- */
@@ -4062,7 +4065,7 @@ body {
     left: 50% !important;
     transform: translateX(-50%) !important;
     width: 100% !important;
-    max-width: 480px !important;
+    max-width: 450px !important;
     height: 65px !important;
     background: #ffffff !important;
     border-radius: 0 !important;
