@@ -3843,30 +3843,31 @@ body {
 }
 
 .category-icon-wrapper {
-    height: 110px;
-    min-width: 110px;
+    height: 70px;
+    min-width: 70px;
     width: max-content;
-    border-radius: 24px;
+    border-radius: 18px;
     background: #ffffff;
     border: 2px solid #f1f5f9;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
     overflow: hidden;
 }
 
-.category-icon-wrapper i {
-    width: 36px;
-    height: 36px;
+.category-icon-wrapper i,
+.category-icon-wrapper svg {
+    width: 24px;
+    height: 24px;
     color: #64748b;
     transition: all 0.3s;
 }
 
 .category-icon-item span {
-    font-size: 0.95rem;
-    font-weight: 900;
+    font-size: 0.8rem;
+    font-weight: 700;
     color: #475569;
     white-space: nowrap;
     transition: all 0.3s;
@@ -3875,32 +3876,43 @@ body {
 .category-icon-item.active .category-icon-wrapper {
     background: linear-gradient(135deg, var(--primary) 0%, #ff8c33 100%);
     border-color: transparent;
-    box-shadow: 0 10px 20px rgba(255, 107, 0, 0.2);
-    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(255, 107, 0, 0.2);
+    transform: translateY(-2px);
 }
 
-.category-icon-item.active .category-icon-wrapper i {
+.category-icon-item.active .category-icon-wrapper i,
+.category-icon-item.active .category-icon-wrapper svg {
     color: white;
-    transform: scale(1.1);
+    transform: scale(1.05);
 }
 
 .category-icon-item.active span {
     color: var(--primary);
-    font-weight: 1000;
+    font-weight: 800;
 }
 
 .category-icon-item:hover .category-icon-wrapper {
     border-color: var(--primary-light);
-    transform: translateY(-2px);
+    transform: translateY(-1px);
 }
 
 @media (max-width: 480px) {
     .category-icons-scroll-container {
-        gap: 15px;
+        gap: 12px;
+        padding: 10px 2px;
     }
     .category-icon-wrapper {
-        height: 90px;
-        min-width: 90px;
+        height: 58px;
+        min-width: 58px;
+        border-radius: 15px;
+    }
+    .category-icon-wrapper i,
+    .category-icon-wrapper svg {
+        width: 20px;
+        height: 20px;
+    }
+    .category-icon-item span {
+        font-size: 0.75rem;
     }
 }
 
