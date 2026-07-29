@@ -4125,6 +4125,18 @@ async function loadUserProfile(user) {
 
             // Refresh icons to ensure they render in newly visible elements
             if (typeof lucide !== 'undefined') lucide.createIcons();
+
+            // Toggle container groups based on visibility of their children
+            const updateGroup = (groupId) => {
+                const group = document.getElementById(groupId);
+                if (group) {
+                    const children = Array.from(group.children);
+                    const hasVisibleChild = children.some(c => c.style.display === 'flex' || c.style.display === 'block');
+                    group.style.display = hasVisibleChild ? 'block' : 'none';
+                }
+            };
+            updateGroup('dashboardGroupContainer');
+            updateGroup('adminManagementGroupContainer');
         }
     }, err => console.error("Profile Listener Error:", err));
 }
