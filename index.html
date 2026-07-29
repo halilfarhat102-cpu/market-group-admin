@@ -944,20 +944,20 @@
         </div>
     </div>
 
-    <div id="contactPage" class="page-section" style="background: #f8fafc; min-height: 100vh; padding-bottom: 90px; direction: rtl; font-family: 'Cairo', sans-serif;">
+    <div id="contactPage" class="page-section" style="background: #f8fafc; min-height: 100vh; padding-bottom: 100px; direction: rtl; font-family: 'Cairo', sans-serif;">
         <!-- Clean Premium Header -->
         <div style="display: flex; align-items: center; justify-content: space-between; padding: 20px; background: white; border-bottom: 1px solid #f1f5f9; position: sticky; top: 0; z-index: 10;">
             <button onclick="navigateTo('homePage')" style="background: #f1f5f9; border: none; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #475569; cursor: pointer; transition: background 0.2s;">
                 <i data-lucide="arrow-right" style="width: 20px; height: 20px;"></i>
             </button>
             <h2 style="font-size: 1.1rem; font-weight: 900; color: #0f172a; margin: 0;">الحساب الشخصي</h2>
-            <div style="width: 38px;"></div> <!-- Placeholder to balance header -->
+            <div style="width: 38px;"></div>
         </div>
 
         <div class="container" style="max-width: 450px; margin: 0 auto; padding: 20px 15px;">
             <!-- User Profile Card -->
-            <div style="background: white; border-radius: 20px; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); border: 1px solid #f1f5f9; display: flex; align-items: center; gap: 15px; margin-bottom: 15px; position: relative;">
-                <div id="profileAvatarContainer" style="width: 60px; height: 60px; border-radius: 50%; overflow: hidden; border: 2.5px solid #ff6b0015; flex-shrink: 0; position: relative;">
+            <div style="background: white; border-radius: 24px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.02); border: 1px solid #f1f5f9; display: flex; align-items: center; gap: 15px; margin-bottom: 20px; position: relative; overflow: hidden;">
+                <div id="profileAvatarContainer" style="width: 65px; height: 65px; border-radius: 50%; overflow: hidden; border: 2.5px solid #ff6b0015; flex-shrink: 0; position: relative;">
                     <!-- VIP Golden Crown -->
                     <div id="superAdminCrown" style="display: none; position: absolute; top: -5px; left: 50%; transform: translateX(-50%); z-index: 10; filter: drop-shadow(0 4px 8px rgba(212, 175, 55, 0.6));">
                         <svg viewBox="0 0 24 24" width="18" height="18" fill="#D4AF37" stroke="#996515" stroke-width="1.5">
@@ -965,16 +965,152 @@
                         </svg>
                     </div>
                     <img id="profileUserImg" src="" style="width: 100%; height: 100%; object-fit: cover; background: #fff;">
-                    <!-- VIP Shimmering Border -->
-
-                <!-- Simple Logout Button -->
-                <div style="margin-top: 25px; border-top: 1px solid #f1f5f9; padding-top: 20px;">
-                    <button onclick="logout()" style="width: 100%; background: #fef2f2; color: #ef4444; border: 1px solid #fee2e2; padding: 12px; border-radius: 16px; font-size: 0.85rem; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.2s;">
-                        <i data-lucide="log-out" style="width: 18px;"></i> تسجيل الخروج
-                    </button>
+                    <!-- VIP Shimmering Aura -->
+                    <div id="superAdminAura" style="display: none; position: absolute; inset: 0; border-radius: 50%; border: 2px solid #D4AF37; animation: auraPulse 2s infinite linear; z-index: 1;"></div>
+                </div>
+                <div style="flex-grow: 1;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <h3 id="profileUserName" style="font-size: 1.1rem; font-weight: 900; color: #0f172a; margin: 0;">الاسم</h3>
+                        <div id="profileVerifiedBadge" style="display: none;">
+                            <svg viewBox="0 0 512 512" width="16" height="16" fill="#1877F2">
+                                <path d="M512 256c0-34.9-20.7-64.9-50.6-78.9 9.3-32.9 2-68.5-22.3-92.8-24.3-24.3-59.9-31.5-92.8-22.3C332.3 32.7 302.3 12 267.4 12c-34.9 0-64.9 20.7-78.9 50.6-32.9-9.3-68.5-2-92.8 22.3-24.3 24.3-31.5 59.9-22.3 92.8C43.3 191.1 22.6 221.1 22.6 256c0 34.9 20.7 64.9 50.6 78.9-9.3 32.9-2 68.5 22.3 92.8 24.3 24.3 59.9 31.5 92.8 22.3 14 29.9 44 50.6 78.9 50.6 34.9 0 64.9-20.7 78.9-50.6 32.9 9.3 68.5 2 92.8-22.3 24.3-24.3 31.5-59.9 22.3-92.8 29.9-14 50.6-44 50.6-78.9z"/>
+                                <path fill="#FFF" d="M366.1 176.6c-4.7-4.7-12.3-4.7-17 0l-123.6 123.6-59.5-59.5c-4.7-4.7-12.3-4.7-17 0s-4.7 12.3 0 17l68 68c2.3 2.3 5.4 3.5 8.5 3.5s6.2-1.2 8.5-3.5l132.1-132.1c4.7-4.7 4.7-12.3 0-17z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <p id="profileUserEmail" style="font-size: 0.75rem; color: #64748b; margin: 2px 0 0; font-weight: 600;">البريد الإلكتروني</p>
+                    <div id="superAdminBadge" style="display: none; background: linear-gradient(135deg, #D4AF37, #996515); padding: 2px 8px; border-radius: 8px; font-size: 0.6rem; font-weight: 900; color: white; margin-top: 5px; width: fit-content;">GOLD VIP MANAGER</div>
                 </div>
             </div>
 
+            <!-- Merchant Entrance Banner (Card style) -->
+            <div id="merchantEntryBtn" onclick="navigateTo('merchantPage')" style="display: none; background: linear-gradient(135deg, #0f172a, #1e293b); border-radius: 20px; padding: 16px; margin-bottom: 15px; cursor: pointer; position: relative; overflow: hidden; border: 1px solid rgba(255,107,0,0.15);">
+                <div style="display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 2;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="background: rgba(255,107,0,0.15); width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--primary);">
+                            <i data-lucide="store" style="width: 20px;"></i>
+                        </div>
+                        <div>
+                            <h4 style="font-size: 0.85rem; font-weight: 900; color: white; margin: 0;">بوابة التاجر الخاصة بك</h4>
+                            <p style="font-size: 0.7rem; color: #94a3b8; margin: 2px 0 0; font-weight: 700;">أضف منتجاتك وتابع متجرك</p>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-left" style="color: #64748b; width: 18px;"></i>
+                </div>
+            </div>
+
+            <!-- Menu Group 1: Personal & Settings (Card block) -->
+            <div style="background: white; border-radius: 24px; padding: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.01); border: 1px solid #f1f5f9; margin-bottom: 15px;">
+                <!-- Settings Item -->
+                <div onclick="document.getElementById('settingsModal').style.display='flex'" style="display: flex; align-items: center; justify-content: space-between; padding: 14px; border-radius: 16px; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="background: #eff6ff; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #2563eb;">
+                            <i data-lucide="settings" style="width: 18px;"></i>
+                        </div>
+                        <span style="font-size: 0.85rem; font-weight: 800; color: #334155;">إعدادات الحساب</span>
+                    </div>
+                    <i data-lucide="chevron-left" style="color: #cbd5e1; width: 16px;"></i>
+                </div>
+                
+                <!-- Shopping Lists Item -->
+                <div onclick="navigateTo('listsPage')" style="display: flex; align-items: center; justify-content: space-between; padding: 14px; border-radius: 16px; cursor: pointer; transition: background 0.2s; margin-top: 5px;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="background: #fdf2f8; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #db2777;">
+                            <i data-lucide="list-heart" style="width: 18px;"></i>
+                        </div>
+                        <span style="font-size: 0.85rem; font-weight: 800; color: #334155;">قوائم التسوق</span>
+                    </div>
+                    <i data-lucide="chevron-left" style="color: #cbd5e1; width: 16px;"></i>
+                </div>
+            </div>
+
+            <!-- Menu Group 2: Special Dashboards (Card block) -->
+            <div id="dashboardGroupContainer" style="background: white; border-radius: 24px; padding: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.01); border: 1px solid #f1f5f9; margin-bottom: 15px;">
+                <!-- Delivery Dashboard Item -->
+                <div id="deliveryDashboardBtn" onclick="openDeliveryDashboard()" style="display: none; align-items: center; justify-content: space-between; padding: 14px; border-radius: 16px; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="background: #ecfdf5; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #059669;">
+                            <i data-lucide="truck" style="width: 18px;"></i>
+                        </div>
+                        <span style="font-size: 0.85rem; font-weight: 800; color: #334155;">لوحة المندوب</span>
+                    </div>
+                    <i data-lucide="chevron-left" style="color: #cbd5e1; width: 16px;"></i>
+                </div>
+
+                <!-- Admin Control Panel Item -->
+                <div id="adminMenuEntry" onclick="window.location.href='admin.html'" style="display: none; align-items: center; justify-content: space-between; padding: 14px; border-radius: 16px; cursor: pointer; transition: background 0.2s; margin-top: 5px;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="background: #f5f3ff; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #7c3aed;">
+                            <i data-lucide="shield-check" style="width: 18px;"></i>
+                        </div>
+                        <span style="font-size: 0.85rem; font-weight: 800; color: #334155;">لوحة تحكم المدير</span>
+                    </div>
+                    <i data-lucide="chevron-left" style="color: #cbd5e1; width: 16px;"></i>
+                </div>
+            </div>
+
+            <!-- Menu Group 3: Admin Management Tools (Card block) -->
+            <div id="adminManagementGroupContainer" style="background: white; border-radius: 24px; padding: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.01); border: 1px solid #f1f5f9; margin-bottom: 15px; display: none;">
+                <!-- Manage Agents Item -->
+                <div id="manageDeliveryBtn" onclick="openManageDeliveryModal()" style="display: none; align-items: center; justify-content: space-between; padding: 14px; border-radius: 16px; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="background: #fff7ed; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #ea580c;">
+                            <i data-lucide="users" style="width: 18px;"></i>
+                        </div>
+                        <span style="font-size: 0.85rem; font-weight: 800; color: #334155;">إدارة المناديب</span>
+                    </div>
+                    <i data-lucide="chevron-left" style="color: #cbd5e1; width: 16px;"></i>
+                </div>
+
+                <!-- Manage Merchants Item -->
+                <div id="manageMerchantsBtn" onclick="openManageMerchantsModal()" style="display: none; align-items: center; justify-content: space-between; padding: 14px; border-radius: 16px; cursor: pointer; transition: background 0.2s; margin-top: 5px;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="background: #f0fdf4; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #16a34a;">
+                            <i data-lucide="store" style="width: 18px;"></i>
+                        </div>
+                        <span style="font-size: 0.85rem; font-weight: 800; color: #334155;">إدارة المتاجر</span>
+                    </div>
+                    <i data-lucide="chevron-left" style="color: #cbd5e1; width: 16px;"></i>
+                </div>
+            </div>
+
+            <!-- Menu Group 4: Support & Policy (Card block) -->
+            <div style="background: white; border-radius: 24px; padding: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.01); border: 1px solid #f1f5f9; margin-bottom: 15px;">
+                <!-- Policy Item -->
+                <div onclick="navigateTo('policyPage')" style="display: flex; align-items: center; justify-content: space-between; padding: 14px; border-radius: 16px; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="background: #f8fafc; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #64748b;">
+                            <i data-lucide="file-text" style="width: 18px;"></i>
+                        </div>
+                        <span style="font-size: 0.85rem; font-weight: 800; color: #334155;">سياسة المتجر</span>
+                    </div>
+                    <i data-lucide="chevron-left" style="color: #cbd5e1; width: 16px;"></i>
+                </div>
+                
+                <!-- Support Item -->
+                <div onclick="window.open('https://wa.me/201035528656')" style="display: flex; align-items: center; justify-content: space-between; padding: 14px; border-radius: 16px; cursor: pointer; transition: background 0.2s; margin-top: 5px;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="background: #ecfdf5; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #059669;">
+                            <i data-lucide="message-circle" style="width: 18px;"></i>
+                        </div>
+                        <span style="font-size: 0.85rem; font-weight: 800; color: #334155;">الدعم الفني (واتساب)</span>
+                    </div>
+                    <i data-lucide="chevron-left" style="color: #cbd5e1; width: 16px;"></i>
+                </div>
+            </div>
+
+            <!-- Menu Group 5: Logout (Card block) -->
+            <div style="background: white; border-radius: 24px; padding: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.01); border: 1px solid #f1f5f9; margin-bottom: 20px;">
+                <div onclick="logout()" style="display: flex; align-items: center; justify-content: space-between; padding: 14px; border-radius: 16px; cursor: pointer; transition: background 0.2s; color: #dc2626;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='transparent'">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="background: #fef2f2; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #dc2626;">
+                            <i data-lucide="log-out" style="width: 18px;"></i>
+                        </div>
+                        <span style="font-size: 0.85rem; font-weight: 800; color: #dc2626;">تسجيل الخروج</span>
+                    </div>
+                    <i data-lucide="chevron-left" style="color: #fca5a5; width: 16px;"></i>
+                </div>
+            </div>
         </div>
     </div>
 
