@@ -71,7 +71,7 @@ function initGSI() {
             const el = document.getElementById(id);
             if (el) {
                 google.accounts.id.renderButton(el, {
-                    theme: "outline", size: "large", width: 320, text: "signin_with", shape: "pill", logo_alignment: "left"
+                    theme: "filled_blue", size: "large", width: 320, text: "signin_with", shape: "rectangular", logo_alignment: "left"
                 });
                 console.log(`GSI: Button rendered into #${id}`);
                 
@@ -104,21 +104,14 @@ function initGSI() {
 window.addEventListener('load', initGSI);
 
 window.triggerGoogleLogin = () => {
-    if (window.google && google.accounts.id) {
-        google.accounts.id.prompt((notification) => {
-            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-                const provider = new firebase.auth.GoogleAuthProvider();
-                auth.signInWithPopup(provider).catch(err => {
-                    if (err.code === 'auth/popup-blocked') {
-                        auth.signInWithRedirect(provider);
-                    } else {
-                        alert("خطأ: " + err.message);
-                    }
-                });
-            }
-        });
+    const provider = new firebase.auth.GoogleAuthProvider();
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+        // Redirect directly in the same tab on mobile to prevent any popups
+        auth.signInWithRedirect(provider);
     } else {
-        const provider = new firebase.auth.GoogleAuthProvider();
+        // Use popup on desktop
         auth.signInWithPopup(provider).catch(err => {
             if (err.code === 'auth/popup-blocked') {
                 auth.signInWithRedirect(provider);
