@@ -48,6 +48,11 @@
     --secondary: #f1f5f9;
 }
 
+/* Hide Recharge/Wallet Requests from Admin sidebar */
+a[href="admin-recharge.html"] {
+    display: none !important;
+}
+
 /* Glassmorphism Utility */
 .glass-effect {
     background: var(--glass-bg);

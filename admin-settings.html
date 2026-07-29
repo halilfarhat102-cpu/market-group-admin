@@ -363,33 +363,7 @@
                 </div>
             </div>
 
-            <!-- Payment Settings -->
-            <div class="admin-card" style="background: white; padding: 30px; border-radius: 15px; box-shadow: var(--shadow-sm); margin-bottom: 30px;">
-                <h4 style="margin-bottom: 20px; color: var(--primary);"><i data-lucide="credit-card"></i> إعدادات استلام الأموال</h4>
-                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 20px;">هذه الأرقام هي التي ستظهر للعملاء في صفحة الدفع عند اختيار "فودافون كاش" أو "انستا باي".</p>
-                
-                <form id="paymentSettingsForm" onsubmit="savePaymentConfig(event)">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 25px;">
-                        <div class="form-group">
-                            <label style="display: block; margin-bottom: 8px; font-weight: 700;">رقم فودافون كاش (للطلبات)</label>
-                            <input type="text" id="vodafoneCashNumber" placeholder="010XXXXXXXX" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
-                        </div>
-                        <div class="form-group">
-                            <label style="display: block; margin-bottom: 8px; font-weight: 700; color:var(--primary);">رقم استقبال أموال المحفظة</label>
-                            <input type="text" id="rechargeNumber" placeholder="رقم شحن المحفظة..." style="width: 100%; padding: 12px; border-radius: 10px; border: 2px solid var(--primary);">
-                        </div>
-                        <div class="form-group">
-                            <label style="display: block; margin-bottom: 8px; font-weight: 700;">رقم / عنوان انستا باي (InstaPay)</label>
-                            <input type="text" id="instapayNumber" placeholder="رقم الهاتف أو العنوان..." style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
-                        </div>
-                        <div class="form-group">
-                            <label style="display: block; margin-bottom: 8px; font-weight: 700;">رقم واتساب الاستلام</label>
-                            <input type="text" id="whatsappSupportNumber" placeholder="012XXXXXXXX" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--bg-soft);">
-                        </div>
-                    </div>
-                    <button type="submit" class="btn-primary" style="width: auto; padding: 12px 40px; border-radius: 12px;">حفظ إعدادات الدفع</button>
-                </form>
-            </div>
+
 
 
             <!-- Delivery Settings -->

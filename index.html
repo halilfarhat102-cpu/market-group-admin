@@ -985,34 +985,7 @@
 
         <div class="container" style="max-width: 400px; margin: 0 auto; padding: 40px 15px 0; position: relative; z-index: 2;">
             
-            <!-- Premium Compact Glass Wallet Card -->
-            <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: 20px; padding: 18px; margin: 0 auto 20px; max-width: 340px; box-shadow: 0 15px 35px rgba(15, 23, 42, 0.3), 0 4px 10px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.08); position: relative; overflow: hidden; color: white;">
-                <!-- Decorative Blurred Glowing Orbs for Glass effect -->
-                <div style="position: absolute; top: -20px; right: -20px; width: 100px; height: 100px; background: linear-gradient(135deg, #FF512F, #F09819); border-radius: 50%; opacity: 0.3; filter: blur(25px);"></div>
-                <div style="position: absolute; bottom: -20px; left: -15px; width: 80px; height: 80px; background: linear-gradient(135deg, #38bdf8, #0ea5e9); border-radius: 50%; opacity: 0.2; filter: blur(20px);"></div>
-                
-                <div style="position: relative; z-index: 2;">
-                    <!-- Compact Balance & Action Buttons Row -->
-                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
-                        <div>
-                            <span style="display: block; font-size: 0.7rem; color: #cbd5e1; font-weight: 600; margin-bottom: 2px;">الرصيد المتاح</span>
-                            <div style="display: flex; align-items: baseline; gap: 4px;">
-                                <span id="walletBalance" style="font-size: 1.6rem; font-weight: 900; letter-spacing: -0.5px; text-shadow: 0 2px 5px rgba(0,0,0,0.3);">0</span>
-                                <span style="font-size: 0.75rem; font-weight: 800; color: #f8fafc;">ج.م</span>
-                            </div>
-                        </div>
-                        
-                        <div style="display: flex; gap: 8px;">
-                            <button onclick="openWalletHistory()" style="background: rgba(255,255,255,0.08); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); width: 38px; height: 38px; border-radius: 12px; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s;">
-                                <i data-lucide="scroll-text" style="width: 16px;"></i>
-                            </button>
-                            <button onclick="openRechargeModal()" style="background: linear-gradient(135deg, #FF512F, #F09819); border: none; padding: 0 14px; height: 38px; border-radius: 12px; color: white; font-size: 0.75rem; font-weight: 900; cursor: pointer; box-shadow: 0 5px 15px rgba(255, 107, 0, 0.4); display: flex; align-items: center; gap: 6px;">
-                                <i data-lucide="plus-circle" style="width: 14px;"></i> إيداع
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
 
 
             <!-- Modern 3x3 Quick Actions Grid -->
@@ -1926,34 +1899,8 @@
                     <input type="hidden" id="latlng">
                 </div>
 
-                <!-- Section 3: Payment -->
-                <div class="form-group">
-                    <label style="display:block; margin-bottom:5px; font-weight:800; font-size: 0.8rem; color: #64748b;">طريقة الدفع</label>
-                    <select id="paymentMethod" onchange="togglePaymentDetails(this.value)" style="width:100%; padding: 10px; border-radius: 10px; border: 1.5px solid #e2e8f0; font-size: 0.9rem; font-weight: 700; background: white;">
-                        <option value="cod">💵 الدفع عند الاستلام</option>
-                        <option value="wallet">👛 الدفع بالمحفظة (رصيد متاح)</option>
-                    </select>
-                </div>
-
-                <!-- Digital Payment Details (Sleek Compact Card) -->
-                <!-- Digital Payment Details (Sleek Compact Card) -->
-                <div id="paymentDetailsContainer" style="display: none; background: #fff7ed; padding: 12px; border-radius: 15px; border: 1px solid #ff6b0030; flex-direction: column; gap: 10px;">
-                    <div style="text-align: center; border-bottom: 1px dashed #fed7aa; padding-bottom: 8px;">
-                        <p id="transferNumberLabel" style="font-weight: 800; color: #c2410c; font-size: 0.7rem; margin-bottom: 2px;"></p>
-                        <h3 id="transferNumber" style="font-size: 1.2rem; color: #ff6b00; font-weight: 900; margin: 0;"></h3>
-                    </div>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                        <div class="form-group">
-                            <label style="display:block; margin-bottom:4px; font-weight:800; font-size: 0.7rem;">صورة الإيصال</label>
-                            <input type="file" id="paymentReceipt" accept="image/*" style="width:100%; font-size: 0.65rem;">
-                        </div>
-                        <div class="form-group">
-                            <label style="display:block; margin-bottom:4px; font-weight:800; font-size: 0.7rem;">آخر 3 أرقام</label>
-                            <input type="text" id="senderLastDigits" placeholder="000" maxlength="3" style="width:100%; padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 0.8rem; text-align: center;">
-                        </div>
-                    </div>
-                </div>
+                <!-- Section 3: Payment (Cash on Delivery Only) -->
+                <input type="hidden" id="paymentMethod" value="cod">
 
                 <!-- Order Summary -->
                 <div style="background: #f8fafc; padding: 15px; border-radius: 15px; border: 1px solid #e2e8f0; margin-top: 10px;">
