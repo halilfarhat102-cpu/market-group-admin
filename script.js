@@ -3518,10 +3518,12 @@ async function loadCategoriesMain() {
 
         const finalCategories = {};
         
-        // Add defaults first
+        // Add defaults first (disabled to only show custom categories from control panel)
+        /*
         Object.values(defaultCategoriesMap).forEach(cat => {
             finalCategories[cat.id] = cat;
         });
+        */
 
         // Override/add with Firebase data
         if (!snap.empty) {
