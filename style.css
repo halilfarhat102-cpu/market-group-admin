@@ -23,9 +23,9 @@
 
 
 :root {
-    --primary: #FF6B00;
-    --primary-hover: #E65100;
-    --primary-glow: rgba(255, 107, 0, 0.2);
+    --primary: #2e7d32;
+    --primary-hover: #1b5e20;
+    --primary-glow: rgba(46, 125, 80, 0.15);
     --secondary: #0F172A;
     --bg-light: #FFFFFF;
     --bg-soft: #F8FAFC;
@@ -38,12 +38,12 @@
     --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --radius: 20px;
+    --radius: 16px;
     --banner-height-desktop: 240px;
     --banner-height-mobile: 280px;
     --banner-width-desktop: 1000px;
     --banner-width-mobile: 100%;
-    --primary-rgb: 255, 107, 0;
+    --primary-rgb: 46, 125, 50;
 }
 
 [data-theme="dark"] {
