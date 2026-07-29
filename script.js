@@ -105,21 +105,13 @@ window.addEventListener('load', initGSI);
 
 window.triggerGoogleLogin = () => {
     const provider = new firebase.auth.GoogleAuthProvider();
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    
-    if (isMobile) {
-        // Redirect directly in the same tab on mobile to prevent any popups
-        auth.signInWithRedirect(provider);
-    } else {
-        // Use popup on desktop
-        auth.signInWithPopup(provider).catch(err => {
-            if (err.code === 'auth/popup-blocked') {
-                auth.signInWithRedirect(provider);
-            } else {
-                alert("خطأ: " + err.message);
-            }
-        });
-    }
+    auth.signInWithPopup(provider).catch(err => {
+        if (err.code === 'auth/popup-blocked') {
+            auth.signInWithRedirect(provider);
+        } else {
+            alert("خطأ: " + err.message);
+        }
+    });
 };
 
 // Load Delivery Config as early as possible
