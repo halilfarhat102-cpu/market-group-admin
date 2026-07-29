@@ -63,7 +63,7 @@ function initGSI() {
         google.accounts.id.initialize({
             client_id: GOOGLE_CLIENT_ID,
             callback: window.handleCredentialResponse,
-            auto_select: false,
+            auto_select: true,
             cancel_on_tap_outside: false
         });
         
@@ -102,6 +102,32 @@ function initGSI() {
 
 // Initialize GSI when window loads
 window.addEventListener('load', initGSI);
+
+window.triggerGoogleLogin = () => {
+    if (window.google && google.accounts.id) {
+        google.accounts.id.prompt((notification) => {
+            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                auth.signInWithPopup(provider).catch(err => {
+                    if (err.code === 'auth/popup-blocked') {
+                        auth.signInWithRedirect(provider);
+                    } else {
+                        alert("خطأ: " + err.message);
+                    }
+                });
+            }
+        });
+    } else {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider).catch(err => {
+            if (err.code === 'auth/popup-blocked') {
+                auth.signInWithRedirect(provider);
+            } else {
+                alert("خطأ: " + err.message);
+            }
+        });
+    }
+};
 
 // Load Delivery Config as early as possible
 loadDeliveryConfig();

@@ -46,7 +46,8 @@ function initGSI() {
     }
     google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
-        callback: window.handleCredentialResponse
+        callback: window.handleCredentialResponse,
+        auto_select: true
     });
     
     // Attempt rendering if container exists (e.g., after showLoginScreen)
