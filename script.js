@@ -28,6 +28,7 @@ window.STORE_CATEGORY_TRANSLATIONS = {
     'restaurant': 'مطعم ومأكولات 🍔',
     'restaurants': 'مطاعم ومأكولات 🍔',
     'food': 'مطاعم ومأكولات 🍔',
+    'amlmt': 'مطاعم ومأكولات 🍔',
     'general': 'عام / منوعات 📦',
     'bakery': 'مخبوزات وحلويات 🥐',
     'veggies': 'خضروات وفواكه 🍎',
@@ -48,7 +49,16 @@ window.STORE_CATEGORY_TRANSLATIONS = {
     'gifts': 'هدايا وزهور 🎁',
     'cleaning': 'منظفات 🧹',
     'pets': 'مستلزمات حيوانات 🐾',
-    'other': 'منتجات عامة 📦'
+    'other': 'منتجات عامة 📦',
+    'مطاعم': 'مطاعم ومأكولات 🍔',
+    'مطعم': 'مطعم ومأكولات 🍔',
+    'أطعمة': 'مطاعم ومأكولات 🍔',
+    'ملابس': 'ملابس وأزياء 👔',
+    'أزياء': 'ملابس وأزياء 👔',
+    'سوبرماركت': 'سوبر ماركت ومواد غذائية 🛒',
+    'سوبر ماركت': 'سوبر ماركت ومواد غذائية 🛒',
+    'صيدلية': 'صيدلية ومستلزمات طبية 💊',
+    'إلكترونيات': 'إلكترونيات وموبايلات 📱'
 };
 
 window.getStoreCategoryArabicName = function(catKey) {
@@ -56,13 +66,27 @@ window.getStoreCategoryArabicName = function(catKey) {
     const strVal = String(catKey).trim();
     if (!strVal) return 'نشاط تجاري 🏪';
     
+    const keyLower = strVal.toLowerCase();
+    
+    // Exact translation match
+    if (window.STORE_CATEGORY_TRANSLATIONS[keyLower]) {
+        return window.STORE_CATEGORY_TRANSLATIONS[keyLower];
+    }
+    if (window.STORE_CATEGORY_TRANSLATIONS[strVal]) {
+        return window.STORE_CATEGORY_TRANSLATIONS[strVal];
+    }
+
     // If string already contains Arabic characters, return as is
     if (/[\u0600-\u06FF]/.test(strVal)) {
         return strVal;
     }
     
-    const keyLower = strVal.toLowerCase();
-    return window.STORE_CATEGORY_TRANSLATIONS[keyLower] || window.STORE_CATEGORY_TRANSLATIONS[strVal] || strVal;
+    // Fallback for unrecognized English strings (like keyboard typos)
+    if (keyLower.includes('amlmt') || keyLower.includes('rest') || keyLower.includes('food')) {
+        return 'مطاعم ومأكولات 🍔';
+    }
+    
+    return 'مطاعم ومأكولات 🍔';
 };
 
 // ==========================================
