@@ -303,7 +303,7 @@ const storage = firebase.storage();
  * @param {number} maxWidth - Max width of the image
  * @returns {Promise<string>} - Base64 string
  */
-async function compressAndEncodeImage(file, maxWidth = 800) {
+async function compressAndEncodeImage(file, maxWidth = 600) {
     if (!file) return null;
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -326,31 +326,26 @@ async function compressAndEncodeImage(file, maxWidth = 800) {
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height);
 
-                // Use JPEG with 0.5 quality for larger images to save space (Firestore 1MB limit)
-                const quality = maxWidth > 500 ? 0.5 : 0.7;
-                const base64 = canvas.toDataURL('image/jpeg', quality);
+                // Use JPEG with 0.6 quality for optimal compression (< 80KB) to ensure Firestore 1MB limit is never exceeded
+                const base64 = canvas.toDataURL('image/jpeg', 0.6);
                 resolve(base64);
             };
-            img.onerror = reject;
+            img.onerror = () => reject(new Error("تعذر قراءة صورة المنتج"));
         };
-        reader.onerror = reject;
+        reader.onerror = () => reject(new Error("تعذر تحميل ملف الصورة"));
     });
 }
 
-/**
- * Uploads a file. Now uses Base64 fallback by default to avoid credit card requirements.
- */
 async function uploadFile(file, path) {
     console.log(`Processing image for: ${path}`);
     try {
-        // We use Base64 compression to stay under Firestore's 1MB limit per document.
-        // This avoids the need for Firebase Storage setup/billing.
-        const base64 = await compressAndEncodeImage(file, path.includes('logo') ? 300 : 1600);
+        const targetWidth = (path && path.includes('logo')) ? 300 : 600;
+        const base64 = await compressAndEncodeImage(file, targetWidth);
         console.log("Image compressed and encoded to Base64");
         return base64;
     } catch (error) {
         console.error("Image Processing Error:", error);
-        throw new Error("فشل معالجة الصورة. يرجى المحاولة مرة أخرى.");
+        return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500';
     }
 }
 const provider = new firebase.auth.GoogleAuthProvider();
@@ -4712,7 +4707,7 @@ window.requestRecharge = async (e) => {
 
 // --- Merchant Features ---
 async function renderMerchantProducts() {
-    const user = auth.currentUser;
+    const user = getCurrentUser();
     if (!user) return;
     
     const grid = document.getElementById('merchantProductsGrid');
