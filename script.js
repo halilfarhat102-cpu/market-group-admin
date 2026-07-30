@@ -12,6 +12,8 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
+window.auth = auth;
+window.db = db;
 window.pendingStoreCovers = [];
 
 
@@ -5466,11 +5468,19 @@ window.ordersUnsub = null;
 window.currentDriver = null;
 window.driverDocRef = null;
 
+function getCurrentUser() {
+    if (typeof auth !== 'undefined' && auth && auth.currentUser) return auth.currentUser;
+    if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) return firebase.auth().currentUser;
+    if (window.currentDriver) return window.currentDriver;
+    return null;
+}
+
 function getDriverDocRef() {
     if (window.driverDocRef) return window.driverDocRef;
-    const user = window.auth?.currentUser;
-    if (user && window.db) {
-        window.driverDocRef = window.db.collection('drivers').doc(user.uid);
+    const user = getCurrentUser();
+    if (user && (db || window.db)) {
+        const firestore = db || window.db;
+        window.driverDocRef = firestore.collection('drivers').doc(user.uid);
         return window.driverDocRef;
     }
     return null;
@@ -6129,7 +6139,7 @@ function renderActiveOrdersForDriver(orders) {
 }
 
 window.acceptOrder = async (orderId) => {
-    const user = window.auth?.currentUser;
+    const user = getCurrentUser();
     if (!user) {
         alert("يرجى تسجيل الدخول أولاً كطيار");
         return;
@@ -6350,7 +6360,7 @@ window.updateDriverLocationGPS = async function() {
     if (text) text.textContent = 'جاري تحديد موقعك الجغرافي (GPS)... 🛰️';
     if (btn) btn.disabled = true;
 
-    const user = window.auth?.currentUser;
+    const user = getCurrentUser();
     if (!user) {
         alert("يرجى تسجيل الدخول أولاً كطيار");
         if (text) text.textContent = 'تحديد وتحديث موقعك تلقائياً (GPS) 📍';
