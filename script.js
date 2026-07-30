@@ -6507,61 +6507,78 @@ window.isStoreCurrentlyOpen = (m) => {
 };
 
 async function loadStoreCategories() {
-    const select = document.getElementById('storeTypeInput');
-    if (!select) return;
-    
-    // Clear previous options
-    select.innerHTML = '<option value="" disabled selected>جاري تحميل الأقسام...</option>';
-    
+    const selectElements = [
+        document.getElementById('storeCategoryInput'),
+        document.getElementById('storeTypeInput')
+    ].filter(Boolean);
+
+    if (selectElements.length === 0) return;
+
+    const defaultOptions = [
+        { id: 'supermarket', name: 'سوبر ماركت ومواد غذائية 🛒' },
+        { id: 'electronics', name: 'إلكترونيات وموبايلات 📱' },
+        { id: 'fashion', name: 'ملابس وأزياء 👔' },
+        { id: 'pharmacy', name: 'صيدلية ومستلزمات طبية 💊' },
+        { id: 'restaurant', name: 'مطعم ومأكولات 🍔' },
+        { id: 'general', name: 'عام / متنوعات 📦' }
+    ];
+
+    let optionsHTML = '<option value="" disabled selected>اختر نوع النشاط...</option>';
+
     try {
         const snap = await db.collection('categories').get();
-        if (snap.empty) {
-            select.innerHTML = '<option value="متنوع">متنوع 🛍️</option>';
-            return;
+        if (!snap.empty) {
+            snap.forEach(doc => {
+                const data = doc.data();
+                optionsHTML += `<option value="${doc.id}">${data.name || doc.id}</option>`;
+            });
         }
-        
-        let html = '<option value="" disabled selected>اختر نوع النشاط...</option>';
-        snap.forEach(doc => {
-            const data = doc.data();
-            html += `<option value="${doc.id}">${data.name}</option>`;
-        });
-        // Add fallback
-        html += '<option value="متنوع">متنوع 🛍️</option>';
-        
-        select.innerHTML = html;
     } catch(e) {
-        console.error("Error loading categories for merchant:", e);
-        select.innerHTML = '<option value="متنوع">متنوع 🛍️</option>';
+        console.warn("Categories fetch fallback:", e);
     }
+
+    // Append default options if not present
+    defaultOptions.forEach(opt => {
+        if (!optionsHTML.includes(`value="${opt.id}"`)) {
+            optionsHTML += `<option value="${opt.id}">${opt.name}</option>`;
+        }
+    });
+
+    selectElements.forEach(sel => {
+        const prev = sel.value;
+        sel.innerHTML = optionsHTML;
+        if (prev) sel.value = prev;
+    });
 }
 
 // --- Store Creation & Merchant Page Logic ---
-window.openCreateStoreModal = async () => {
-    // Load categories dynamically
+window.openMerchantStoreSettingsModal = async () => {
     await loadStoreCategories();
     
-    const modal = document.getElementById('createStoreModal');
+    const modal = document.getElementById('merchantSettingsModal') || document.getElementById('createStoreModal');
     if (!modal) return;
     modal.style.display = 'flex';
     
-    // Pre-fill if store already exists
-    const user = auth.currentUser;
+    const user = getCurrentUser();
     if (!user) return;
     try {
         const snap = await db.collection('merchants').where('ownerUid', '==', user.uid).limit(1).get();
         if (!snap.empty) {
             const data = snap.docs[0].data();
-            document.getElementById('storeNameInput').value = data.name || '';
-            document.getElementById('storeTypeInput').value = data.category || data.type || 'متنوع';
-            document.getElementById('storeDescInput').value = data.description || '';
+            if (document.getElementById('storeNameInput')) document.getElementById('storeNameInput').value = data.name || '';
+            if (document.getElementById('storeTypeInput')) document.getElementById('storeTypeInput').value = data.category || data.type || 'supermarket';
+            if (document.getElementById('storeCategoryInput')) document.getElementById('storeCategoryInput').value = data.category || data.type || 'supermarket';
+            if (document.getElementById('storeDescInput')) document.getElementById('storeDescInput').value = data.description || '';
             
             // Show previews if images exist
             const logoPreview = document.getElementById('storeLogoPreview');
-            if (data.logo) {
-                logoPreview.src = data.logo;
-                logoPreview.style.display = 'block';
-            } else {
-                logoPreview.style.display = 'none';
+            if (logoPreview) {
+                if (data.logo) {
+                    logoPreview.src = data.logo;
+                    logoPreview.style.display = 'block';
+                } else {
+                    logoPreview.style.display = 'none';
+                }
             }
             
             // Pre-fill multi-cover preview grid
@@ -6572,7 +6589,7 @@ window.openCreateStoreModal = async () => {
             window.pendingStoreCovers = covers.map(url => ({ type: 'url', data: url }));
             
             if (coverGrid && window.pendingStoreCovers.length > 0) {
-                renderCoverPreviews();
+                if (typeof renderCoverPreviews === 'function') renderCoverPreviews();
             } else if (coverGrid) {
                 coverGrid.style.display = 'none';
                 coverGrid.innerHTML = '';
@@ -6581,7 +6598,7 @@ window.openCreateStoreModal = async () => {
             const statusInput = document.getElementById('storeIsOpenInput');
             if (statusInput) {
                 statusInput.checked = isOpen;
-                updateStoreStatusLabel(isOpen);
+                if (typeof updateStoreStatusLabel === 'function') updateStoreStatusLabel(isOpen);
             }
             
             // Populate Working Hours
@@ -6604,20 +6621,13 @@ window.openCreateStoreModal = async () => {
                     });
                 }
             }
-        } else {
-            // Reset for new store
-            window.pendingStoreCovers = [];
-            const statusInput = document.getElementById('storeIsOpenInput');
-            if (statusInput) {
-                statusInput.checked = true;
-                updateStoreStatusLabel(true);
-            }
             if (document.getElementById('storeCoverPreviewGrid')) {
                 document.getElementById('storeCoverPreviewGrid').style.display = 'none';
             }
         }
-    } catch(e) { console.error(e); }
-    
+    } catch(e) {
+        console.warn("Error fetching merchant data for settings:", e);
+    }
     if (window.lucide) lucide.createIcons();
 };
 
@@ -7721,18 +7731,21 @@ window.updateMerchantButtonUI = function(status) {
     }
 };
 
-window.openCreateStoreModal = function() {
+window.openCreateStoreModal = async function() {
     const user = getCurrentUser();
     if (!user) {
         alert("يرجى تسجيل الدخول أولاً كعميل لتقديم طلب إنشاء متجر");
         return;
     }
     
+    // Load categories for selector
+    await loadStoreCategories();
+
     // Auto fill available user details
     const ownerInput = document.getElementById('storeOwnerInput');
     const phoneInput = document.getElementById('storePhoneInput');
-    if (ownerInput && user.displayName) ownerInput.value = user.displayName;
-    if (phoneInput && user.phoneNumber) phoneInput.value = user.phoneNumber;
+    if (ownerInput && user.displayName && !ownerInput.value) ownerInput.value = user.displayName;
+    if (phoneInput && user.phoneNumber && !phoneInput.value) phoneInput.value = user.phoneNumber;
 
     const modal = document.getElementById('createStoreModal');
     if (modal) modal.style.display = 'flex';
@@ -7746,14 +7759,20 @@ window.submitMerchantApplication = async function(e) {
         return;
     }
 
-    const storeName = document.getElementById('storeNameInput').value.trim();
-    const ownerName = document.getElementById('storeOwnerInput').value.trim();
-    const phone = document.getElementById('storePhoneInput').value.trim();
-    const category = document.getElementById('storeCategoryInput').value;
-    const desc = document.getElementById('storeDescInput').value.trim();
+    const storeName = document.getElementById('storeNameInput')?.value.trim() || '';
+    const ownerName = document.getElementById('storeOwnerInput')?.value.trim() || '';
+    const phone = document.getElementById('storePhoneInput')?.value.trim() || '';
+    const categorySelect = document.getElementById('storeCategoryInput');
+    const category = categorySelect ? categorySelect.value : 'supermarket';
+    const desc = document.getElementById('storeDescInput')?.value.trim() || '';
 
     if (!storeName || !ownerName || !phone) {
         alert("يرجى إدخال كافة البيانات الأساسية المطلوبة");
+        return;
+    }
+
+    if (!category) {
+        alert("يرجى اختيار نوع النشاط التجاري لمتجرك");
         return;
     }
 
