@@ -378,7 +378,7 @@
         }
     </style>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>مسعودي كيتشن | Masoudi Kitchen - وجهتك الأولى لأدوات المطبخ والمنزل</title>
     <meta name="description" content="مسعودي كيتشن (Masoudi Kitchen) وجهتك المتخصصة في أدوات المطبخ، الأجهزة المنزلية، وأواني الطهي في مصر. جودة عالية، أسعار تنافسية، وتوصيل سريع.">
     <meta name="keywords" content="مسعودي كيتشن, Masoudi Kitchen, أدوات مطبخ, أواني طهي, أجهزة منزلية, خلاطات, قلايات هوائية, مستلزمات المطبخ الحديث, تجهيز العرائس, أدوات مائدة">
@@ -474,15 +474,21 @@
     <link rel="apple-touch-icon" href="logo.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#FF6B00">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="مسعودي">
 
     <script>
+        // Silent error handler - log to console only (no disruptive alerts)
         window.onerror = function(message, source, lineno, colno, error) {
-            alert("خطأ برمجي: " + message + "\nفي: " + source + " سطر: " + lineno);
-            return false;
+            console.error('[App Error]', message, '|', source, 'L' + lineno);
+            return true; // Suppress default browser error
         };
+        window.addEventListener('unhandledrejection', function(e) {
+            console.warn('[Unhandled Promise]', e.reason);
+            e.preventDefault();
+        });
     </script>
     
     <!-- Google Fonts -->
@@ -512,7 +518,7 @@
             });
         }
     </script>
-    <link rel="stylesheet" href="style.css?v=3.0.8">
+    <link rel="stylesheet" href="style.css?v=3.1.0">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body style="display: block !important; visibility: visible !important; opacity: 1 !important;">
@@ -2428,12 +2434,12 @@
         }
     </style>
 
-    <script src="https://unpkg.com/lucide@latest" defer></script>
+    <script src="https://unpkg.com/lucide@0.474.0/dist/umd/lucide.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js" defer></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js" defer></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js" defer></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js" defer></script>
-    <script src="script.js?v=3.0.9" defer></script>
+    <script src="script.js?v=3.1.0" defer></script>
     <!-- Super Admin Direct Self-Recharge Modal -->
     <div id="superAdminRechargeModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); z-index: 100000; align-items: center; justify-content: center; padding: 20px;">
         <div style="background: linear-gradient(135deg, #0f172a, #1e293b); border-radius: 30px; padding: 35px 25px; max-width: 360px; width: 100%; box-shadow: 0 30px 60px rgba(0,0,0,0.5); border: 1px solid rgba(255,107,0,0.25); position: relative; overflow: hidden; font-family: 'Cairo', sans-serif; direction: rtl;">
