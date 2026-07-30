@@ -7827,10 +7827,10 @@ window.openCreateStoreModal = async function() {
 
         const user = getCurrentUser();
         if (!user) {
-            modal.style.setProperty('display', 'none', 'important');
             const loginModal = document.getElementById('loginModal');
             if (loginModal) {
-                loginModal.style.display = 'flex';
+                loginModal.style.setProperty('display', 'flex', 'important');
+                loginModal.style.setProperty('z-index', '10000000', 'important');
             } else {
                 alert("❌ خطأ: لم يتم العثور على شاشة تسجيل الدخول 'loginModal'");
             }
@@ -8401,37 +8401,51 @@ window.openCreateStoreModalSync = function(e) {
     if (e && typeof e.preventDefault === 'function') {
         e.preventDefault();
     }
-    console.log("openCreateStoreModalSync clicked 🚀");
-    
-    // 1. Instant synchronous modal display
+    console.log("STEP 1: CLICK RECEIVED 👆");
+    console.log("STEP 2: openCreateStoreModalSync START ⚡");
+
     const modal = document.getElementById('createStoreModal');
     if (modal) {
+        console.log("STEP 3: createStoreModal FOUND ✅");
         modal.style.setProperty('display', 'flex', 'important');
         modal.style.setProperty('z-index', '9999999', 'important');
         modal.style.setProperty('visibility', 'visible', 'important');
         modal.style.setProperty('opacity', '1', 'important');
+        console.log("STEP 4: MODAL DISPLAY SET 🟢");
     } else {
-        alert("❌ خطأ: لم يتم العثور على النافذة 'createStoreModal' في الصفحة");
+        console.error("STEP 3: createStoreModal NOT FOUND ❌");
+        alert("❌ خطأ: لم يتم العثور على النافذة 'createStoreModal'");
         return;
     }
 
     const form = document.getElementById('createStoreForm');
     const pendingView = document.getElementById('createStorePendingView');
-    if (form) form.style.display = 'block';
+    if (form) {
+        console.log("STEP 5: FORM FOUND ✅");
+        form.style.display = 'block';
+    }
     if (pendingView) pendingView.style.display = 'none';
 
-    // 2. Background async data populating
     if (typeof window.openCreateStoreModal === 'function') {
+        console.log("STEP 6: openCreateStoreModal EXISTS ✅");
         try {
             const res = window.openCreateStoreModal();
+            console.log("STEP 7: openCreateStoreModal EXECUTED 🚀");
             if (res && typeof res.catch === 'function') {
-                res.catch(err => {
-                    console.warn("Async store populate error:", err);
-                });
+                res.catch(err => console.warn("Async store populate error:", err));
             }
         } catch(err) {
             console.warn("Sync store populate error:", err);
         }
+    } else {
+        console.error("STEP 6: openCreateStoreModal DOES NOT EXIST ❌");
+    }
+
+    const computedDisplay = getComputedStyle(modal).display;
+    if (computedDisplay !== 'none') {
+        console.log("STEP 8: MODAL VISIBLE 🎉 (computed display: " + computedDisplay + ")");
+    } else {
+        console.error("STEP 8: MODAL STILL HIDDEN ❌ (computed display: " + computedDisplay + ")");
     }
 };
 
