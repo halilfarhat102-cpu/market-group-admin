@@ -24,6 +24,9 @@ window.STORE_CATEGORY_TRANSLATIONS = {
     'fashion': 'ملابس وأزياء 👔',
     'clothes': 'ملابس وأزياء 👔',
     'clothing': 'ملابس وأزياء 👔',
+    'bslmi': 'ملابس وأزياء 👔',
+    'bslm': 'ملابس وأزياء 👔',
+    'ةbslmi': 'ملابس وأزياء 👔',
     'pharmacy': 'صيدلية ومستلزمات طبية 💊',
     'restaurant': 'مطعم ومأكولات 🍔',
     'restaurants': 'مطاعم ومأكولات 🍔',
@@ -79,20 +82,20 @@ window.getStoreCategoryArabicName = function(catKey) {
     }
 
     // 2. Specific keyboard typos check
+    if (keyLower.includes('bslm') || keyLower.includes('bslmi') || keyLower.includes('clot') || keyLower.includes('fash')) {
+        return 'ملابس وأزياء 👔';
+    }
     if (keyLower.includes('lylsyd') || keyLower.includes('pharm')) {
         return 'صيدلية ومستلزمات طبية 💊';
     }
     if (keyLower.includes('amlmt') || keyLower.includes('rest') || keyLower.includes('food')) {
         return 'مطاعم ومأكولات 🍔';
     }
-    if (keyLower.includes('clot') || keyLower.includes('fash')) {
-        return 'ملابس وأزياء 👔';
-    }
     if (keyLower.includes('super') || keyLower.includes('groc')) {
         return 'سوبر ماركت ومواد غذائية 🛒';
     }
 
-    // 3. If string is proper Arabic (and not a mixed typo like ةlylsyd), return as is
+    // 3. If string is proper Arabic (and not a mixed typo like ةlylsyd or ةbslmi), return as is
     if (/[\u0600-\u06FF]/.test(strVal) && !/^[ةa-zA-Z]+$/.test(strVal)) {
         return strVal;
     }
@@ -6947,7 +6950,13 @@ async function loadStoreCategories() {
         if (!snap.empty) {
             snap.forEach(doc => {
                 const data = doc.data();
-                optionsHTML += `<option value="${doc.id}">${data.name || doc.id}</option>`;
+                let cleanVal = (doc.id || '').toLowerCase();
+                if (cleanVal.includes('bslm') || cleanVal.includes('fash') || cleanVal.includes('clot')) cleanVal = 'fashion';
+                else if (cleanVal.includes('amlm') || cleanVal.includes('rest') || cleanVal.includes('food')) cleanVal = 'restaurant';
+                else if (cleanVal.includes('lylsy') || cleanVal.includes('pharm')) cleanVal = 'pharmacy';
+                else if (cleanVal.includes('super') || cleanVal.includes('groc')) cleanVal = 'supermarket';
+                const arLabel = window.getStoreCategoryArabicName(data.name || doc.id);
+                optionsHTML += `<option value="${cleanVal}">${arLabel}</option>`;
             });
         }
     } catch(e) {

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'masoudi-cache-v8';
+const CACHE_NAME = 'masoudi-cache-v9';
 const assetsToCache = [
   '/',
   '/logo.png'
