@@ -2681,7 +2681,11 @@
 
             const form = document.getElementById('createStoreForm');
             const pendingView = document.getElementById('createStorePendingView');
-            if (form) form.style.display = 'block';
+            if (form) {
+                form.style.setProperty('display', 'block', 'important');
+                form.style.setProperty('visibility', 'visible', 'important');
+                form.style.setProperty('opacity', '1', 'important');
+            }
             if (pendingView) pendingView.style.display = 'none';
 
             if (typeof window.openCreateStoreModal === 'function') {

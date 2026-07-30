@@ -7814,30 +7814,26 @@ window.openCreateStoreModal = async function() {
         modal.style.setProperty('display', 'flex', 'important');
         modal.style.setProperty('z-index', '9999999', 'important');
 
-        const user = getCurrentUser();
-        if (!user) {
-            const loginModal = document.getElementById('loginModal');
-            if (loginModal) {
-                loginModal.style.setProperty('display', 'flex', 'important');
-                loginModal.style.setProperty('z-index', '10000000', 'important');
-            } else {
-                alert("❌ خطأ: لم يتم العثور على شاشة تسجيل الدخول 'loginModal'");
-            }
-            if (typeof showToast === 'function') showToast("يرجى تسجيل الدخول أولاً لتقديم طلب إنشاء متجر 🔑", "error");
-            return;
-        }
-
         const form = document.getElementById('createStoreForm');
         const pendingView = document.getElementById('createStorePendingView');
 
-        if (form) form.style.display = 'block';
+        if (form) {
+            form.style.setProperty('display', 'block', 'important');
+            form.style.setProperty('visibility', 'visible', 'important');
+            form.style.setProperty('opacity', '1', 'important');
+        }
         if (pendingView) pendingView.style.display = 'none';
 
         try {
             await loadStoreCategories();
         } catch(catErr) { 
             console.warn("Load store categories error:", catErr); 
-            alert("⚠️ تنبيه أثناء تحميل الأقسام: " + catErr.message);
+        }
+
+        const user = getCurrentUser();
+        if (!user) {
+            if (typeof showToast === 'function') showToast("مرحباً بك! يرجى ملء بيانات متجرك 🔑", "info");
+            return;
         }
 
         const titleEl = document.getElementById('createStoreModalTitle');
@@ -7872,30 +7868,25 @@ window.openCreateStoreModal = async function() {
                 if (storeDoc.exists) existingStore = storeDoc.data();
             }
 
-            if (isPending && (!existingStore || existingStore.status === 'pending')) {
-                if (form) form.style.display = 'none';
-                if (pendingView) pendingView.style.display = 'block';
-            } else {
-                if (form) form.style.display = 'block';
-                if (pendingView) pendingView.style.display = 'none';
+            if (form) form.style.display = 'block';
+            if (pendingView) pendingView.style.display = 'none';
 
-                if (existingStore) {
-                    if (titleEl) titleEl.textContent = 'تعديل بيانات المتجر 🏪';
-                    if (nameInput) nameInput.value = existingStore.name || existingStore.storeName || '';
-                    if (ownerInput) ownerInput.value = existingStore.ownerName || user.displayName || '';
-                    if (phoneInput) phoneInput.value = existingStore.phone || user.phoneNumber || '';
-                    if (categoryInput && (existingStore.category || existingStore.type)) {
-                        categoryInput.value = existingStore.category || existingStore.type;
-                    }
-                    if (descInput) descInput.value = existingStore.description || '';
-                    if (existingStore.lat && existingStore.lng) {
-                        if (latInput) latInput.value = existingStore.lat;
-                        if (lngInput) lngInput.value = existingStore.lng;
-                        if (statusEl) {
-                            statusEl.style.display = 'block';
-                            statusEl.style.color = '#10b981';
-                            statusEl.textContent = `📍 الموقع المحفوظ: (${parseFloat(existingStore.lat).toFixed(4)}, ${parseFloat(existingStore.lng).toFixed(4)})`;
-                        }
+            if (existingStore) {
+                if (titleEl) titleEl.textContent = 'تعديل بيانات المتجر 🏪';
+                if (nameInput) nameInput.value = existingStore.name || existingStore.storeName || '';
+                if (ownerInput) ownerInput.value = existingStore.ownerName || user.displayName || '';
+                if (phoneInput) phoneInput.value = existingStore.phone || user.phoneNumber || '';
+                if (categoryInput && (existingStore.category || existingStore.type)) {
+                    categoryInput.value = existingStore.category || existingStore.type;
+                }
+                if (descInput) descInput.value = existingStore.description || '';
+                if (existingStore.lat && existingStore.lng) {
+                    if (latInput) latInput.value = existingStore.lat;
+                    if (lngInput) lngInput.value = existingStore.lng;
+                    if (statusEl) {
+                        statusEl.style.display = 'block';
+                        statusEl.style.color = '#10b981';
+                        statusEl.textContent = `📍 الموقع المحفوظ: (${parseFloat(existingStore.lat).toFixed(4)}, ${parseFloat(existingStore.lng).toFixed(4)})`;
                     }
                 }
             }
@@ -8404,7 +8395,11 @@ window.openCreateStoreModalSync = function(e) {
 
     const form = document.getElementById('createStoreForm');
     const pendingView = document.getElementById('createStorePendingView');
-    if (form) form.style.display = 'block';
+    if (form) {
+        form.style.setProperty('display', 'block', 'important');
+        form.style.setProperty('visibility', 'visible', 'important');
+        form.style.setProperty('opacity', '1', 'important');
+    }
     if (pendingView) pendingView.style.display = 'none';
 
     if (typeof window.openCreateStoreModal === 'function') {
