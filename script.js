@@ -1345,13 +1345,17 @@ window.closeQuickViewModal = () => {
 };
 
 window.calculateStoreToCustomerDeliveryFee = async function(customerLat = null, customerLng = null) {
-    if (!window.cart || window.cart.length === 0) return 0;
+    if (!window.cart || window.cart.length === 0) {
+        window.currentDeliveryFee = 15;
+        if (typeof updateCheckoutTotal === 'function') updateCheckoutTotal();
+        return 15;
+    }
 
     // 1. Get Customer Coordinates
-    let cLat = customerLat;
-    let cLng = customerLng;
+    let cLat = parseFloat(customerLat);
+    let cLng = parseFloat(customerLng);
 
-    if (!cLat || !cLng) {
+    if (isNaN(cLat) || isNaN(cLng)) {
         const latlngVal = document.getElementById('latlng')?.value;
         if (latlngVal && latlngVal.includes(',')) {
             const parts = latlngVal.split(',');
@@ -1360,7 +1364,7 @@ window.calculateStoreToCustomerDeliveryFee = async function(customerLat = null, 
         }
     }
 
-    if (!cLat || !cLng) {
+    if (isNaN(cLat) || isNaN(cLng)) {
         const user = getCurrentUser();
         if (user && window.currentUserData && window.currentUserData.latlng) {
             const parts = window.currentUserData.latlng.split(',');
@@ -1370,18 +1374,16 @@ window.calculateStoreToCustomerDeliveryFee = async function(customerLat = null, 
     }
 
     // 2. Get Merchant Store Coordinates
-    let storeLat = deliveryConfig.storeLat || 30.0444; // Default store fallback
-    let storeLng = deliveryConfig.storeLng || 31.2357;
+    let storeLat = null;
+    let storeLng = null;
     let storeName = '';
 
     const firstItem = window.cart[0];
     const merchantId = firstItem ? (firstItem.merchantId || firstItem.storeId) : null;
 
     if (merchantId) {
-        // Try finding in window.merchants
         let foundStore = (window.merchants || []).find(m => m.id === merchantId || m.ownerUid === merchantId || m.userId === merchantId);
         
-        // If not in memory, query Firestore directly for 100% accuracy!
         if (!foundStore) {
             try {
                 const storeDoc = await db.collection('merchants').doc(merchantId).get();
@@ -1403,15 +1405,22 @@ window.calculateStoreToCustomerDeliveryFee = async function(customerLat = null, 
         }
     }
 
-    // 3. Compute Distance & Accurate Fee
-    let fee = 15; // Base delivery fee
+    if (isNaN(storeLat) || isNaN(storeLng) || !storeLat || !storeLng) {
+        storeLat = (deliveryConfig && deliveryConfig.storeLat) ? parseFloat(deliveryConfig.storeLat) : 30.0444;
+        storeLng = (deliveryConfig && deliveryConfig.storeLng) ? parseFloat(deliveryConfig.storeLng) : 31.2357;
+    }
+
+    // 3. Compute Distance & Fee
+    let fee = 15; // Base fee
     let distance = 0;
 
-    if (cLat && cLng && storeLat && storeLng) {
+    if (!isNaN(cLat) && !isNaN(cLng) && !isNaN(storeLat) && !isNaN(storeLng) && cLat !== 0 && cLng !== 0) {
         distance = calculateDistance(storeLat, storeLng, cLat, cLng);
-        // Base fee: 15 EGP for 0-2km. Beyond 2km: +5 EGP per extra km
+        if (isNaN(distance) || distance < 0) distance = 0;
         fee = Math.ceil(15 + Math.max(0, distance - 2) * 5);
     }
+
+    if (isNaN(fee) || fee < 15) fee = 15;
 
     window.currentDeliveryFee = fee;
 
@@ -1420,7 +1429,7 @@ window.calculateStoreToCustomerDeliveryFee = async function(customerLat = null, 
     const feeDisplay = document.getElementById('deliveryFeeDisplay');
     const feeCont = document.getElementById('deliveryFeeContainer');
 
-    if (feeEl) feeEl.textContent = `${fee} ج.م`;
+    if (feeEl) feeEl.innerHTML = `<strong>${fee}</strong> ج.م`;
     if (feeDisplay) {
         const distText = distance > 0 ? `(${distance.toFixed(1)} كم)` : '';
         const storeText = storeName ? `من متجر "${storeName}" ${distText}` : `حسب المسافة ${distText}`;
@@ -1428,8 +1437,7 @@ window.calculateStoreToCustomerDeliveryFee = async function(customerLat = null, 
     }
     if (feeCont) feeCont.style.display = 'flex';
 
-    if (typeof updateCheckoutTotal === 'function') updateCheckoutTotal();
-
+    updateCheckoutTotal();
     return fee;
 };
 
@@ -1451,16 +1459,28 @@ window.openCheckout = async () => {
 };
 
 window.updateCheckoutTotal = () => {
-    const subtotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
-    const fee = window.currentDeliveryFee || 0;
+    let subtotal = 0;
+    if (window.cart && Array.isArray(window.cart)) {
+        subtotal = window.cart.reduce((s, i) => {
+            const price = parseFloat(i.price) || 0;
+            const qty = parseInt(i.quantity) || 1;
+            return s + (price * qty);
+        }, 0);
+    }
+
+    const fee = parseFloat(window.currentDeliveryFee) || 15;
     const total = subtotal + fee;
 
-    if (document.getElementById('checkoutSubtotal')) document.getElementById('checkoutSubtotal').textContent = `${subtotal.toLocaleString()} ج.م`;
-    if (document.getElementById('deliveryFeeAmount')) document.getElementById('deliveryFeeAmount').textContent = `${fee.toLocaleString()} ج.م`;
-    if (document.getElementById('checkoutTotal')) document.getElementById('checkoutTotal').textContent = `${total.toLocaleString()} ج.م`;
-    
+    const subtotalEl = document.getElementById('checkoutSubtotal');
+    const feeEl = document.getElementById('deliveryFeeAmount');
+    const totalEl = document.getElementById('checkoutTotal');
     const feeCont = document.getElementById('deliveryFeeContainer');
-    if (feeCont && fee > 0) feeCont.style.display = 'flex';
+
+    if (subtotalEl) subtotalEl.innerHTML = `<strong>${subtotal}</strong> ج.م`;
+    if (feeEl) feeEl.innerHTML = `<strong>${fee}</strong> ج.م`;
+    if (totalEl) totalEl.innerHTML = `<strong>${total}</strong> ج.م`;
+
+    if (feeCont) feeCont.style.display = 'flex';
 };
 
 
@@ -7671,40 +7691,30 @@ window.openCreateStoreModal = async function() {
         return;
     }
     
-    // Check user status and existing store
-    let isPending = false;
-    let existingStore = null;
-
-    try {
-        const userDoc = await db.collection('users').doc(user.uid).get();
-        if (userDoc.exists && userDoc.data().merchantStatus === 'pending') {
-            isPending = true;
-        }
-
-        // Fetch existing store data for pre-filling
-        const storeSnap = await db.collection('merchants').where('ownerUid', '==', user.uid).limit(1).get();
-        if (!storeSnap.empty) {
-            existingStore = storeSnap.docs[0].data();
-        } else {
-            const storeDoc = await db.collection('merchants').doc(user.uid).get();
-            if (storeDoc.exists) existingStore = storeDoc.data();
-        }
-    } catch(e) { console.warn("Check store status error:", e); }
+    // Open modal immediately with max z-index
+    const modal = document.getElementById('createStoreModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        modal.style.zIndex = '999999';
+    }
 
     const form = document.getElementById('createStoreForm');
     const pendingView = document.getElementById('createStorePendingView');
+    if (form) form.style.display = 'block';
+    if (pendingView) pendingView.style.display = 'none';
 
-    if (isPending && (!existingStore || existingStore.status === 'pending')) {
-        if (form) form.style.display = 'none';
-        if (pendingView) pendingView.style.display = 'block';
-    } else {
-        if (form) form.style.display = 'block';
-        if (pendingView) pendingView.style.display = 'none';
-        
-        // Load categories for selector
-        try {
-            await loadStoreCategories();
-        } catch(catErr) { console.warn("Load store categories error:", catErr); }
+    // Populate input fields asynchronously
+    try {
+        let existingStore = null;
+        const storeDoc = await db.collection('merchants').doc(user.uid).get();
+        if (storeDoc.exists) {
+            existingStore = storeDoc.data();
+        } else {
+            const storeSnap = await db.collection('merchants').where('ownerUid', '==', user.uid).limit(1).get();
+            if (!storeSnap.empty) existingStore = storeSnap.docs[0].data();
+        }
+
+        try { await loadStoreCategories(); } catch(e) {}
 
         const titleEl = document.getElementById('createStoreModalTitle');
         const nameInput = document.getElementById('storeNameInput');
@@ -7718,7 +7728,7 @@ window.openCreateStoreModal = async function() {
 
         if (existingStore) {
             if (titleEl) titleEl.textContent = 'تعديل بيانات المتجر 🏪';
-            if (nameInput) nameInput.value = existingStore.name || '';
+            if (nameInput) nameInput.value = existingStore.name || existingStore.storeName || '';
             if (ownerInput) ownerInput.value = existingStore.ownerName || user.displayName || '';
             if (phoneInput) phoneInput.value = existingStore.phone || user.phoneNumber || '';
             if (categoryInput && (existingStore.category || existingStore.type)) {
@@ -7741,10 +7751,7 @@ window.openCreateStoreModal = async function() {
             if (phoneInput) phoneInput.value = user.phoneNumber || '';
             if (descInput) descInput.value = '';
         }
-    }
-
-    const modal = document.getElementById('createStoreModal');
-    if (modal) modal.style.display = 'flex';
+    } catch(e) { console.warn("Check store status error:", e); }
 };
 
 window.submitMerchantApplication = async function(e) {
