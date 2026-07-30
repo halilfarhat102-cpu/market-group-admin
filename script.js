@@ -7275,6 +7275,7 @@ async function handleMerchantProductSubmit(e) {
             image: imageUrl,
             merchantId: user.uid,
             storeId: user.uid,
+            ownerUid: user.uid,
             merchantEmail: user.email || '',
             updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
             status: 'active',
