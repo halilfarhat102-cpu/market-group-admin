@@ -6692,31 +6692,16 @@ window.saveMyStore = async () => {
         const existingSnap = await db.collection('merchants').where('ownerUid', '==', user.uid).limit(1).get();
         const existingData = !existingSnap.empty ? existingSnap.docs[0].data() : null;
 
-        if (logoFile) {
-            console.log("Uploading logo...");
-            logoUrl = await uploadFile(logoFile, 'merchants/logos');
-        } else if (existingData) {
-            logoUrl = existingData.logo;
-        }
+        // Run logo upload and cover image uploads concurrently using Promise.all for ultra-fast performance!
+        const [uploadedLogo, uploadedCovers] = await Promise.all([
+            logoFile ? uploadFile(logoFile, 'merchants/logos') : Promise.resolve(existingData ? existingData.logo : ''),
+            coverFiles.length > 0
+                ? Promise.all(coverFiles.map(async (item) => item.type === 'file' ? await uploadFile(item.data, 'merchants/covers') : item.data))
+                : Promise.resolve(existingData ? (existingData.covers || (existingData.cover ? [existingData.cover] : [])) : [])
+        ]);
 
-        // Handle multiple covers with SEQUENTIAL uploads to prevent memory issues and ensure data integrity
-        let coversArray = [];
-        
-        if (coverFiles.length > 0) {
-            console.log(`Processing ${coverFiles.length} cover image(s) sequentially...`);
-            for (const item of coverFiles) {
-                if (item.type === 'file') {
-                    // Use a smaller maxWidth (1000) for covers when multiple are present
-                    const url = await uploadFile(item.data, 'merchants/covers');
-                    coversArray.push(url);
-                } else {
-                    coversArray.push(item.data); // Existing URL
-                }
-            }
-        } else if (existingData) {
-            // Preserve existing covers
-            coversArray = existingData.covers || (existingData.cover ? [existingData.cover] : []);
-        }
+        logoUrl = uploadedLogo || '';
+        let coversArray = uploadedCovers || [];
         const coverUrl = coversArray[0] || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800';
 
         const isAlreadyApproved = existingData ? (existingData.status === 'approved' || existingData.isApproved === true) : false;
@@ -7756,14 +7741,34 @@ window.openCreateStoreModal = async function() {
         return;
     }
     
-    // Load categories for selector
-    await loadStoreCategories();
+    // Check if user has a pending merchant request
+    let isPending = false;
+    try {
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (userDoc.exists && userDoc.data().merchantStatus === 'pending') {
+            isPending = true;
+        }
+    } catch(e) { console.warn("Check user merchant status error:", e); }
 
-    // Auto fill available user details
-    const ownerInput = document.getElementById('storeOwnerInput');
-    const phoneInput = document.getElementById('storePhoneInput');
-    if (ownerInput && user.displayName && !ownerInput.value) ownerInput.value = user.displayName;
-    if (phoneInput && user.phoneNumber && !phoneInput.value) phoneInput.value = user.phoneNumber;
+    const form = document.getElementById('createStoreForm');
+    const pendingView = document.getElementById('createStorePendingView');
+
+    if (isPending) {
+        if (form) form.style.display = 'none';
+        if (pendingView) pendingView.style.display = 'block';
+    } else {
+        if (form) form.style.display = 'block';
+        if (pendingView) pendingView.style.display = 'none';
+        
+        // Load categories for selector
+        await loadStoreCategories();
+
+        // Auto fill available user details
+        const ownerInput = document.getElementById('storeOwnerInput');
+        const phoneInput = document.getElementById('storePhoneInput');
+        if (ownerInput && user.displayName && !ownerInput.value) ownerInput.value = user.displayName;
+        if (phoneInput && user.phoneNumber && !phoneInput.value) phoneInput.value = user.phoneNumber;
+    }
 
     const modal = document.getElementById('createStoreModal');
     if (modal) modal.style.display = 'flex';
@@ -7826,8 +7831,11 @@ window.submitMerchantApplication = async function(e) {
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
 
-        const modal = document.getElementById('createStoreModal');
-        if (modal) modal.style.display = 'none';
+        // Show pending view inside modal
+        const form = document.getElementById('createStoreForm');
+        const pendingView = document.getElementById('createStorePendingView');
+        if (form) form.style.display = 'none';
+        if (pendingView) pendingView.style.display = 'block';
 
         if (typeof window.showToast === 'function') {
             window.showToast("🎉 تم إرسال طلب إنشاء متجرك بنجاح! سيتم مراجعة الطلب من الإدارة والموافقة عليه.");

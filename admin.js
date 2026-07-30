@@ -5788,32 +5788,122 @@ async function loadStores() {
     } catch (err) { console.error("Error loading stores:", err); }
 }
 
+window.approveStore = async function(storeId) {
+    if (!confirm("هل أنت متأكد من تفعيل هذا المتجر ونشره للعملاء؟")) return;
+    try {
+        const storeDoc = await db.collection('merchants').doc(storeId).get();
+        const storeData = storeDoc.exists ? storeDoc.data() : {};
+        const ownerUid = storeData.userId || storeData.ownerUid || storeId;
+
+        await db.collection('merchants').doc(storeId).set({
+            status: 'approved',
+            isApproved: true,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+
+        await db.collection('users').doc(ownerUid).set({
+            isMerchant: true,
+            merchantStatus: 'approved',
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+
+        showToast("🟢 تم تفعيل ونشر المتجر بنجاح!");
+        loadStores();
+    } catch(err) {
+        alert("فشل تفعيل المتجر: " + err.message);
+    }
+};
+
+window.rejectStore = async function(storeId) {
+    if (!confirm("هل أنت متأكد من رفض طلب هذا المتجر؟")) return;
+    try {
+        const storeDoc = await db.collection('merchants').doc(storeId).get();
+        const storeData = storeDoc.exists ? storeDoc.data() : {};
+        const ownerUid = storeData.userId || storeData.ownerUid || storeId;
+
+        await db.collection('merchants').doc(storeId).set({
+            status: 'rejected',
+            isApproved: false,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+
+        await db.collection('users').doc(ownerUid).set({
+            isMerchant: false,
+            merchantStatus: 'rejected',
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+
+        showToast("🔴 تم رفض طلب المتجر");
+        loadStores();
+    } catch(err) {
+        alert("فشل رفض المتجر: " + err.message);
+    }
+};
+
 function renderStoresList() {
     const list = document.getElementById('adminStoresList');
     if(!list) return;
     list.innerHTML = '';
 
-    if(window.allStores.length === 0) {
+    if(!window.allStores || window.allStores.length === 0) {
         list.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#64748b;">لا توجد متاجر حالياً. اضغط على "توليد من الأقسام" للبدء سريعاً! 🚀</td></tr>';
         return;
     }
 
-    window.allStores.forEach(s => {
+    // Sort: Pending store applications first!
+    const sortedStores = [...window.allStores].sort((a, b) => {
+        const aPending = (a.status === 'pending' || a.isApproved === false);
+        const bPending = (b.status === 'pending' || b.isApproved === false);
+        if (aPending && !bPending) return -1;
+        if (!aPending && bPending) return 1;
+        return 0;
+    });
+
+    sortedStores.forEach(s => {
+        const isApproved = s.status === 'approved' || s.isApproved === true;
+        const isPending = s.status === 'pending' || (!isApproved && s.status !== 'rejected');
+        
+        let statusBadge = '';
+        if (isPending) {
+            statusBadge = `<span class="badge" style="background:#fff7ed; color:#ea580c; border:1px solid #ffedd5; font-weight:900;">⏳ طلب معلق</span>`;
+        } else if (isApproved) {
+            statusBadge = `<span class="badge ${s.isOpen !== false ? 'badge-completed' : 'badge-cancelled'}">${s.isOpen !== false ? 'مفتوح (مفعل 🟢)' : 'مغلق (مفعل 🟢)'}</span>`;
+        } else {
+            statusBadge = `<span class="badge" style="background:#fef2f2; color:#dc2626; border:1px solid #fecaca; font-weight:800;">🔴 مرفوض</span>`;
+        }
+
+        const ownerInfo = s.ownerName || s.phone ? `<div style="font-size:0.72rem; color:#ea580c; font-weight:800; margin-top:2px;">👤 ${s.ownerName || ''} | 📱 ${s.phone || ''}</div>` : '';
+
         const row = document.createElement('tr');
+        if (isPending) {
+            row.style.background = '#fffbf5'; // Highlight pending store application row
+        }
+
         row.innerHTML = `
             <td style="padding:15px;">
                 <div style="display:flex; align-items:center; gap:12px;">
-                    <img src="${s.logo || 'https://ui-avatars.com/api/?name='+s.name+'&background=ff6b00&color=fff'}" style="width:40px; height:40px; border-radius:10px; object-fit:cover;">
-                    <div style="font-weight:900;">${s.name}</div>
+                    <img src="${s.logo || 'https://ui-avatars.com/api/?name='+encodeURIComponent(s.name || 'Store')+'&background=ff6b00&color=fff'}" style="width:42px; height:42px; border-radius:12px; object-fit:cover; border:1px solid #f1f5f9;">
+                    <div>
+                        <div style="font-weight:900; color:#0f172a;">${s.name || 'بدون اسم'}</div>
+                        ${ownerInfo}
+                    </div>
                 </div>
             </td>
-            <td>${s.type || s.category || '---'}</td>
+            <td><span style="font-size:0.8rem; font-weight:800; color:#334155;">${s.type || s.category || 'عام'}</span></td>
             <td style="text-align:center;"><span class="badge" style="background:#f1f5f9; color:#475569;">${s.productCount || 0}</span></td>
-            <td><span class="badge ${s.isOpen !== false ? 'badge-completed' : 'badge-cancelled'}">${s.isOpen !== false ? 'مفتوح' : 'مغلق'}</span></td>
+            <td>${statusBadge}</td>
             <td style="text-align:center;">
-                <div style="display:flex; justify-content:center; gap:8px;">
-                    <button onclick="showStoreModal('${s.id}')" style="background:none; border:none; color:var(--primary); cursor:pointer;"><i data-lucide="edit"></i></button>
-                    <button onclick="deleteStore('${s.id}')" style="background:none; border:none; color:#ef4444; cursor:pointer;"><i data-lucide="trash-2"></i></button>
+                <div style="display:flex; justify-content:center; align-items:center; gap:8px;">
+                    ${isPending ? `
+                        <button onclick="approveStore('${s.id}')" title="تفعيل ونشر المتجر" style="background:#ecfdf5; border:1px solid #a7f3d0; color:#059669; padding:6px 12px; border-radius:10px; font-weight:900; cursor:pointer; font-size:0.75rem; display:flex; align-items:center; gap:4px;">
+                            <i data-lucide="check-circle" style="width:14px;"></i> تفعيل 🟢
+                        </button>
+                        <button onclick="rejectStore('${s.id}')" title="رفض الطلب" style="background:#fef2f2; border:1px solid #fecaca; color:#dc2626; padding:6px 12px; border-radius:10px; font-weight:900; cursor:pointer; font-size:0.75rem; display:flex; align-items:center; gap:4px;">
+                            <i data-lucide="x-circle" style="width:14px;"></i> رفض 🔴
+                        </button>
+                    ` : ''}
+                    <button onclick="showStoreModal('${s.id}')" style="background:#f8fafc; border:1px solid #e2e8f0; color:var(--primary); padding:6px; border-radius:8px; cursor:pointer;" title="تعديل"><i data-lucide="edit" style="width:16px;"></i></button>
+                    <button onclick="deleteStore('${s.id}')" style="background:#fef2f2; border:1px solid #fecaca; color:#ef4444; padding:6px; border-radius:8px; cursor:pointer;" title="حذف"><i data-lucide="trash-2" style="width:16px;"></i></button>
                 </div>
             </td>
         `;
