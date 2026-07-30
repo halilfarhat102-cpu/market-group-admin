@@ -512,7 +512,7 @@
             });
         }
     </script>
-    <link rel="stylesheet" href="style.css?v=3.0.6">
+    <link rel="stylesheet" href="style.css?v=3.0.7">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body style="display: block !important; visibility: visible !important; opacity: 1 !important;">
@@ -1272,8 +1272,16 @@
                     </div>
                 </div>
                 <button type="button" onclick="openCreateStoreModalSync(event)" class="btn-edit-store">
-                    <i data-lucide="settings" style="width: 16px; pointer-events: none;"></i>
-                    <span style="pointer-events: none;">تعديل بيانات وموقع المتجر 🏪</span>
+                    <div class="btn-edit-store__icon">
+                        <i data-lucide="store" style="width: 22px; height: 22px;"></i>
+                    </div>
+                    <div class="btn-edit-store__text">
+                        <span class="btn-edit-store__title">تعديل بيانات وموقع المتجر</span>
+                        <span class="btn-edit-store__sub">الصور • البيانات • الموقع الجغرافي</span>
+                    </div>
+                    <div class="btn-edit-store__chevron">
+                        <i data-lucide="chevron-left" style="width: 18px; height: 18px;"></i>
+                    </div>
                 </button>
             </div>
 
@@ -2433,7 +2441,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js" defer></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js" defer></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js" defer></script>
-    <script src="script.js?v=3.0.6" defer></script>
+    <script src="script.js?v=3.0.7" defer></script>
     <!-- Super Admin Direct Self-Recharge Modal -->
     <div id="superAdminRechargeModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); z-index: 100000; align-items: center; justify-content: center; padding: 20px;">
         <div style="background: linear-gradient(135deg, #0f172a, #1e293b); border-radius: 30px; padding: 35px 25px; max-width: 360px; width: 100%; box-shadow: 0 30px 60px rgba(0,0,0,0.5); border: 1px solid rgba(255,107,0,0.25); position: relative; overflow: hidden; font-family: 'Cairo', sans-serif; direction: rtl;">
@@ -2589,81 +2597,118 @@
     <!-- END storeMenuModal -->
 
     <!-- Modal: Create Store / Merchant Application Form (direct child of body) -->
-    <div id="createStoreModal" style="display: none; position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100vw !important; height: 100vh !important; background: rgba(15, 23, 42, 0.85) !important; backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important; z-index: 9999999 !important; align-items: center !important; justify-content: center !important; padding: 20px !important; overflow-y: auto !important;">
-        <div style="background: white; border-radius: 28px; width: 100%; max-width: 520px; padding: 30px; position: relative; animation: slideUp 0.3s cubic-bezier(0.165, 0.84, 0.44, 1); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); max-height: 90vh; overflow-y: auto;">
-            <button onclick="closeCreateStoreModal()" style="position: absolute; top: 20px; left: 20px; background: #f1f5f9; border: none; width: 36px; height: 36px; border-radius: 12px; cursor: pointer; color: #64748b; font-weight: 900; font-size: 1.1rem; display: flex; align-items: center; justify-content: center;">✕</button>
+    <div id="createStoreModal" style="display: none; position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100vw !important; height: 100vh !important; background: #f8fafc !important; z-index: 9999999 !important; overflow-y: auto !important; flex-direction: column !important; align-items: stretch !important; justify-content: flex-start !important; padding: 0 !important;">
 
-            <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 25px;">
-                <div style="width: 50px; height: 50px; background: #fff7ed; border-radius: 16px; display: flex; align-items: center; justify-content: center; color: var(--primary);">
-                    <i data-lucide="store" style="width: 26px;"></i>
+        <div id="createStorePage">
+
+            <!-- Page Header -->
+            <div class="store-page-header">
+                <div style="display: flex; align-items: center; gap: 14px; direction: rtl;">
+                    <button onclick="closeCreateStoreModal()" style="background: rgba(255,255,255,0.2); border: none; width: 40px; height: 40px; border-radius: 14px; cursor: pointer; color: white; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; backdrop-filter: blur(8px);">✕</button>
+                    <div>
+                        <h2 id="createStoreModalTitle" style="margin: 0; font-size: 1.3rem; font-weight: 1000; font-family: 'Cairo', sans-serif; color: white;">انضم كتاجر في مسعودي 🚀</h2>
+                        <p style="margin: 4px 0 0; font-size: 0.78rem; color: rgba(255,255,255,0.85); font-weight: 700;">أدخل بيانات متجرك للبدء في عرض منتجاتك</p>
+                    </div>
                 </div>
-                <div>
-                    <h3 style="font-size: 1.25rem; font-weight: 1000; color: #0f172a; margin: 0; font-family: 'Cairo', sans-serif;">انضم كتاجر في مسعودي 🚀</h3>
-                    <p style="font-size: 0.8rem; color: #64748b; margin: 2px 0 0; font-weight: 700;">أدخل بيانات متجرك للبدء في عرض منتجاتك</p>
+
+                <!-- Logo Picker centered in header bottom -->
+                <div class="store-logo-picker" style="margin-top: 20px;">
+                    <input type="file" id="storeLogoFileInput" accept="image/*" style="display: none;" onchange="handleStoreLogoPreview(this)">
+                    <img id="storeLogoPreview" class="store-logo-picker__preview" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='90' viewBox='0 0 90 90'><rect width='100%' height='100%' fill='%23fff7ed'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='38' fill='%23FF6B00'>🏪</text></svg>" onclick="document.getElementById('storeLogoFileInput').click()" alt="شعار المتجر">
+                    <label class="store-logo-picker__label" onclick="document.getElementById('storeLogoFileInput').click()">
+                        <span>📷</span> تغيير شعار المتجر
+                    </label>
                 </div>
             </div>
 
-            <!-- Pending Status View -->
-            <div id="createStorePendingView" style="display: none; text-align: center; padding: 15px 10px;">
-                <div style="width: 70px; height: 70px; background: #fff7ed; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: #ea580c;">
-                    <i data-lucide="clock" style="width: 36px; height: 36px;"></i>
+            <!-- Page Body -->
+            <div class="store-page-body">
+
+                <!-- Pending Status View -->
+                <div id="createStorePendingView" style="display: none; text-align: center; padding: 30px 15px; background: white; border-radius: 20px; border: 1.5px solid #f1f5f9; box-shadow: 0 4px 16px rgba(0,0,0,0.06);">
+                    <div style="width: 70px; height: 70px; background: #fff7ed; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: #ea580c;">
+                        <i data-lucide="clock" style="width: 36px; height: 36px;"></i>
+                    </div>
+                    <h3 style="font-size: 1.3rem; font-weight: 1000; color: #0f172a; margin-bottom: 8px;">طلب متجرك قيد المراجعة 🕒</h3>
+                    <p style="font-size: 0.85rem; color: #64748b; font-weight: 700; line-height: 1.6; margin-bottom: 25px;">
+                        يسعدنا انضمامك! يقوم فريق الإدارة حالياً بمراجعة بيانات متجرك لتفعيله وإتاحة لوحة التحكم لك في أسرع وقت.
+                    </p>
+                    <button onclick="closeCreateStoreModal()" class="store-submit-btn">حسناً، فهمت 🫡</button>
                 </div>
-                <h3 style="font-size: 1.3rem; font-weight: 1000; color: #0f172a; margin-bottom: 8px;">طلب متجرك قيد المراجعة 🕒</h3>
-                <p style="font-size: 0.85rem; color: #64748b; font-weight: 700; line-height: 1.6; margin-bottom: 25px;">
-                    يسعدنا انضمامك! يقوم فريق الإدارة حالياً بمراجعة بيانات متجرك لتفعيله وإتاحة لوحة التحكم لك في أسرع وقت.
-                </p>
-                <button onclick="closeCreateStoreModal()" class="btn-primary" style="padding: 14px 35px; border-radius: 16px; font-weight: 900; font-size: 0.95rem;">حسناً، فهمت 🫡</button>
-            </div>
 
-            <form id="createStoreForm" onsubmit="submitMerchantApplication(event)">
-                <div style="display: flex; flex-direction: column; gap: 16px;">
-                    <div>
-                        <label style="display: block; font-size: 0.82rem; font-weight: 900; color: #1e293b; margin-bottom: 6px;">اسم المتجر / النشاط التجاري *</label>
-                        <input type="text" id="storeNameInput" required placeholder="مثال: سوبر ماركت البركة / متجر الإلكترونيات" style="width: 100%; padding: 14px; border-radius: 14px; border: 1.5px solid #e2e8f0; font-weight: 800; font-size: 0.9rem; outline: none;">
+                <form id="createStoreForm" onsubmit="submitMerchantApplication(event)">
+
+                    <!-- Cover Photos -->
+                    <div class="store-covers-section">
+                        <div class="store-covers-section__title">
+                            <span>🖼️</span> صور غلاف المتجر (حتى 5 صور)
+                        </div>
+                        <input type="file" id="storeCoverFileInput" accept="image/*" multiple style="display: none;" onchange="handleMultiCoverPreview(this)">
+                        <div class="store-covers-grid">
+                            <div id="storeCoverPreviewGrid" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;"></div>
+                            <div class="store-covers-add" onclick="document.getElementById('storeCoverFileInput').click()">
+                                <span style="font-size: 1.4rem;">＋</span>
+                                <span>أضف صورة</span>
+                            </div>
+                        </div>
                     </div>
 
-                    <div>
-                        <label style="display: block; font-size: 0.82rem; font-weight: 900; color: #1e293b; margin-bottom: 6px;">اسم المسؤول / صاحب المتجر *</label>
-                        <input type="text" id="storeOwnerInput" required placeholder="اسمك الثلاثي" style="width: 100%; padding: 14px; border-radius: 14px; border: 1.5px solid #e2e8f0; font-weight: 800; font-size: 0.9rem; outline: none;">
+                    <!-- Basic Info -->
+                    <div class="store-field-card">
+                        <div>
+                            <label>🏪 اسم المتجر / النشاط التجاري *</label>
+                            <input type="text" id="storeNameInput" required placeholder="مثال: سوبر ماركت البركة">
+                        </div>
+                        <div>
+                            <label>👤 اسم المسؤول / صاحب المتجر *</label>
+                            <input type="text" id="storeOwnerInput" required placeholder="اسمك الثلاثي">
+                        </div>
+                        <div>
+                            <label>📞 رقم التواصل (واتساب / هاتف) *</label>
+                            <input type="tel" id="storePhoneInput" required placeholder="01xxxxxxxxx" maxlength="11">
+                        </div>
+                        <div>
+                            <label>🏷️ نشاط المتجر / القسم *</label>
+                            <select id="storeCategoryInput" required>
+                                <option value="supermarket">سوبر ماركت ومواد غذائية 🛒</option>
+                                <option value="electronics">إلكترونيات وموبايلات 📱</option>
+                                <option value="fashion">ملابس وأزياء 👔</option>
+                                <option value="pharmacy">صيدلية ومستلزمات طبية 💊</option>
+                                <option value="restaurant">مطعم ومأكولات 🍔</option>
+                                <option value="general">عام / منوعات 📦</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div>
-                        <label style="display: block; font-size: 0.82rem; font-weight: 900; color: #1e293b; margin-bottom: 6px;">رقم للتواصل (واتساب / هاتف) *</label>
-                        <input type="tel" id="storePhoneInput" required placeholder="01xxxxxxxxx" maxlength="11" style="width: 100%; padding: 14px; border-radius: 14px; border: 1.5px solid #e2e8f0; font-weight: 800; font-size: 0.9rem; outline: none;">
+                    <!-- Description -->
+                    <div class="store-field-card">
+                        <div>
+                            <label>📝 نبذة عن المتجر والعنوان</label>
+                            <textarea id="storeDescInput" rows="3" placeholder="اكتب نبذة مختصرة عن المنتجات والعنوان التفصيلي للمتجر..."></textarea>
+                        </div>
                     </div>
 
-                    <div>
-                        <label style="display: block; font-size: 0.82rem; font-weight: 900; color: #1e293b; margin-bottom: 6px;">نشاط المتجر / القسم *</label>
-                        <select id="storeCategoryInput" required style="width: 100%; padding: 14px; border-radius: 14px; border: 1.5px solid #e2e8f0; font-weight: 800; font-size: 0.9rem; background: white;">
-                            <option value="supermarket">سوبر ماركت ومواد غذائية 🛒</option>
-                            <option value="electronics">إلكترونيات وموبايلات 📱</option>
-                            <option value="fashion">ملابس وأزياء 👔</option>
-                            <option value="pharmacy">صيدلية ومستلزمات طبية 💊</option>
-                            <option value="restaurant">مطعم ومأكولات 🍔</option>
-                            <option value="general">عام / منوعات 📦</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label style="display: block; font-size: 0.82rem; font-weight: 900; color: #1e293b; margin-bottom: 6px;">موقع المتجر الجغرافي (GPS) 📍</label>
-                        <button type="button" onclick="getMerchantStoreGPSLocation()" style="background: #eff6ff; color: #2563eb; border: 1.5px solid #bfdbfe; padding: 13px 15px; border-radius: 14px; font-weight: 900; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; transition: all 0.2s;">
+                    <!-- GPS Location -->
+                    <div class="store-field-card">
+                        <label>📍 موقع المتجر الجغرافي</label>
+                        <button type="button" class="store-gps-btn" onclick="getMerchantStoreGPSLocation()">
                             <i data-lucide="map-pin" style="width: 18px;"></i> تحديد موقع المتجر تلقائياً بالـ GPS 📍
                         </button>
-                        <div id="storeGPSStatus" style="font-size: 0.75rem; font-weight: 800; color: #059669; display: none; text-align: center; margin-top: 6px;"></div>
+                        <div id="storeGPSStatus" style="font-size: 0.75rem; font-weight: 800; color: #059669; display: none; text-align: center;"></div>
                         <input type="hidden" id="storeLatInput">
                         <input type="hidden" id="storeLngInput">
                     </div>
 
-                    <div>
-                        <label style="display: block; font-size: 0.82rem; font-weight: 900; color: #1e293b; margin-bottom: 6px;">نبذة عن المتجر والعنوان</label>
-                        <textarea id="storeDescInput" rows="3" placeholder="اكتب نبذة مختصرة عن المنتجات والعنوان التفصيلي للمتجر..." style="width: 100%; padding: 14px; border-radius: 14px; border: 1.5px solid #e2e8f0; font-weight: 700; font-size: 0.85rem; outline: none; font-family: inherit; resize: none;"></textarea>
-                    </div>
-                </div>
+                    <!-- Submit -->
+                    <button type="submit" id="submitStoreBtn" class="store-submit-btn">
+                        إرسال طلب الانضمام كتاجر 🏁
+                    </button>
 
-                <button type="submit" id="submitStoreBtn" class="btn-primary" style="width: 100%; margin-top: 25px; padding: 16px; border-radius: 16px; font-size: 1rem; font-weight: 1000; box-shadow: 0 10px 20px rgba(255, 107, 0, 0.2);">
-                    إرسال طلب الانضمام كتاجر 🏁
-                </button>
-            </form>
+                    <!-- Bottom padding -->
+                    <div style="height: 30px;"></div>
+
+                </form>
+            </div>
         </div>
     </div>
     <script>

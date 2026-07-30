@@ -7735,6 +7735,21 @@ window.openMerchantRewards = () => {
 // Initial data load
 loadMerchants();
 
+// --- Helper: Store Logo Preview ---
+window.handleStoreLogoPreview = function(input) {
+    if (!input.files || !input.files[0]) return;
+    const file = input.files[0];
+    if (!file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const preview = document.getElementById('storeLogoPreview');
+        if (preview) preview.src = e.target.result;
+        window.pendingStoreLogoFile = file;
+        window.pendingStoreLogoBase64 = e.target.result;
+    };
+    reader.readAsDataURL(file);
+};
+
 // --- Helper: Multi-Cover Preview ---
 window.handleMultiCoverPreview = (input) => {
     const grid = document.getElementById('storeCoverPreviewGrid');
@@ -7889,6 +7904,33 @@ window.openCreateStoreModal = async function() {
                         statusEl.textContent = `📍 الموقع المحفوظ: (${parseFloat(existingStore.lat).toFixed(4)}, ${parseFloat(existingStore.lng).toFixed(4)})`;
                     }
                 }
+
+                // Load existing logo into preview
+                const logoPreview = document.getElementById('storeLogoPreview');
+                const existingLogo = existingStore.logo || existingStore.image || existingStore.photo || '';
+                if (logoPreview && existingLogo) {
+                    logoPreview.src = existingLogo;
+                }
+                // Clear any pending logo so we don't overwrite unless user picks new one
+                window.pendingStoreLogoBase64 = null;
+                window.pendingStoreLogoFile = null;
+
+                // Load existing covers
+                const existingCovers = existingStore.covers || [];
+                if (existingCovers.length > 0) {
+                    window.pendingStoreCovers = existingCovers.map(url => ({ type: 'url', data: url }));
+                } else {
+                    window.pendingStoreCovers = [];
+                }
+                if (typeof renderCoverPreviews === 'function') renderCoverPreviews();
+            } else {
+                // New store – reset logo preview
+                const logoPreview = document.getElementById('storeLogoPreview');
+                if (logoPreview) logoPreview.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='90' viewBox='0 0 90 90'><rect width='100%' height='100%' fill='%23fff7ed'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='38' fill='%23FF6B00'>🏪</text></svg>";
+                window.pendingStoreLogoBase64 = null;
+                window.pendingStoreLogoFile = null;
+                window.pendingStoreCovers = [];
+                if (typeof renderCoverPreviews === 'function') renderCoverPreviews();
             }
         } catch(e) {
             console.warn("Check store status error:", e);
@@ -7950,6 +7992,23 @@ window.submitMerchantApplication = async function(e) {
     } catch(e) {}
 
     try {
+        // Collect logo
+        const logoBase64 = window.pendingStoreLogoBase64 || null;
+
+        // Collect cover photos (base64)
+        const coverBase64Array = [];
+        const coverFiles = window.pendingStoreCovers || [];
+        const toBase64 = (item) => new Promise((resolve) => {
+            if (item.type === 'url') { resolve(item.data); return; }
+            const reader = new FileReader();
+            reader.onload = e => resolve(e.target.result);
+            reader.readAsDataURL(item.data);
+        });
+        for (const item of coverFiles) {
+            const b64 = await toBase64(item);
+            coverBase64Array.push(b64);
+        }
+
         const merchantData = {
             userId: user.uid,
             ownerUid: user.uid,
@@ -7965,6 +8024,20 @@ window.submitMerchantApplication = async function(e) {
             photo: user.photoURL || '',
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
+
+        // Attach logo if user uploaded one
+        if (logoBase64) {
+            merchantData.image = logoBase64;
+            merchantData.logo = logoBase64;
+            // Update logo preview in banner immediately
+            const bannerLogo = document.getElementById('myStoreLogo');
+            if (bannerLogo) bannerLogo.src = logoBase64;
+        }
+
+        // Attach covers if any
+        if (coverBase64Array.length > 0) {
+            merchantData.covers = coverBase64Array;
+        }
 
         if (latVal && lngVal) {
             merchantData.lat = parseFloat(latVal);
