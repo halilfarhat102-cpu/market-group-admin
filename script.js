@@ -3886,6 +3886,15 @@ async function loadUserProfile(user) {
         window.isMerchantUser = true; // Set globally for super admin
     }
 
+    // Set initial Auth email & name before Firestore snapshot loads
+    const initialEmail = user.email || user.phoneNumber || 'لا يوجد بريد مسجل';
+    const initialName = user.displayName || (user.email ? user.email.split('@')[0] : 'عميل مسعودي 👤');
+    const initialPhoto = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(initialName)}&background=FF6B00&color=fff&rounded=true&bold=true`;
+
+    if (document.getElementById('profileUserEmail')) document.getElementById('profileUserEmail').textContent = initialEmail;
+    if (document.getElementById('profileUserName')) document.getElementById('profileUserName').textContent = initialName;
+    if (document.getElementById('profileUserImg')) document.getElementById('profileUserImg').src = initialPhoto;
+
     // --- Real-time Profile & Wallet Listener ---
     if (window.userProfileUnsub) window.userProfileUnsub();
     
@@ -3896,24 +3905,28 @@ async function loadUserProfile(user) {
             // Cache globally for other modules (chatbot, checkout, reviews, recharge)
             window.currentUserData = data;
             
-            // 1. Sync User Name in Real-time from Firestore
-            if (data.name && document.getElementById('profileUserName')) {
-                document.getElementById('profileUserName').textContent = data.name;
+            // 1. Sync User Name & Real Email in Real-time from Firestore
+            const displayName = data.name || user.displayName || (user.email ? user.email.split('@')[0] : 'عميل مسعودي 👤');
+            const displayEmail = data.email || user.email || user.phoneNumber || 'لا يوجد بريد مسجل';
+
+            if (document.getElementById('profileUserName')) {
+                document.getElementById('profileUserName').textContent = displayName;
+            }
+            if (document.getElementById('profileUserEmail')) {
+                document.getElementById('profileUserEmail').textContent = displayEmail;
             }
 
             // 2. Sync User Profile & Header Images in Real-time from Firestore
-            const firestorePhoto = data.photo || data.photoURL;
-            if (firestorePhoto) {
-                if (document.getElementById('profileUserImg')) {
-                    document.getElementById('profileUserImg').src = firestorePhoto;
-                }
-                const headerImg = document.getElementById('userImg');
-                const headerIcon = document.getElementById('accountTrigger') ? document.getElementById('accountTrigger').querySelector('i') : null;
-                if (headerImg) {
-                    headerImg.src = firestorePhoto;
-                    headerImg.style.display = 'block';
-                    if (headerIcon) headerIcon.style.display = 'none';
-                }
+            const firestorePhoto = data.photo || data.photoURL || user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=FF6B00&color=fff&rounded=true&bold=true`;
+            if (document.getElementById('profileUserImg')) {
+                document.getElementById('profileUserImg').src = firestorePhoto;
+            }
+            const headerImg = document.getElementById('userImg');
+            const headerIcon = document.getElementById('accountTrigger') ? document.getElementById('accountTrigger').querySelector('i') : null;
+            if (headerImg) {
+                headerImg.src = firestorePhoto;
+                headerImg.style.display = 'block';
+                if (headerIcon) headerIcon.style.display = 'none';
             }
 
             // Update Wallet Balance UI

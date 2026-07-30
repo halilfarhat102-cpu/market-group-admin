@@ -912,30 +912,48 @@
         </div>
 
         <div class="container" style="max-width: 450px; margin: 0 auto; padding: 20px 15px;">
-            <!-- User Profile Card -->
-            <div style="background: white; border-radius: 24px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.02); border: 1px solid #f1f5f9; display: flex; align-items: center; gap: 15px; margin-bottom: 20px; position: relative; overflow: hidden;">
-                <div id="profileAvatarContainer" style="width: 65px; height: 65px; border-radius: 50%; overflow: hidden; border: 2.5px solid #ff6b0015; flex-shrink: 0; position: relative;">
+            <!-- User Profile Card (Stunning Modern Circular Avatar) -->
+            <div style="background: white; border-radius: 24px; padding: 18px 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.01); border: 1px solid #f1f5f9; display: flex; align-items: center; gap: 16px; margin-bottom: 15px; position: relative; overflow: hidden;">
+                <!-- Circular Avatar Ring Wrapper -->
+                <div style="position: relative; flex-shrink: 0;">
                     <!-- VIP Golden Crown -->
-                    <div id="superAdminCrown" style="display: none; position: absolute; top: -5px; left: 50%; transform: translateX(-50%); z-index: 10; filter: drop-shadow(0 4px 8px rgba(212, 175, 55, 0.6));">
-                        <svg viewBox="0 0 24 24" width="18" height="18" fill="#D4AF37" stroke="#996515" stroke-width="1.5">
+                    <div id="superAdminCrown" style="display: none; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); z-index: 10; filter: drop-shadow(0 4px 8px rgba(212, 175, 55, 0.6));">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="#D4AF37" stroke="#996515" stroke-width="1.5">
                             <path d="M5 21h14a2 2 0 0 0 2-2V7l-4.5 4.5L12 3l-4.5 8.5L3 7v12a2 2 0 0 0 2 2z"/>
                         </svg>
                     </div>
-                    <img id="profileUserImg" src="" style="width: 100%; height: 100%; object-fit: cover; background: #fff;">
-                    <!-- VIP Shimmering Aura -->
-                    <div id="superAdminAura" style="display: none; position: absolute; inset: 0; border-radius: 50%; border: 2px solid #D4AF37; animation: auraPulse 2s infinite linear; z-index: 1;"></div>
+
+                    <div id="profileAvatarContainer" style="width: 68px; height: 68px; border-radius: 50%; padding: 3px; background: linear-gradient(135deg, var(--primary), #ff8c33); box-shadow: 0 8px 20px rgba(255, 107, 0, 0.2); position: relative;">
+                        <div style="width: 100%; height: 100%; border-radius: 50%; overflow: hidden; background: white; border: 2px solid white;">
+                            <img id="profileUserImg" src="" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; background: #f8fafc;" onerror="this.src='https://ui-avatars.com/api/?name=User&background=FF6B00&color=fff&rounded=true'">
+                        </div>
+                        <!-- VIP Shimmering Aura -->
+                        <div id="superAdminAura" style="display: none; position: absolute; inset: -3px; border-radius: 50%; border: 2px solid #D4AF37; animation: auraPulse 2s infinite linear; z-index: 1; pointer-events: none;"></div>
+                    </div>
+
+                    <!-- Camera Edit Avatar Badge -->
+                    <div onclick="openProfileModal()" style="position: absolute; bottom: -2px; left: -2px; width: 22px; height: 22px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.15); border: 1.5px solid #f1f5f9; cursor: pointer;" title="تغيير الصورة الشخصية">
+                        <i data-lucide="camera" style="width: 12px; height: 12px;"></i>
+                    </div>
                 </div>
-                <div style="flex-grow: 1;">
+
+                <div style="flex-grow: 1; overflow: hidden;">
                     <div style="display: flex; align-items: center; gap: 6px;">
-                        <h3 id="profileUserName" style="font-size: 1.1rem; font-weight: 900; color: #0f172a; margin: 0;">الاسم</h3>
-                        <div id="profileVerifiedBadge" style="display: none;">
+                        <h3 id="profileUserName" style="font-size: 1.1rem; font-weight: 900; color: #0f172a; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">جاري التحميل...</h3>
+                        <div id="profileVerifiedBadge" style="display: none; flex-shrink: 0;">
                             <svg viewBox="0 0 512 512" width="16" height="16" fill="#1877F2">
                                 <path d="M512 256c0-34.9-20.7-64.9-50.6-78.9 9.3-32.9 2-68.5-22.3-92.8-24.3-24.3-59.9-31.5-92.8-22.3C332.3 32.7 302.3 12 267.4 12c-34.9 0-64.9 20.7-78.9 50.6-32.9-9.3-68.5-2-92.8 22.3-24.3 24.3-31.5 59.9-22.3 92.8C43.3 191.1 22.6 221.1 22.6 256c0 34.9 20.7 64.9 50.6 78.9-9.3 32.9-2 68.5 22.3 92.8 24.3 24.3 59.9 31.5 92.8 22.3 14 29.9 44 50.6 78.9 50.6 34.9 0 64.9-20.7 78.9-50.6 32.9 9.3 68.5 2 92.8-22.3 24.3-24.3 31.5-59.9 22.3-92.8 29.9-14 50.6-44 50.6-78.9z"/>
                                 <path fill="#FFF" d="M366.1 176.6c-4.7-4.7-12.3-4.7-17 0l-123.6 123.6-59.5-59.5c-4.7-4.7-12.3-4.7-17 0s-4.7 12.3 0 17l68 68c2.3 2.3 5.4 3.5 8.5 3.5s6.2-1.2 8.5-3.5l132.1-132.1c4.7-4.7 4.7-12.3 0-17z"/>
                             </svg>
                         </div>
                     </div>
-                    <p id="profileUserEmail" style="font-size: 0.75rem; color: #64748b; margin: 2px 0 0; font-weight: 600;">البريد الإلكتروني</p>
+                    
+                    <!-- Real User Email Display -->
+                    <div style="display: flex; align-items: center; gap: 5px; margin-top: 4px; overflow: hidden;">
+                        <i data-lucide="mail" style="width: 14px; height: 14px; color: #94a3b8; flex-shrink: 0;"></i>
+                        <span id="profileUserEmail" style="font-size: 0.78rem; color: #64748b; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">جاري التحميل...</span>
+                    </div>
+
                     <div id="superAdminBadge" style="display: none; background: linear-gradient(135deg, #D4AF37, #996515); padding: 2px 8px; border-radius: 8px; font-size: 0.6rem; font-weight: 900; color: white; margin-top: 5px; width: fit-content;">GOLD VIP MANAGER</div>
                 </div>
             </div>
