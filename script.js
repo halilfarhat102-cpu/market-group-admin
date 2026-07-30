@@ -4727,9 +4727,77 @@ window.requestRecharge = async (e) => {
 
 
 // --- Merchant Features ---
+window.getMerchantDashboardGPSLocation = function() {
+    const user = getCurrentUser();
+    if (!user) return showToast("⚠️ يرجى تسجيل الدخول أولاً", "warning");
+
+    const statusText = document.getElementById('merchantGPSCardText');
+    const statusRow = document.getElementById('merchantDashboardGPSStatus');
+
+    if (!navigator.geolocation) {
+        showToast("❌ جهازك لا يدعم خاصية الـ GPS", "error");
+        return;
+    }
+
+    if (statusText) statusText.textContent = "⏳ جاري تحديد موقع متجرك الآن بالـ GPS... (يرجى إعطاء الإذن)";
+    if (statusRow) statusRow.textContent = "⏳ جاري البحث عن الموقع...";
+    showToast("⏳ جاري تحديد موقع متجرك بالـ GPS...", "info");
+
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+
+        let address = 'موقع محدد عبر GPS 📍';
+        try {
+            const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&accept-language=ar`);
+            const data = await resp.json();
+            if (data && data.display_name) {
+                address = data.display_name;
+            }
+        } catch(e) {}
+
+        try {
+            await db.collection('merchants').doc(user.uid).set({
+                lat: lat,
+                lng: lng,
+                address: address,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+
+            if (statusText) statusText.textContent = `✅ تم حفظ الموقع: (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+            if (statusRow) statusRow.textContent = `✅ الموقع محفوظ (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+
+            showToast("📍 تم حفظ موقع متجرك الجغرافي بنجاح وسوف يتم احتساب التوصيل بناءً عليه!", "success");
+
+            if (window.lucide) lucide.createIcons();
+        } catch(err) {
+            console.error("Save store GPS error:", err);
+            showToast("❌ حدث خطأ أثناء حفظ الموقع: " + err.message, "error");
+        }
+    }, (err) => {
+        console.error("GPS Error:", err);
+        if (statusText) statusText.textContent = "❌ تعذر تحديد الموقع، يرجى تفعيل إذن الـ GPS في الهاتف";
+        showToast("❌ يرجى تفعيل إذن الوصول للموقع (GPS) في متصفحك", "error");
+    }, { enableHighAccuracy: true, timeout: 15000 });
+};
+
 async function renderMerchantProducts() {
     const user = getCurrentUser();
     if (!user) return;
+
+    // Load store GPS info for dashboard display
+    try {
+        const storeDoc = await db.collection('merchants').doc(user.uid).get();
+        if (storeDoc.exists) {
+            const s = storeDoc.data();
+            const statusText = document.getElementById('merchantGPSCardText');
+            const statusRow = document.getElementById('merchantDashboardGPSStatus');
+            if (s.lat && s.lng) {
+                if (statusText) statusText.textContent = `✅ الموقع الحالي المحفوظ: (${parseFloat(s.lat).toFixed(4)}, ${parseFloat(s.lng).toFixed(4)})`;
+                if (statusRow) statusRow.textContent = `✅ الموقع محفوظ (${parseFloat(s.lat).toFixed(4)}, ${parseFloat(s.lng).toFixed(4)})`;
+            }
+        }
+    } catch(e) {}
     
     const grid = document.getElementById('merchantProductsGrid');
     const totalCountEl = document.getElementById('merchantTotalProducts');

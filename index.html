@@ -1311,6 +1311,22 @@
                 </div>
             </div>
 
+            <!-- Prominent Merchant GPS Location Card -->
+            <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-radius: 20px; padding: 16px; margin-bottom: 15px; border: 1.5px solid #bfdbfe; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.06);">
+                <div style="display: flex; align-items: center; gap: 12px; overflow: hidden;">
+                    <div style="background: #2563eb; width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);">
+                        <i data-lucide="map-pin" style="width: 22px;"></i>
+                    </div>
+                    <div style="overflow: hidden;">
+                        <h4 style="font-size: 0.9rem; font-weight: 900; color: #1e3a8a; margin: 0;">موقع المتجر الجغرافي (GPS) 📍</h4>
+                        <p id="merchantGPSCardText" style="font-size: 0.72rem; color: #1e40af; font-weight: 700; margin: 2px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">انقر لتحديد موقعك الجغرافي وحساب مصاريف التوصيل</p>
+                    </div>
+                </div>
+                <button onclick="getMerchantDashboardGPSLocation()" style="background: #2563eb; color: white; border: none; padding: 10px 16px; border-radius: 12px; font-weight: 900; font-size: 0.8rem; cursor: pointer; flex-shrink: 0; white-space: nowrap; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);">
+                    تحديد الموقع 📍
+                </button>
+            </div>
+
             <!-- Card Block 2: Quick Management Options (Matching Profile Menu Card Style) -->
             <div style="background: white; border-radius: 24px; padding: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.01); border: 1px solid #f1f5f9; margin-bottom: 15px;">
                 <!-- Add Product Row -->
@@ -1320,6 +1336,20 @@
                             <i data-lucide="plus-circle" style="width: 18px;"></i>
                         </div>
                         <span style="font-size: 0.85rem; font-weight: 800; color: #334155;">إضافة منتج جديد</span>
+                    </div>
+                    <i data-lucide="chevron-left" style="color: #cbd5e1; width: 16px;"></i>
+                </div>
+
+                <!-- GPS Location Row -->
+                <div onclick="getMerchantDashboardGPSLocation()" style="display: flex; align-items: center; justify-content: space-between; padding: 14px; border-radius: 16px; cursor: pointer; transition: background 0.2s; margin-top: 4px;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="background: #eff6ff; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #2563eb;">
+                            <i data-lucide="map-pin" style="width: 18px;"></i>
+                        </div>
+                        <div>
+                            <span style="font-size: 0.85rem; font-weight: 800; color: #334155; display: block;">تحديد موقع المتجر بالـ GPS</span>
+                            <span id="merchantDashboardGPSStatus" style="font-size: 0.68rem; color: #64748b; font-weight: 700;">انقر لتحديد إحداثيات موقعك الجغرافي</span>
+                        </div>
                     </div>
                     <i data-lucide="chevron-left" style="color: #cbd5e1; width: 16px;"></i>
                 </div>
