@@ -1167,33 +1167,46 @@
         </div>
     </div>
 
-    <!-- Merchant Dashboard Page (Redesigned to Match Profile Page Aesthetics) -->
-    <section id="merchantPage" class="page-section" style="background: #f8fafc; min-height: 100vh; padding-bottom: 100px;">
-        <!-- Merchant Product Addition Modal (Clean Professional UI) -->
-        <div id="merchantAddProductModal" style="display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.8); backdrop-filter: blur(12px); z-index: 11000; align-items: center; justify-content: center; padding: 20px;">
-            <div style="background: white; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; border-radius: 28px; padding: 25px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); position: relative; animation: slideUp 0.3s cubic-bezier(0.165, 0.84, 0.44, 1); border: 1px solid #f1f5f9;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <div>
-                        <h3 style="font-size: 1.2rem; font-weight: 1000; color: #0f172a; margin: 0; font-family: 'Cairo', sans-serif;">منتج جديد 📦</h3>
-                        <p style="font-size: 0.75rem; color: #94a3b8; font-weight: 700; margin-top: 2px;">أدخل بيانات المنتجات لإضافتها لمجتزك</p>
-                    </div>
-                    <button onclick="document.getElementById('merchantAddProductModal').style.display='none'" style="background: #f8fafc; border: 1px solid #e2e8f0; width: 36px; height: 36px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #64748b;">
-                        <i data-lucide="x" style="width: 18px;"></i>
-                    </button>
+    <!-- Add/Edit Merchant Product Page (Full Standalone Page) -->
+    <section id="merchantAddProductPage" class="page-section" style="background: #f8fafc; min-height: 100vh; padding-bottom: 100px;">
+        <!-- Page Header -->
+        <div style="background: #0f172a; padding: 35px 20px 45px; border-bottom-left-radius: 36px; border-bottom-right-radius: 36px; color: white; position: relative; overflow: hidden; margin-bottom: 20px;">
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(45deg, var(--primary) -20%, transparent 80%); opacity: 0.15;"></div>
+            <div class="container" style="max-width: 600px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 2;">
+                <button onclick="navigateTo('merchantPage')" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); color: white; width: 38px; height: 38px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                    <i data-lucide="chevron-right" style="width: 20px;"></i>
+                </button>
+                <div style="text-align: center;">
+                    <h2 id="merchantAddProductPageTitle" style="font-size: 1.2rem; font-weight: 1000; margin: 0; letter-spacing: -0.5px;">إضافة منتج جديد 📦</h2>
+                    <p style="font-size: 0.7rem; color: #94a3b8; font-weight: 700; margin-top: 2px;">أدخل تفاصيل منتجك ليبدأ في الظهور لعملائك</p>
                 </div>
+                <div style="width: 38px;"></div>
+            </div>
+        </div>
 
-                <form id="merchantAddProductForm" onsubmit="handleMerchantProductSubmit(event)" style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="container" style="max-width: 600px; margin: 0 auto; padding: 0 15px;">
+            <div style="background: white; border-radius: 24px; padding: 22px; box-shadow: 0 4px 15px rgba(0,0,0,0.01); border: 1px solid #f1f5f9;">
+                <form id="merchantAddProductForm" onsubmit="handleMerchantProductSubmit(event)" style="display: flex; flex-direction: column; gap: 16px;">
                     <div>
                         <label style="display: block; font-size: 0.82rem; font-weight: 900; color: #1e293b; margin-bottom: 6px;">اسم المنتج *</label>
-                        <input type="text" id="mProdName" required placeholder="ماذا تود أن تبيع؟" style="width: 100%; padding: 13px 16px; border-radius: 14px; border: 1.5px solid #e2e8f0; font-size: 0.9rem; font-weight: 700; outline: none;">
+                        <input type="text" id="mProdName" required placeholder="ماذا تود أن تبيع؟ (مثال: شيبسي حار / موبايل سامسونج)" style="width: 100%; padding: 14px 16px; border-radius: 14px; border: 1.5px solid #e2e8f0; font-size: 0.9rem; font-weight: 800; outline: none; background: white;">
                     </div>
+
                     <div>
                         <label style="display: block; font-size: 0.82rem; font-weight: 900; color: #1e293b; margin-bottom: 6px;">السعر (ج.م) *</label>
                         <div style="position: relative;">
-                            <input type="number" id="mProdPrice" required placeholder="0.00" style="width: 100%; padding: 13px 16px 13px 45px; border-radius: 14px; border: 1.5px solid #e2e8f0; font-size: 1rem; font-weight: 900; outline: none;">
+                            <input type="number" step="0.5" id="mProdPrice" required placeholder="0.00" style="width: 100%; padding: 14px 16px 14px 45px; border-radius: 14px; border: 1.5px solid #e2e8f0; font-size: 1rem; font-weight: 900; outline: none; background: white;">
                             <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-weight: 800; color: #94a3b8; font-size: 0.75rem;">EGP</span>
                         </div>
                     </div>
+
+                    <div>
+                        <label style="display: block; font-size: 0.82rem; font-weight: 900; color: #1e293b; margin-bottom: 6px;">تصنيف المنتج *</label>
+                        <select id="mProdCategory" required style="width: 100%; padding: 14px 16px; border-radius: 14px; border: 1.5px solid #e2e8f0; font-size: 0.9rem; font-weight: 800; outline: none; background: white;">
+                            <option value="general">جاري التحميل...</option>
+                        </select>
+                    </div>
+
                     <div>
                         <label style="display: block; font-size: 0.82rem; font-weight: 900; color: #1e293b; margin-bottom: 6px;">صورة المنتج</label>
                         <div style="display: flex; flex-direction: column; gap: 10px;">
@@ -1202,28 +1215,29 @@
                                 <div style="background: white; width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.04);">
                                     <i data-lucide="image-plus" style="width: 22px;"></i>
                                 </div>
-                                <span style="font-size: 0.8rem; font-weight: 800; color: #64748b;">رفع صورة المنتج</span>
+                                <span style="font-size: 0.8rem; font-weight: 800; color: #64748b;">اضغط لاختيار صورة للمنتج</span>
                             </label>
-                            <img id="mProdPreview" style="display: none; width: 100%; height: 160px; object-fit: cover; border-radius: 16px; border: 1.5px solid #f1f5f9; background: #f8fafc;">
+                            <img id="mProdPreview" style="display: none; width: 100%; height: 180px; object-fit: cover; border-radius: 16px; border: 1.5px solid #f1f5f9; background: #f8fafc;">
                         </div>
                     </div>
+
                     <div>
-                        <label style="display: block; font-size: 0.82rem; font-weight: 900; color: #1e293b; margin-bottom: 6px;">التصنيف</label>
-                        <select id="mProdCategory" style="width: 100%; padding: 13px 16px; border-radius: 14px; border: 1.5px solid #e2e8f0; font-size: 0.9rem; font-weight: 700; outline: none; background: white;">
-                            <option value="general">جاري التحميل...</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style="display: block; font-size: 0.82rem; font-weight: 900; color: #1e293b; margin-bottom: 6px;">وصف المنتج</label>
-                        <textarea id="mProdDesc" rows="3" placeholder="أدخل تفاصيل التعبئة أو الألوان المتاحة..." style="width: 100%; padding: 13px 16px; border-radius: 14px; border: 1.5px solid #e2e8f0; font-size: 0.85rem; font-weight: 700; outline: none; resize: none; font-family: inherit;"></textarea>
+                        <label style="display: block; font-size: 0.82rem; font-weight: 900; color: #1e293b; margin-bottom: 6px;">وصف المنتج (اختياري)</label>
+                        <textarea id="mProdDesc" rows="3" placeholder="أدخل تفاصيل الحجم، الألوان أو مواصفات المنتج..." style="width: 100%; padding: 14px 16px; border-radius: 14px; border: 1.5px solid #e2e8f0; font-size: 0.85rem; font-weight: 700; outline: none; resize: none; font-family: inherit; background: white;"></textarea>
                     </div>
 
-                    <button type="submit" id="mProdSubmitBtn" class="btn-primary" style="width: 100%; padding: 15px; border-radius: 16px; font-size: 1rem; font-weight: 1000; cursor: pointer; margin-top: 10px; box-shadow: 0 10px 20px rgba(255, 107, 0, 0.2);">
-                        حفظ ونشر المنتج ✅
-                    </button>
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <button type="submit" id="mProdSubmitBtn" class="btn-primary" style="flex: 2; padding: 15px; border-radius: 14px; font-size: 0.95rem; font-weight: 900; cursor: pointer;">
+                            حفظ ونشر المنتج ✅
+                        </button>
+                        <button type="button" onclick="navigateTo('merchantPage')" style="flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; color: #64748b; padding: 15px; border-radius: 14px; font-size: 0.95rem; font-weight: 800; cursor: pointer;">
+                            إلغاء
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
+    </section>
 
         <!-- Dashboard Header -->
         <div style="background: #0f172a; padding: 35px 20px 45px; border-bottom-left-radius: 36px; border-bottom-right-radius: 36px; color: white; position: relative; overflow: hidden; margin-bottom: 20px;">

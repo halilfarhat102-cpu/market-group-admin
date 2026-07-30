@@ -4799,10 +4799,9 @@ window.editMerchantProduct = async (id) => {
         const p = doc.data();
         window.editingProductId = id;
         
-        // Fill the modal
+        // Fill the page inputs
         document.getElementById('mProdName').value = p.name || '';
         document.getElementById('mProdPrice').value = p.price || '';
-        // Mapping legacy Arabic values to English IDs if needed
         const categoryMap = {
             'عروض جملة': 'offers', 'إلكترونيات': 'electronics', 'أزياء': 'fashion', 'أزياء وملابس': 'fashion',
             'منزل': 'home', 'منزل وديكور': 'home', 'عام': 'other', 'منتجات عامة': 'other',
@@ -4812,7 +4811,7 @@ window.editMerchantProduct = async (id) => {
             'ألعاب وأطفال': 'toys', 'أدوات رياضية': 'sports', 'كتب ومكتبة': 'books',
             'هدايا وزهور': 'gifts', 'منظفات': 'cleaning', 'حيوانات أليفة': 'pets'
         };
-        let catValue = p.category || 'offers';
+        let catValue = p.category || 'supermarket';
         if (categoryMap[catValue]) catValue = categoryMap[catValue];
         
         document.getElementById('mProdCategory').value = catValue;
@@ -4827,14 +4826,13 @@ window.editMerchantProduct = async (id) => {
             preview.style.display = 'none';
         }
         
-        // Change Modal title and button
-        const modalTitle = document.querySelector('#merchantAddProductModal h3');
-        if (modalTitle) modalTitle.textContent = 'تعديل المنتج';
+        const pageTitle = document.getElementById('merchantAddProductPageTitle');
+        if (pageTitle) pageTitle.textContent = 'تعديل بيانات المنتج ✏️';
         
         const submitBtn = document.getElementById('mProdSubmitBtn');
-        if (submitBtn) submitBtn.textContent = 'حفظ التغييرات';
+        if (submitBtn) submitBtn.textContent = 'حفظ التغييرات ✅';
         
-        document.getElementById('merchantAddProductModal').style.display = 'flex';
+        navigateTo('merchantAddProductPage');
         
     } catch(err) {
         console.error("Edit fetch error:", err);
@@ -7155,65 +7153,98 @@ async function populateMerchantCategoryDropdown() {
             'health': '💊', 'toys': '🧸', 'sports': '⚽', 'books': '📚',
             'gifts': '🎁', 'cleaning': '🧼', 'pets': '🐾', 'general': '📋', 'other': '🛍️'
         };
-        snap.forEach(doc => {
-            const data = doc.data();
-            const emoji = dropdownEmojis[doc.id] || '🏷️';
-            optionsHTML += `<option value="${doc.id}">${data.name} ${emoji}</option>`;
-        });
-        catSelect.innerHTML = optionsHTML || '<option value="general">عام 📋</option>';
-    } catch(e) { console.error("Error loading categories", e); }
+
+        if (!snap.empty) {
+            snap.forEach(doc => {
+                const data = doc.data();
+                const emoji = dropdownEmojis[doc.id] || '🏷️';
+                optionsHTML += `<option value="${doc.id}">${data.name} ${emoji}</option>`;
+            });
+        }
+        
+        if (!optionsHTML) {
+            optionsHTML = `
+                <option value="supermarket">سوبر ماركت ومواد غذائية 🛒</option>
+                <option value="electronics">إلكترونيات وموبايلات 📱</option>
+                <option value="fashion">ملابس وأزياء 👔</option>
+                <option value="restaurant">مطعم ومأكولات 🍔</option>
+                <option value="bakery">حلويات ومخبوزات 🥐</option>
+                <option value="general">عام / منتجات أخرى 📋</option>
+            `;
+        }
+        catSelect.innerHTML = optionsHTML;
+    } catch(e) { 
+        console.error("Error loading categories", e); 
+        catSelect.innerHTML = `
+            <option value="supermarket">سوبر ماركت 🛒</option>
+            <option value="electronics">إلكترونيات 📱</option>
+            <option value="fashion">ملابس 👔</option>
+            <option value="restaurant">مطاعم 🍔</option>
+            <option value="general">عام 📋</option>
+        `;
+    }
 }
 
 async function openMerchantAddProductModal() {
     window.editingProductId = null;
-    document.getElementById('merchantAddProductForm').reset();
-    document.getElementById('mProdPreview').style.display = 'none';
+    const form = document.getElementById('merchantAddProductForm');
+    if (form) form.reset();
+
+    const preview = document.getElementById('mProdPreview');
+    if (preview) {
+        preview.src = '';
+        preview.style.display = 'none';
+    }
     
     await populateMerchantCategoryDropdown();
     
-    const modalTitle = document.querySelector('#merchantAddProductModal h3');
-    if (modalTitle) modalTitle.textContent = 'إضافة منتج جديد';
+    const pageTitle = document.getElementById('merchantAddProductPageTitle');
+    if (pageTitle) pageTitle.textContent = 'إضافة منتج جديد 📦';
     
     const submitBtn = document.getElementById('mProdSubmitBtn');
-    if (submitBtn) submitBtn.textContent = 'حفظ ونشر التعديلات';
+    if (submitBtn) submitBtn.textContent = 'حفظ ونشر المنتج ✅';
     
-    document.getElementById('merchantAddProductModal').style.display = 'flex';
+    navigateTo('merchantAddProductPage');
 }
 
 async function handleMerchantProductSubmit(e) {
     e.preventDefault();
-    const user = auth.currentUser;
-    if (!user) return;
+    const user = getCurrentUser();
+    if (!user) {
+        showToast("⚠️ يرجى تسجيل الدخول أولاً", "warning");
+        return;
+    }
 
     const submitBtn = document.getElementById('mProdSubmitBtn');
     const name = document.getElementById('mProdName').value.trim();
     const price = parseFloat(document.getElementById('mProdPrice').value);
-    const category = document.getElementById('mProdCategory').value;
+    const category = document.getElementById('mProdCategory').value || 'general';
     const desc = document.getElementById('mProdDesc').value.trim();
     
-    if (!name || isNaN(price)) return showToast("⚠️ يرجى إدخال اسم المنتج وسعره", "warning");
+    if (!name || isNaN(price)) {
+        showToast("⚠️ يرجى إدخال اسم المنتج وسعره بالشكل الصحيح", "warning");
+        return;
+    }
 
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<i data-lucide="loader-2" class="animate-spin" style="width:18px;"></i> جاري الحفظ...';
     if (window.lucide) lucide.createIcons();
 
     try {
-        const imageFile = document.getElementById('mProdFile').files[0];
+        const imageFileInput = document.getElementById('mProdFile');
+        const imageFile = imageFileInput && imageFileInput.files ? imageFileInput.files[0] : null;
         let imageUrl = '';
 
         if (window.editingProductId) {
-            // Preserving image if not changed
             const existingDoc = await db.collection('products').doc(window.editingProductId).get();
             if (existingDoc.exists) imageUrl = existingDoc.data().image || '';
         }
 
         if (imageFile) {
             imageUrl = await uploadFile(imageFile, 'products');
-        } else if (!window.editingProductId) {
-            // New product must have an image
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'حفظ ونشر التعديلات';
-            return showToast("⚠️ يرجى اختيار صورة للمنتج", "warning");
+        } else if (!imageUrl) {
+            // Default placeholder image if no image provided
+            imageUrl = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500';
         }
 
         const productData = {
@@ -7223,6 +7254,7 @@ async function handleMerchantProductSubmit(e) {
             description: desc,
             image: imageUrl,
             merchantId: user.uid,
+            storeId: user.uid,
             merchantEmail: user.email || '',
             updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
             status: 'active',
@@ -7238,20 +7270,23 @@ async function handleMerchantProductSubmit(e) {
             showToast('✅ تم إضافة المنتج بنجاح إلى متجرك!', 'success');
         }
 
-        document.getElementById('merchantAddProductModal').style.display = 'none';
-        document.getElementById('merchantAddProductForm').reset();
+        const form = document.getElementById('merchantAddProductForm');
+        if (form) form.reset();
+        window.editingProductId = null;
         
-        // Refresh UI
-        if (typeof fetchProducts === 'function') await fetchProducts();
+        // Return to merchant dashboard page
+        navigateTo('merchantPage');
+        
+        // Refresh products list
+        if (typeof fetchProducts === 'function') fetchProducts();
         if (typeof renderMerchantProducts === 'function') renderMerchantProducts();
         
-        window.editingProductId = null;
     } catch (error) {
         console.error('Error adding/updating product:', error);
         showToast('❌ فشل حفظ المنتج: ' + error.message, 'error');
     } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'حفظ ونشر التعديلات';
+        submitBtn.textContent = 'حفظ ونشر المنتج ✅';
     }
 }
 
@@ -7751,19 +7786,30 @@ window.openCreateStoreModal = async function() {
         return;
     }
     
-    // Check if user has a pending merchant request
+    // Check user status and existing store
     let isPending = false;
+    let existingStore = null;
+
     try {
         const userDoc = await db.collection('users').doc(user.uid).get();
         if (userDoc.exists && userDoc.data().merchantStatus === 'pending') {
             isPending = true;
         }
-    } catch(e) { console.warn("Check user merchant status error:", e); }
+
+        // Fetch existing store data for pre-filling
+        const storeSnap = await db.collection('merchants').where('ownerUid', '==', user.uid).limit(1).get();
+        if (!storeSnap.empty) {
+            existingStore = storeSnap.docs[0].data();
+        } else {
+            const storeDoc = await db.collection('merchants').doc(user.uid).get();
+            if (storeDoc.exists) existingStore = storeDoc.data();
+        }
+    } catch(e) { console.warn("Check store status error:", e); }
 
     const form = document.getElementById('createStoreForm');
     const pendingView = document.getElementById('createStorePendingView');
 
-    if (isPending) {
+    if (isPending && (!existingStore || existingStore.status === 'pending')) {
         if (form) form.style.display = 'none';
         if (pendingView) pendingView.style.display = 'block';
     } else {
@@ -7773,11 +7819,29 @@ window.openCreateStoreModal = async function() {
         // Load categories for selector
         await loadStoreCategories();
 
-        // Auto fill available user details
+        const titleEl = document.getElementById('createStoreModalTitle');
+        const nameInput = document.getElementById('storeNameInput');
         const ownerInput = document.getElementById('storeOwnerInput');
         const phoneInput = document.getElementById('storePhoneInput');
-        if (ownerInput && user.displayName && !ownerInput.value) ownerInput.value = user.displayName;
-        if (phoneInput && user.phoneNumber && !phoneInput.value) phoneInput.value = user.phoneNumber;
+        const categoryInput = document.getElementById('storeCategoryInput');
+        const descInput = document.getElementById('storeDescInput');
+
+        if (existingStore) {
+            if (titleEl) titleEl.textContent = 'تعديل بيانات المتجر 🏪';
+            if (nameInput) nameInput.value = existingStore.name || '';
+            if (ownerInput) ownerInput.value = existingStore.ownerName || user.displayName || '';
+            if (phoneInput) phoneInput.value = existingStore.phone || user.phoneNumber || '';
+            if (categoryInput && (existingStore.category || existingStore.type)) {
+                categoryInput.value = existingStore.category || existingStore.type;
+            }
+            if (descInput) descInput.value = existingStore.description || '';
+        } else {
+            if (titleEl) titleEl.textContent = 'انضم كتاجر في مسعودي 🚀';
+            if (nameInput) nameInput.value = '';
+            if (ownerInput) ownerInput.value = user.displayName || '';
+            if (phoneInput) phoneInput.value = user.phoneNumber || '';
+            if (descInput) descInput.value = '';
+        }
     }
 
     const modal = document.getElementById('createStoreModal');
