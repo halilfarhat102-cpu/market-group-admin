@@ -20,12 +20,10 @@ window.pendingStoreCovers = [];
 // 🔍 GLOBAL DIAGNOSTIC & BUTTON TRACKER SYSTEM
 // ==========================================
 (function initDiagnosticTracker() {
-    console.log("🔍 Global Diagnostic System Active.");
-
     window.addEventListener('error', function(e) {
-        console.error("🚨 [DIAGNOSTIC ERROR]:", e.message, "at", e.filename, "line", e.lineno);
+        console.error("🚨 [APP ERROR]:", e.message, "at", e.filename, "line", e.lineno);
         if (typeof window.showToast === 'function') {
-            window.showToast(`⚠️ خطأ برمجي: ${e.message} (سطر ${e.lineno})`, "error");
+            window.showToast(`⚠️ خطأ برمجي: ${e.message}`, "error");
         }
     });
 
@@ -36,15 +34,6 @@ window.pendingStoreCovers = [];
             window.showToast(`⚠️ خطأ استجابة: ${reasonMsg}`, "error");
         }
     });
-
-    document.addEventListener('click', function(e) {
-        const clickable = e.target.closest('[onclick], button, .btn-primary, div[id]');
-        if (clickable) {
-            const onclickAttr = clickable.getAttribute('onclick');
-            const elementId = clickable.id || clickable.className || clickable.tagName;
-            console.log(`👆 [CLICK EVENT]: Element: <${clickable.tagName.toLowerCase()}> (ID: ${elementId}), Handler: "${onclickAttr}"`);
-        }
-    }, true);
 })();
 
 window.runDiagnosticCheck = async function() {
@@ -8401,51 +8390,32 @@ window.openCreateStoreModalSync = function(e) {
     if (e && typeof e.preventDefault === 'function') {
         e.preventDefault();
     }
-    console.log("STEP 1: CLICK RECEIVED 👆");
-    console.log("STEP 2: openCreateStoreModalSync START ⚡");
 
     const modal = document.getElementById('createStoreModal');
     if (modal) {
-        console.log("STEP 3: createStoreModal FOUND ✅");
         modal.style.setProperty('display', 'flex', 'important');
-        modal.style.setProperty('z-index', '9999999', 'important');
+        modal.style.setProperty('z-index', '100000', 'important');
         modal.style.setProperty('visibility', 'visible', 'important');
         modal.style.setProperty('opacity', '1', 'important');
-        console.log("STEP 4: MODAL DISPLAY SET 🟢");
     } else {
-        console.error("STEP 3: createStoreModal NOT FOUND ❌");
         alert("❌ خطأ: لم يتم العثور على النافذة 'createStoreModal'");
         return;
     }
 
     const form = document.getElementById('createStoreForm');
     const pendingView = document.getElementById('createStorePendingView');
-    if (form) {
-        console.log("STEP 5: FORM FOUND ✅");
-        form.style.display = 'block';
-    }
+    if (form) form.style.display = 'block';
     if (pendingView) pendingView.style.display = 'none';
 
     if (typeof window.openCreateStoreModal === 'function') {
-        console.log("STEP 6: openCreateStoreModal EXISTS ✅");
         try {
             const res = window.openCreateStoreModal();
-            console.log("STEP 7: openCreateStoreModal EXECUTED 🚀");
             if (res && typeof res.catch === 'function') {
                 res.catch(err => console.warn("Async store populate error:", err));
             }
         } catch(err) {
             console.warn("Sync store populate error:", err);
         }
-    } else {
-        console.error("STEP 6: openCreateStoreModal DOES NOT EXIST ❌");
-    }
-
-    const computedDisplay = getComputedStyle(modal).display;
-    if (computedDisplay !== 'none') {
-        console.log("STEP 8: MODAL VISIBLE 🎉 (computed display: " + computedDisplay + ")");
-    } else {
-        console.error("STEP 8: MODAL STILL HIDDEN ❌ (computed display: " + computedDisplay + ")");
     }
 };
 
