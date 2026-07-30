@@ -16,6 +16,106 @@ window.auth = auth;
 window.db = db;
 window.pendingStoreCovers = [];
 
+// ==========================================
+// 🔍 GLOBAL DIAGNOSTIC & BUTTON TRACKER SYSTEM
+// ==========================================
+(function initDiagnosticTracker() {
+    console.log("🔍 Global Diagnostic System Active.");
+
+    window.addEventListener('error', function(e) {
+        console.error("🚨 [DIAGNOSTIC ERROR]:", e.message, "at", e.filename, "line", e.lineno);
+        if (typeof window.showToast === 'function') {
+            window.showToast(`⚠️ خطأ برمجي: ${e.message} (سطر ${e.lineno})`, "error");
+        }
+    });
+
+    window.addEventListener('unhandledrejection', function(e) {
+        console.error("🚨 [PROMISE REJECTION]:", e.reason);
+        const reasonMsg = (e.reason && e.reason.message) ? e.reason.message : String(e.reason);
+        if (typeof window.showToast === 'function') {
+            window.showToast(`⚠️ خطأ استجابة: ${reasonMsg}`, "error");
+        }
+    });
+
+    document.addEventListener('click', function(e) {
+        const clickable = e.target.closest('[onclick], button, .btn-primary, div[id]');
+        if (clickable) {
+            const onclickAttr = clickable.getAttribute('onclick');
+            const elementId = clickable.id || clickable.className || clickable.tagName;
+            console.log(`👆 [CLICK EVENT]: Element: <${clickable.tagName.toLowerCase()}> (ID: ${elementId}), Handler: "${onclickAttr}"`);
+        }
+    }, true);
+})();
+
+window.runDiagnosticCheck = async function() {
+    console.group("🛠️ === MASOUDI APP DIAGNOSTIC SUITE ===");
+    
+    const user = typeof auth !== 'undefined' && auth ? auth.currentUser : null;
+    console.log("1️⃣ Firebase Auth User:", user ? `Logged in (${user.email || user.uid})` : "Not logged in (Guest)");
+
+    try {
+        if (typeof db !== 'undefined' && db) {
+            const testDoc = await db.collection('settings').doc('delivery').get();
+            console.log("2️⃣ Firestore Connection:", testDoc.exists ? "Connected & Reading ✅" : "Connected (Doc empty) ✅");
+        } else {
+            console.error("2️⃣ Firestore Connection: Failed - db object undefined ❌");
+        }
+    } catch(err) {
+        console.error("2️⃣ Firestore Connection Error:", err.message, "❌");
+    }
+
+    const elementsToCheck = [
+        'createStoreModal',
+        'createStoreForm',
+        'createStorePendingView',
+        'merchantPage',
+        'checkoutModal',
+        'checkoutAddress',
+        'latlng',
+        'checkoutSubtotal',
+        'deliveryFeeAmount',
+        'checkoutTotal'
+    ];
+
+    console.log("3️⃣ Checking Essential DOM Elements:");
+    elementsToCheck.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            console.log(`   ✅ #${id}: Found (display: ${el.style.display || getComputedStyle(el).display})`);
+        } else {
+            console.error(`   ❌ #${id}: NOT FOUND in DOM!`);
+        }
+    });
+
+    const functionsToCheck = [
+        'openCreateStoreModal',
+        'submitMerchantApplication',
+        'getMerchantDashboardGPSLocation',
+        'getMerchantStoreGPSLocation',
+        'openMerchantAddProductModal',
+        'openMyStoreView',
+        'openMerchantRewards',
+        'calculateStoreToCustomerDeliveryFee',
+        'updateCheckoutTotal',
+        'navigateTo'
+    ];
+
+    console.log("4️⃣ Checking Function Bindings on window:");
+    functionsToCheck.forEach(fn => {
+        if (typeof window[fn] === 'function') {
+            console.log(`   ✅ window.${fn}: Bound & Available`);
+        } else {
+            console.error(`   ❌ window.${fn}: NOT DEFINED or not a function!`);
+        }
+    });
+
+    console.groupEnd();
+    
+    if (typeof showToast === 'function') {
+        showToast("🔍 اكتمل التقرير التشخيصي! افتح Console (F12) لرؤية التفاصيل الكاملة.", "success");
+    }
+};
+
 
 // Set Auth Persistence to LOCAL for session retention
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
