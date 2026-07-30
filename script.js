@@ -665,9 +665,6 @@ function createProductCardHTML(p) {
         <button class="wishlist-btn ${isWishlisted ? 'active' : ''}" onclick="toggleWishlist(this, '${p.id}')">
             <i data-lucide="heart" ${isWishlisted ? 'fill="currentColor"' : ''}></i>
         </button>
-        <button class="list-add-btn" onclick="openAddToListModal(event, '${p.id}')" style="position: absolute; top: 52px; right: 15px; background: white; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.08); color: #64748b; z-index: 10; transition: all 0.2s;">
-            <i data-lucide="list-plus" style="width:16px; height:16px;"></i>
-        </button>
         ${badgeHTML}
         <div class="image-wrapper" onclick="openQuickView('${p.id}')" style="cursor:pointer;">
             <img src="${p.image}" alt="${p.name}" loading="lazy">
