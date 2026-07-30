@@ -85,6 +85,24 @@ service cloud.firestore {
       allow write: if request.auth != null;
     }
 
+    // --- Reviews Collection ---
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update, delete: if isAdmin() || (request.auth != null && resource.data.userId == request.auth.uid);
+    }
+
+    // --- Blocked Users & Driver Registrations ---
+    match /blockedUsers/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /pending_drivers/{docId} {
+      allow read: if true;
+      allow write: if request.auth != null || isAdmin();
+    }
+
     // --- Wallet Transactions (Audit Log) ---
     match /walletTransactions/{transId} {
       allow read: if request.auth != null && resource.data.userId == request.auth.uid || isAdmin();

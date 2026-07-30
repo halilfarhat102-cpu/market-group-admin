@@ -5148,7 +5148,14 @@ window.loadProductReviews = async (productId) => {
     } catch (err) {
         console.error("Error loading reviews:", err);
         if (listContainer) {
-            listContainer.innerHTML = `<p style="color:#ef4444; font-size:0.8rem;">خطأ في تحميل التقييمات: ${err.message}</p>`;
+            listContainer.innerHTML = `
+                <div style="text-align:center; padding:35px 20px; background:#f8fafc; border-radius:18px; border:1px solid #e2e8f0; width:100%;">
+                    <i data-lucide="message-square" style="width:36px; height:36px; color:#cbd5e1; margin-bottom:10px;"></i>
+                    <p style="color:#64748B; font-size:0.85rem; margin:0; font-weight:700;">لا توجد تقييمات مسجلة لهذا المنتج بعد.</p>
+                    <p style="color:#94a3b8; font-size:0.75rem; margin:5px 0 0 0;">كن أول من يشتري المنتج ويشارك رأيه وتقييمه الصادق!</p>
+                </div>
+            `;
+            if (window.lucide) lucide.createIcons();
         }
     }
 };
