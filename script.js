@@ -7816,94 +7816,111 @@ window.getMerchantStoreGPSLocation = function() {
 };
 
 window.openCreateStoreModal = async function() {
-    const modal = document.getElementById('createStoreModal');
-    if (modal) modal.style.display = 'flex';
-
-    const user = getCurrentUser();
-    if (!user) {
-        if (modal) modal.style.display = 'none';
-        const loginModal = document.getElementById('loginModal');
-        if (loginModal) loginModal.style.display = 'flex';
-        if (typeof showToast === 'function') showToast("يرجى تسجيل الدخول أولاً لتقديم طلب إنشاء متجر 🔑");
-        return;
-    }
-
-    const form = document.getElementById('createStoreForm');
-    const pendingView = document.getElementById('createStorePendingView');
-
-    if (form) form.style.display = 'block';
-    if (pendingView) pendingView.style.display = 'none';
-
     try {
-        await loadStoreCategories();
-    } catch(catErr) { console.warn("Load store categories error:", catErr); }
+        const modal = document.getElementById('createStoreModal');
+        if (!modal) {
+            alert("❌ خطأ: لم يتم العثور على عنصر النافذة 'createStoreModal' في كود الصفحة (DOM missing)");
+            return;
+        }
+        modal.style.display = 'flex';
 
-    const titleEl = document.getElementById('createStoreModalTitle');
-    const nameInput = document.getElementById('storeNameInput');
-    const ownerInput = document.getElementById('storeOwnerInput');
-    const phoneInput = document.getElementById('storePhoneInput');
-    const categoryInput = document.getElementById('storeCategoryInput');
-    const descInput = document.getElementById('storeDescInput');
-    const latInput = document.getElementById('storeLatInput');
-    const lngInput = document.getElementById('storeLngInput');
-    const statusEl = document.getElementById('storeGPSStatus');
-
-    if (titleEl) titleEl.textContent = 'انضم كتاجر في مسعودي 🚀';
-    if (nameInput) nameInput.value = '';
-    if (ownerInput) ownerInput.value = user.displayName || '';
-    if (phoneInput) phoneInput.value = user.phoneNumber || '';
-    if (descInput) descInput.value = '';
-
-    try {
-        const userDoc = await db.collection('users').doc(user.uid).get();
-        let isPending = false;
-        if (userDoc.exists && userDoc.data().merchantStatus === 'pending') {
-            isPending = true;
+        const user = getCurrentUser();
+        if (!user) {
+            modal.style.display = 'none';
+            const loginModal = document.getElementById('loginModal');
+            if (loginModal) {
+                loginModal.style.display = 'flex';
+            } else {
+                alert("❌ خطأ: لم يتم العثور على شاشة تسجيل الدخول 'loginModal'");
+            }
+            if (typeof showToast === 'function') showToast("يرجى تسجيل الدخول أولاً لتقديم طلب إنشاء متجر 🔑", "error");
+            return;
         }
 
-        let existingStore = null;
-        const storeSnap = await db.collection('merchants').where('ownerUid', '==', user.uid).limit(1).get();
-        if (!storeSnap.empty) {
-            existingStore = storeSnap.docs[0].data();
-        } else {
-            const storeDoc = await db.collection('merchants').doc(user.uid).get();
-            if (storeDoc.exists) existingStore = storeDoc.data();
+        const form = document.getElementById('createStoreForm');
+        const pendingView = document.getElementById('createStorePendingView');
+
+        if (form) form.style.display = 'block';
+        if (pendingView) pendingView.style.display = 'none';
+
+        try {
+            await loadStoreCategories();
+        } catch(catErr) { 
+            console.warn("Load store categories error:", catErr); 
+            alert("⚠️ تنبيه أثناء تحميل الأقسام: " + catErr.message);
         }
 
-        if (isPending && (!existingStore || existingStore.status === 'pending')) {
-            if (form) form.style.display = 'none';
-            if (pendingView) pendingView.style.display = 'block';
-        } else {
-            if (form) form.style.display = 'block';
-            if (pendingView) pendingView.style.display = 'none';
+        const titleEl = document.getElementById('createStoreModalTitle');
+        const nameInput = document.getElementById('storeNameInput');
+        const ownerInput = document.getElementById('storeOwnerInput');
+        const phoneInput = document.getElementById('storePhoneInput');
+        const categoryInput = document.getElementById('storeCategoryInput');
+        const descInput = document.getElementById('storeDescInput');
+        const latInput = document.getElementById('storeLatInput');
+        const lngInput = document.getElementById('storeLngInput');
+        const statusEl = document.getElementById('storeGPSStatus');
 
-            if (existingStore) {
-                if (titleEl) titleEl.textContent = 'تعديل بيانات المتجر 🏪';
-                if (nameInput) nameInput.value = existingStore.name || existingStore.storeName || '';
-                if (ownerInput) ownerInput.value = existingStore.ownerName || user.displayName || '';
-                if (phoneInput) phoneInput.value = existingStore.phone || user.phoneNumber || '';
-                if (categoryInput && (existingStore.category || existingStore.type)) {
-                    categoryInput.value = existingStore.category || existingStore.type;
-                }
-                if (descInput) descInput.value = existingStore.description || '';
-                if (existingStore.lat && existingStore.lng) {
-                    if (latInput) latInput.value = existingStore.lat;
-                    if (lngInput) lngInput.value = existingStore.lng;
-                    if (statusEl) {
-                        statusEl.style.display = 'block';
-                        statusEl.style.color = '#10b981';
-                        statusEl.textContent = `📍 الموقع المحفوظ: (${parseFloat(existingStore.lat).toFixed(4)}, ${parseFloat(existingStore.lng).toFixed(4)})`;
+        if (titleEl) titleEl.textContent = 'انضم كتاجر في مسعودي 🚀';
+        if (nameInput) nameInput.value = '';
+        if (ownerInput) ownerInput.value = user.displayName || '';
+        if (phoneInput) phoneInput.value = user.phoneNumber || '';
+        if (descInput) descInput.value = '';
+
+        try {
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            let isPending = false;
+            if (userDoc.exists && userDoc.data().merchantStatus === 'pending') {
+                isPending = true;
+            }
+
+            let existingStore = null;
+            const storeSnap = await db.collection('merchants').where('ownerUid', '==', user.uid).limit(1).get();
+            if (!storeSnap.empty) {
+                existingStore = storeSnap.docs[0].data();
+            } else {
+                const storeDoc = await db.collection('merchants').doc(user.uid).get();
+                if (storeDoc.exists) existingStore = storeDoc.data();
+            }
+
+            if (isPending && (!existingStore || existingStore.status === 'pending')) {
+                if (form) form.style.display = 'none';
+                if (pendingView) pendingView.style.display = 'block';
+            } else {
+                if (form) form.style.display = 'block';
+                if (pendingView) pendingView.style.display = 'none';
+
+                if (existingStore) {
+                    if (titleEl) titleEl.textContent = 'تعديل بيانات المتجر 🏪';
+                    if (nameInput) nameInput.value = existingStore.name || existingStore.storeName || '';
+                    if (ownerInput) ownerInput.value = existingStore.ownerName || user.displayName || '';
+                    if (phoneInput) phoneInput.value = existingStore.phone || user.phoneNumber || '';
+                    if (categoryInput && (existingStore.category || existingStore.type)) {
+                        categoryInput.value = existingStore.category || existingStore.type;
+                    }
+                    if (descInput) descInput.value = existingStore.description || '';
+                    if (existingStore.lat && existingStore.lng) {
+                        if (latInput) latInput.value = existingStore.lat;
+                        if (lngInput) lngInput.value = existingStore.lng;
+                        if (statusEl) {
+                            statusEl.style.display = 'block';
+                            statusEl.style.color = '#10b981';
+                            statusEl.textContent = `📍 الموقع المحفوظ: (${parseFloat(existingStore.lat).toFixed(4)}, ${parseFloat(existingStore.lng).toFixed(4)})`;
+                        }
                     }
                 }
             }
+        } catch(e) {
+            console.warn("Check store status error:", e);
+            alert("⚠️ تنبيه أثناء التحقق من المتجر في السيرفر: " + e.message);
+            if (form) form.style.display = 'block';
+            if (pendingView) pendingView.style.display = 'none';
         }
-    } catch(e) {
-        console.warn("Check store status error:", e);
-        if (form) form.style.display = 'block';
-        if (pendingView) pendingView.style.display = 'none';
-    }
 
-    if (window.lucide) lucide.createIcons();
+        if (window.lucide) lucide.createIcons();
+    } catch (globalErr) {
+        console.error("openCreateStoreModal critical error:", globalErr);
+        alert("🚨 خطأ برمجي فادح أثناء تشغيل الزر:\n" + globalErr.message);
+    }
 };
 
 window.submitMerchantApplication = async function(e) {
