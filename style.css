@@ -4133,6 +4133,32 @@ body {
     align-items: center !important;
     justify-content: center !important;
     border: 1.5px solid white !important;
+/* Dedicated Single Store Edit Button */
+.btn-edit-store {
+    width: 100% !important;
+    margin-top: 15px !important;
+    padding: 13px 18px !important;
+    border-radius: 14px !important;
+    background: linear-gradient(135deg, #FF6B00 0%, #ff8c33 100%) !important;
+    color: white !important;
+    font-size: 0.88rem !important;
+    font-weight: 900 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    font-family: 'Cairo', sans-serif !important;
+    border: none !important;
+    cursor: pointer !important;
+    box-shadow: 0 8px 20px rgba(255, 107, 0, 0.25) !important;
+    transition: transform 0.2s, box-shadow 0.2s !important;
+}
+.btn-edit-store:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 12px 25px rgba(255, 107, 0, 0.35) !important;
+}
+.btn-edit-store:active {
+    transform: translateY(0) !important;
 }
 
 
