@@ -1345,7 +1345,11 @@ window.closeQuickViewModal = () => {
 };
 
 window.calculateStoreToCustomerDeliveryFee = async function(customerLat = null, customerLng = null) {
-    if (!window.cart || window.cart.length === 0) return 0;
+    const activeCart = (window.cart && window.cart.length > 0) ? window.cart : (typeof cart !== 'undefined' ? cart : []);
+    if (!activeCart || activeCart.length === 0) {
+        if (typeof updateCheckoutTotal === 'function') updateCheckoutTotal();
+        return 0;
+    }
 
     // 1. Get Customer Coordinates
     let cLat = customerLat;
@@ -1374,14 +1378,14 @@ window.calculateStoreToCustomerDeliveryFee = async function(customerLat = null, 
     let storeLng = (window.deliveryConfig && window.deliveryConfig.storeLng) ? parseFloat(window.deliveryConfig.storeLng) : null;
     let storeName = '';
 
-    const firstItem = window.cart[0];
+    const firstItem = activeCart[0];
     const merchantId = firstItem ? (firstItem.merchantId || firstItem.storeId || firstItem.ownerUid) : null;
 
     if (merchantId) {
         // Try finding in window.merchants
         let foundStore = (window.merchants || []).find(m => m.id === merchantId || m.ownerUid === merchantId || m.userId === merchantId);
         
-        // If not in memory, query Firestore directly for 100% accuracy!
+        // If not in memory, query Firestore directly
         if (!foundStore) {
             try {
                 const storeDoc = await db.collection('merchants').doc(merchantId).get();
@@ -1409,8 +1413,9 @@ window.calculateStoreToCustomerDeliveryFee = async function(customerLat = null, 
 
     if (cLat && cLng && storeLat && storeLng) {
         distance = calculateDistance(storeLat, storeLng, cLat, cLng);
-        // Base fee: 15 EGP for 0-2km. Beyond 2km: +5 EGP per extra km
         fee = Math.ceil(15 + Math.max(0, distance - 2) * 5);
+    } else {
+        fee = 15; // Fallback minimum fee
     }
 
     window.currentDeliveryFee = fee;
@@ -1437,7 +1442,8 @@ window.openCheckout = async () => {
         document.getElementById('loginModal').style.display = 'flex';
         return;
     }
-    if(cart.length === 0) { alert('السلة فارغة!'); return; }
+    const activeCart = (window.cart && window.cart.length > 0) ? window.cart : (typeof cart !== 'undefined' ? cart : []);
+    if(activeCart.length === 0) { alert('السلة فارغة!'); return; }
     
     // Refresh delivery config to catch latest admin changes
     loadDeliveryConfig();
@@ -1463,20 +1469,22 @@ window.openCheckout = async () => {
 };
 
 window.updateCheckoutTotal = () => {
+    const activeCart = (window.cart && window.cart.length > 0) ? window.cart : (typeof cart !== 'undefined' ? cart : []);
+
     const parsePrice = (val) => {
-        if (typeof val === 'number') return val;
+        if (typeof val === 'number') return isNaN(val) ? 0 : val;
         if (!val) return 0;
         const clean = String(val).replace(/[^0-9.]/g, '');
         return parseFloat(clean) || 0;
     };
 
-    const subtotal = (window.cart || []).reduce((s, i) => {
+    const subtotal = activeCart.reduce((s, i) => {
         const itemPrice = parsePrice(i.price);
         const itemQty = parseInt(i.quantity) || 1;
         return s + (itemPrice * itemQty);
     }, 0);
 
-    const fee = parseInt(window.currentDeliveryFee) || 0;
+    const fee = parseInt(window.currentDeliveryFee) || 15;
     const total = subtotal + fee;
 
     const formatNum = (num) => Math.round(num).toLocaleString('en-US');
@@ -4876,7 +4884,7 @@ window.getMerchantDashboardGPSLocation = function() {
     }, { enableHighAccuracy: true, timeout: 15000 });
 };
 
-async function renderMerchantProducts() {
+window.renderMerchantProducts = async function() {
     const user = getCurrentUser();
     if (!user) return;
 
@@ -7410,7 +7418,7 @@ async function populateMerchantCategoryDropdown() {
     }
 }
 
-async function openMerchantAddProductModal() {
+window.openMerchantAddProductModal = async function() {
     window.editingProductId = null;
     const form = document.getElementById('merchantAddProductForm');
     if (form) form.reset();
@@ -7430,9 +7438,9 @@ async function openMerchantAddProductModal() {
     if (submitBtn) submitBtn.textContent = 'حفظ ونشر المنتج ✅';
     
     navigateTo('merchantAddProductPage');
-}
+};
 
-async function handleMerchantProductSubmit(e) {
+window.handleMerchantProductSubmit = async function(e) {
     e.preventDefault();
     const user = getCurrentUser();
     if (!user) {
