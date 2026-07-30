@@ -1510,96 +1510,24 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
         const docRef = await db.collection('orders').add(data);
         console.log("Order Saved Instantly:", docRef.id);
 
-        // Increment salesCount dynamically in Firestore for the ordered products!
-        for (const item of cart) {
-            try {
-                await db.collection('products').doc(item.id).update({
-                    salesCount: firebase.firestore.FieldValue.increment(item.quantity)
-                });
-            } catch (err) {
-                console.error(`Failed to increment salesCount for product ${item.id}:`, err);
-            }
-        }
-
-        // 2.5 Deduct from Wallet if applicable
-        if (payment === 'wallet' && user) {
-            const userRef = db.collection('users').doc(user.uid);
-            await db.runTransaction(async (transaction) => {
-                const userSnap = await transaction.get(userRef);
-                const currentBalance = userSnap.data().walletBalance || 0;
-                transaction.update(userRef, { 
-                    walletBalance: currentBalance - data.total,
-                    lastSpentAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                transaction.update(docRef, { paymentConfirmed: true });
-            });
-            // Log purchase transaction
-            logWalletTransaction(user.uid, -data.total, 'purchase', `شراء طلب رقم #${nextNumber}`);
-        }
-
-        // 2.6 Handle Loyalty Points and Referral (Points are now awarded ONLY on delivery/completion)
-        if (user) {
-            const userRef = db.collection('users').doc(user.uid);
-            const userSnap = await userRef.get();
-            const userData = userSnap.data();
-
-            // Handle Referral Code (Enhanced Anti-Fraud Logic)
-            const referralInput = document.getElementById('checkoutReferral');
-            const providedCode = referralInput ? referralInput.value.trim().toUpperCase() : '';
-            
-            // Check for Device Fraud (LocalStorage Fingerprint)
-            const deviceFingerprint = localStorage.getItem('masoudi_ref_fingerprint');
-            
-            // Check if user has no orders yet
-            const ordersSnap = await db.collection('orders').where('userId', '==', user.uid).limit(2).get();
-            
-            if (providedCode && ordersSnap.size <= 1) {
-                if (deviceFingerprint) {
-                    console.warn("Potential Referral Fraud: Device already used for referral.");
-                    // We don't block the order, but we don't tag it for a reward
-                } else {
-                    // Find the referrer who owns this code
-                    const referrersSnap = await db.collection('users').where('referralCode', '==', providedCode).get();
-                    if (!referrersSnap.empty) {
-                        const referrerDoc = referrersSnap.docs[0];
-                        const referrerId = referrerDoc.id;
-                        
-                        if (referrerId !== user.uid) { // Cannot refer self
-                            // Tag the order for reward ON COMPLETION
-                            data.pendingReferralReward = {
-                                referrerId: referrerId,
-                                amount: 20
-                            };
-                            // Set device fingerprint to prevent further abuse from this browser
-                            localStorage.setItem('masoudi_ref_fingerprint', Date.now());
-                        }
-                    }
-                }
-            }
-        }
-        
         // Store for PDF generation
         window.lastOrderData = { ...data, id: docRef.id };
         
-        // 3. Show Success Modal Immediately
+        // 2. SHOW SUCCESS MODAL INSTANTLY TO USER (< 0.2s response time!)
         document.getElementById('checkoutModal').style.display = 'none';
         document.getElementById('successModal').style.display = 'flex';
         
-        // Update Success Modal Content
         const successTitle = document.querySelector('#successModal h2');
         const successMsg = document.querySelector('#successModal p');
         if (successTitle) successTitle.textContent = "تم استلام طلبك بنجاح! 🎉";
         if (successMsg) successMsg.innerHTML = `رقم الطلب الخاص بك هو: <strong>#${nextNumber}</strong><br>سيتم التواصل معك قريباً لتأكيد الشحن.`;
 
-        // 3. Handle Digital Payment Background Tasks
+        // Handle WhatsApp Receipt Button if applicable
         if (payment === 'vodafone_cash' || payment === 'instapay') {
-            const successMsg = document.querySelector('#successModal p');
             const waBtn = document.getElementById('whatsappReceiptBtn');
-            
             if (waBtn) {
                 const config = window.paymentConfig || {};
                 const supportNumber = config.whatsappSupportNumber || "01035528656";
-                // Sanitize: ensure no leading zero if it starts with 20, or add 20
                 let cleanSupport = supportNumber.replace(/\D/g, '');
                 if (cleanSupport.startsWith('0')) cleanSupport = cleanSupport.substring(1);
                 if (!cleanSupport.startsWith('2')) cleanSupport = '2' + cleanSupport;
@@ -1608,9 +1536,74 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
                 waBtn.href = `https://wa.me/${cleanSupport}?text=${encodeURIComponent(`مرحباً، لقد قمت بطلب أوردر جديد رقم #${nextNumber}.\nالاسم: ${name}\nالمبلغ: ${data.total} ج.م\nهذا هو إيصال الدفع:`)}`;
             }
 
-            if (receiptFile) {
-                if (successMsg) successMsg.innerHTML += `<div id="uploadStatus" style="margin-top:15px; background:#F8FAFC; padding:10px; border-radius:12px; font-size:0.8rem; color:#64748B; display:flex; align-items:center; justify-content:center; gap:8px;"><span class="spin" style="width:12px; height:12px; border:2px solid #64748B; border-top-color:transparent; border-radius:50%;"></span> جاري رفع صورة الإيصال...</div>`;
-                
+            if (receiptFile && successMsg) {
+                successMsg.innerHTML += `<div id="uploadStatus" style="margin-top:15px; background:#F8FAFC; padding:10px; border-radius:12px; font-size:0.8rem; color:#64748B; display:flex; align-items:center; justify-content:center; gap:8px;"><span class="spin" style="width:12px; height:12px; border:2px solid #64748B; border-top-color:transparent; border-radius:50%;"></span> جاري رفع صورة الإيصال...</div>`;
+            }
+        }
+
+        // Fast Cleanup & UI Reset
+        const currentCartItems = [...cart];
+        document.getElementById('checkoutForm').reset();
+        if(document.getElementById('paymentDetailsContainer')) document.getElementById('paymentDetailsContainer').style.display = 'none';
+        closeCart();
+        cart = [];
+        localStorage.removeItem('masoudi_cart');
+        updateCartUI();
+        if (user) trackOrders(); 
+
+        // 3. NON-BLOCKING BACKGROUND TASKS (Parallel execution in background)
+        (async () => {
+            // Increment salesCount in parallel for all items
+            Promise.all(currentCartItems.map(item => 
+                db.collection('products').doc(item.id).update({
+                    salesCount: firebase.firestore.FieldValue.increment(item.quantity)
+                }).catch(err => console.error(`Failed to increment salesCount:`, err))
+            ));
+
+            // Wallet Deduction if applicable
+            if (payment === 'wallet' && user) {
+                try {
+                    const userRef = db.collection('users').doc(user.uid);
+                    await db.runTransaction(async (transaction) => {
+                        const userSnap = await transaction.get(userRef);
+                        const currentBalance = userSnap.data().walletBalance || 0;
+                        transaction.update(userRef, { 
+                            walletBalance: currentBalance - data.total,
+                            lastSpentAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        transaction.update(docRef, { paymentConfirmed: true });
+                    });
+                    logWalletTransaction(user.uid, -data.total, 'purchase', `شراء طلب رقم #${nextNumber}`);
+                } catch (err) {
+                    console.error("Wallet deduction error:", err);
+                }
+            }
+
+            // Referral check
+            if (user) {
+                try {
+                    const referralInput = document.getElementById('checkoutReferral');
+                    const providedCode = referralInput ? referralInput.value.trim().toUpperCase() : '';
+                    const deviceFingerprint = localStorage.getItem('masoudi_ref_fingerprint');
+                    const ordersSnap = await db.collection('orders').where('userId', '==', user.uid).limit(2).get();
+                    
+                    if (providedCode && ordersSnap.size <= 1 && !deviceFingerprint) {
+                        const referrersSnap = await db.collection('users').where('referralCode', '==', providedCode).get();
+                        if (!referrersSnap.empty) {
+                            const referrerDoc = referrersSnap.docs[0];
+                            if (referrerDoc.id !== user.uid) {
+                                await docRef.update({
+                                    pendingReferralReward: { referrerId: referrerDoc.id, amount: 20 }
+                                });
+                                localStorage.setItem('masoudi_ref_fingerprint', Date.now());
+                            }
+                        }
+                    }
+                } catch(e) { console.error("Referral error:", e); }
+            }
+
+            // Background Receipt Upload
+            if ((payment === 'vodafone_cash' || payment === 'instapay') && receiptFile) {
                 try {
                     const fileName = `rec_${docRef.id}_${Date.now()}.jpg`;
                     const storageRef = firebase.storage().ref().child(`receipts/${fileName}`);
@@ -1624,6 +1617,7 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
                         statusEl.style.color = '#10B981';
                         statusEl.innerHTML = '✅ تم رفع الإيصال بنجاح';
                     }
+                    const waBtn = document.getElementById('whatsappReceiptBtn');
                     if (waBtn) waBtn.innerHTML = '✅ تم رفع الإيصال تلقائياً';
                 } catch (err) {
                     console.error("Upload failed", err);
@@ -1635,16 +1629,7 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
                     }
                 }
             }
-        }
-
-        // Cleanup
-        document.getElementById('checkoutForm').reset();
-        if(document.getElementById('paymentDetailsContainer')) document.getElementById('paymentDetailsContainer').style.display = 'none';
-        closeCart();
-        cart = [];
-        localStorage.removeItem('masoudi_cart');
-        updateCartUI();
-        if (user) trackOrders(); 
+        })();
 
     } catch (err) { 
         console.error("Critical Submit Error:", err);
