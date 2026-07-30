@@ -2665,12 +2665,15 @@
     <script>
         window.openCreateStoreModalSync = function() {
             console.log("Inline openCreateStoreModalSync triggered");
-            if (typeof window.openCreateStoreModal === 'function') {
-                window.openCreateStoreModal().catch(err => {
-                    alert("🚨 خطأ أثناء تشغيل النافذة:\n" + err.message);
-                });
+            const modal = document.getElementById('createStoreModal');
+            if (modal) {
+                modal.style.setProperty('display', 'flex', 'important');
+                modal.style.setProperty('z-index', '9999999', 'important');
             } else {
-                alert("❌ خطأ: لم يتم تحميل الملف البرمجي بالكامل بعد أو هناك نسخة قديمة مخزنة في متصفحك. يرجى تحديث الصفحة بالكامل لتخطي الكاش.");
+                alert("❌ خطأ: النافذة غير موجودة في الصفحة");
+            }
+            if (typeof window.openCreateStoreModal === 'function') {
+                window.openCreateStoreModal().catch(err => console.warn(err));
             }
         };
     </script>

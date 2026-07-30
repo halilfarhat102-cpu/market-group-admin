@@ -8399,12 +8399,27 @@ window.updateMerchantButtonUI = function(status) {
 
 window.openCreateStoreModalSync = function() {
     console.log("openCreateStoreModalSync clicked");
+    
+    // 1. Instant synchronous modal display
+    const modal = document.getElementById('createStoreModal');
+    if (modal) {
+        modal.style.setProperty('display', 'flex', 'important');
+        modal.style.setProperty('z-index', '9999999', 'important');
+    } else {
+        alert("❌ خطأ: لم يتم العثور على النافذة 'createStoreModal' في الصفحة");
+        return;
+    }
+
+    const form = document.getElementById('createStoreForm');
+    const pendingView = document.getElementById('createStorePendingView');
+    if (form) form.style.display = 'block';
+    if (pendingView) pendingView.style.display = 'none';
+
+    // 2. Background async data populating
     if (typeof window.openCreateStoreModal === 'function') {
         window.openCreateStoreModal().catch(err => {
-            alert("🚨 خطأ أثناء فتح شاشة المتجر:\n" + err.message);
+            console.warn("Async store populate error:", err);
         });
-    } else {
-        alert("❌ خطأ: دالة openCreateStoreModal غير معرّفة على الكائن window!");
     }
 };
 
