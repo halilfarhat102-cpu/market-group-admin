@@ -7599,10 +7599,17 @@ loadMerchants();
 window.handleMultiCoverPreview = (input) => {
     const grid = document.getElementById('storeCoverPreviewGrid');
     if (!grid) return;
-    
     if (!window.pendingStoreCovers) window.pendingStoreCovers = [];
-    
     const newFiles = Array.from(input.files);
+    newFiles.forEach(file => {
+        if (window.pendingStoreCovers.length < 5) {
+            window.pendingStoreCovers.push({ type: 'file', data: file });
+        }
+    });
+    input.value = '';
+    renderCoverPreviews();
+};
+
 window.getMerchantStoreGPSLocation = function() {
     const statusEl = document.getElementById('storeGPSStatus');
     const latInput = document.getElementById('storeLatInput');
@@ -7695,7 +7702,9 @@ window.openCreateStoreModal = async function() {
         if (pendingView) pendingView.style.display = 'none';
         
         // Load categories for selector
-        await loadStoreCategories();
+        try {
+            await loadStoreCategories();
+        } catch(catErr) { console.warn("Load store categories error:", catErr); }
 
         const titleEl = document.getElementById('createStoreModalTitle');
         const nameInput = document.getElementById('storeNameInput');
@@ -7808,15 +7817,6 @@ window.submitMerchantApplication = async function(e) {
     } catch (error) {
         console.error("Submit merchant application error:", error);
     }
-};
-    newFiles.forEach(file => {
-        if (window.pendingStoreCovers.length < 5) {
-            window.pendingStoreCovers.push({ type: 'file', data: file });
-        }
-    });
-
-    input.value = '';
-    renderCoverPreviews();
 };
 
 window.removePendingCover = (index) => {
