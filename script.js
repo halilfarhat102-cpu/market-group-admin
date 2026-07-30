@@ -1345,17 +1345,13 @@ window.closeQuickViewModal = () => {
 };
 
 window.calculateStoreToCustomerDeliveryFee = async function(customerLat = null, customerLng = null) {
-    if (!window.cart || window.cart.length === 0) {
-        window.currentDeliveryFee = 15;
-        if (typeof updateCheckoutTotal === 'function') updateCheckoutTotal();
-        return 15;
-    }
+    if (!window.cart || window.cart.length === 0) return 0;
 
     // 1. Get Customer Coordinates
-    let cLat = parseFloat(customerLat);
-    let cLng = parseFloat(customerLng);
+    let cLat = customerLat;
+    let cLng = customerLng;
 
-    if (isNaN(cLat) || isNaN(cLng)) {
+    if (!cLat || !cLng) {
         const latlngVal = document.getElementById('latlng')?.value;
         if (latlngVal && latlngVal.includes(',')) {
             const parts = latlngVal.split(',');
@@ -1364,7 +1360,7 @@ window.calculateStoreToCustomerDeliveryFee = async function(customerLat = null, 
         }
     }
 
-    if (isNaN(cLat) || isNaN(cLng)) {
+    if (!cLat || !cLng) {
         const user = getCurrentUser();
         if (user && window.currentUserData && window.currentUserData.latlng) {
             const parts = window.currentUserData.latlng.split(',');
@@ -1374,16 +1370,18 @@ window.calculateStoreToCustomerDeliveryFee = async function(customerLat = null, 
     }
 
     // 2. Get Merchant Store Coordinates
-    let storeLat = null;
-    let storeLng = null;
+    let storeLat = (window.deliveryConfig && window.deliveryConfig.storeLat) ? parseFloat(window.deliveryConfig.storeLat) : null;
+    let storeLng = (window.deliveryConfig && window.deliveryConfig.storeLng) ? parseFloat(window.deliveryConfig.storeLng) : null;
     let storeName = '';
 
     const firstItem = window.cart[0];
-    const merchantId = firstItem ? (firstItem.merchantId || firstItem.storeId) : null;
+    const merchantId = firstItem ? (firstItem.merchantId || firstItem.storeId || firstItem.ownerUid) : null;
 
     if (merchantId) {
+        // Try finding in window.merchants
         let foundStore = (window.merchants || []).find(m => m.id === merchantId || m.ownerUid === merchantId || m.userId === merchantId);
         
+        // If not in memory, query Firestore directly for 100% accuracy!
         if (!foundStore) {
             try {
                 const storeDoc = await db.collection('merchants').doc(merchantId).get();
@@ -1405,22 +1403,15 @@ window.calculateStoreToCustomerDeliveryFee = async function(customerLat = null, 
         }
     }
 
-    if (isNaN(storeLat) || isNaN(storeLng) || !storeLat || !storeLng) {
-        storeLat = (deliveryConfig && deliveryConfig.storeLat) ? parseFloat(deliveryConfig.storeLat) : 30.0444;
-        storeLng = (deliveryConfig && deliveryConfig.storeLng) ? parseFloat(deliveryConfig.storeLng) : 31.2357;
-    }
-
-    // 3. Compute Distance & Fee
-    let fee = 15; // Base fee
+    // 3. Compute Distance & Accurate Fee
+    let fee = 15; // Base delivery fee (15 EGP)
     let distance = 0;
 
-    if (!isNaN(cLat) && !isNaN(cLng) && !isNaN(storeLat) && !isNaN(storeLng) && cLat !== 0 && cLng !== 0) {
+    if (cLat && cLng && storeLat && storeLng) {
         distance = calculateDistance(storeLat, storeLng, cLat, cLng);
-        if (isNaN(distance) || distance < 0) distance = 0;
+        // Base fee: 15 EGP for 0-2km. Beyond 2km: +5 EGP per extra km
         fee = Math.ceil(15 + Math.max(0, distance - 2) * 5);
     }
-
-    if (isNaN(fee) || fee < 15) fee = 15;
 
     window.currentDeliveryFee = fee;
 
@@ -1429,7 +1420,6 @@ window.calculateStoreToCustomerDeliveryFee = async function(customerLat = null, 
     const feeDisplay = document.getElementById('deliveryFeeDisplay');
     const feeCont = document.getElementById('deliveryFeeContainer');
 
-    if (feeEl) feeEl.innerHTML = `<strong>${fee}</strong> ج.م`;
     if (feeDisplay) {
         const distText = distance > 0 ? `(${distance.toFixed(1)} كم)` : '';
         const storeText = storeName ? `من متجر "${storeName}" ${distText}` : `حسب المسافة ${distText}`;
@@ -1437,7 +1427,8 @@ window.calculateStoreToCustomerDeliveryFee = async function(customerLat = null, 
     }
     if (feeCont) feeCont.style.display = 'flex';
 
-    updateCheckoutTotal();
+    if (typeof updateCheckoutTotal === 'function') updateCheckoutTotal();
+
     return fee;
 };
 
@@ -1453,34 +1444,55 @@ window.openCheckout = async () => {
     
     closeCart();
     document.getElementById('checkoutModal').style.display = 'flex';
+
+    // Auto pre-fill saved user address and latlng if empty
+    if (window.currentUserData) {
+        const addrInput = document.getElementById('checkoutAddress');
+        const latlngInput = document.getElementById('latlng');
+        if (addrInput && !addrInput.value && window.currentUserData.address) {
+            addrInput.value = window.currentUserData.address;
+        }
+        if (latlngInput && !latlngInput.value && window.currentUserData.latlng) {
+            latlngInput.value = window.currentUserData.latlng;
+        }
+    }
     
-    // Automatically calculate accurate store-to-customer delivery fee on opening!
+    // Calculate totals & fee immediately
+    updateCheckoutTotal();
     await calculateStoreToCustomerDeliveryFee();
 };
 
 window.updateCheckoutTotal = () => {
-    let subtotal = 0;
-    if (window.cart && Array.isArray(window.cart)) {
-        subtotal = window.cart.reduce((s, i) => {
-            const price = parseFloat(i.price) || 0;
-            const qty = parseInt(i.quantity) || 1;
-            return s + (price * qty);
-        }, 0);
-    }
+    const parsePrice = (val) => {
+        if (typeof val === 'number') return val;
+        if (!val) return 0;
+        const clean = String(val).replace(/[^0-9.]/g, '');
+        return parseFloat(clean) || 0;
+    };
 
-    const fee = parseFloat(window.currentDeliveryFee) || 15;
+    const subtotal = (window.cart || []).reduce((s, i) => {
+        const itemPrice = parsePrice(i.price);
+        const itemQty = parseInt(i.quantity) || 1;
+        return s + (itemPrice * itemQty);
+    }, 0);
+
+    const fee = parseInt(window.currentDeliveryFee) || 0;
     const total = subtotal + fee;
+
+    const formatNum = (num) => Math.round(num).toLocaleString('en-US');
 
     const subtotalEl = document.getElementById('checkoutSubtotal');
     const feeEl = document.getElementById('deliveryFeeAmount');
     const totalEl = document.getElementById('checkoutTotal');
     const feeCont = document.getElementById('deliveryFeeContainer');
 
-    if (subtotalEl) subtotalEl.innerHTML = `<strong>${subtotal}</strong> ج.م`;
-    if (feeEl) feeEl.innerHTML = `<strong>${fee}</strong> ج.م`;
-    if (totalEl) totalEl.innerHTML = `<strong>${total}</strong> ج.م`;
-
-    if (feeCont) feeCont.style.display = 'flex';
+    if (subtotalEl) subtotalEl.textContent = `${formatNum(subtotal)} ج.م`;
+    if (feeEl) feeEl.textContent = `${formatNum(fee)} ج.م`;
+    if (totalEl) totalEl.textContent = `${formatNum(total)} ج.م`;
+    
+    if (feeCont) {
+        feeCont.style.display = 'flex';
+    }
 };
 
 
@@ -7593,12 +7605,20 @@ window.openMyStoreView = async () => {
     if (!user) return showToast("يجب تسجيل الدخول أولاً", "error");
     
     try {
+        let storeId = null;
         const snap = await db.collection('merchants').where('ownerUid', '==', user.uid).limit(1).get();
-        if (snap.empty) {
-            showToast("⚠️ يرجى تأسيس متجرك أولاً", "warning");
+        if (!snap.empty) {
+            storeId = snap.docs[0].id;
+        } else {
+            const doc = await db.collection('merchants').doc(user.uid).get();
+            if (doc.exists) storeId = doc.id;
+        }
+
+        if (!storeId) {
+            showToast("⚠️ يرجى إعداد بيانات متجرك أولاً", "warning");
             openCreateStoreModal();
         } else {
-            openStoreMenu(snap.docs[0].id);
+            openStoreMenu(storeId);
         }
     } catch (e) {
         console.error(e);
@@ -7691,30 +7711,40 @@ window.openCreateStoreModal = async function() {
         return;
     }
     
-    // Open modal immediately with max z-index
-    const modal = document.getElementById('createStoreModal');
-    if (modal) {
-        modal.style.display = 'flex';
-        modal.style.zIndex = '999999';
-    }
+    // Check user status and existing store
+    let isPending = false;
+    let existingStore = null;
+
+    try {
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (userDoc.exists && userDoc.data().merchantStatus === 'pending') {
+            isPending = true;
+        }
+
+        // Fetch existing store data for pre-filling
+        const storeSnap = await db.collection('merchants').where('ownerUid', '==', user.uid).limit(1).get();
+        if (!storeSnap.empty) {
+            existingStore = storeSnap.docs[0].data();
+        } else {
+            const storeDoc = await db.collection('merchants').doc(user.uid).get();
+            if (storeDoc.exists) existingStore = storeDoc.data();
+        }
+    } catch(e) { console.warn("Check store status error:", e); }
 
     const form = document.getElementById('createStoreForm');
     const pendingView = document.getElementById('createStorePendingView');
-    if (form) form.style.display = 'block';
-    if (pendingView) pendingView.style.display = 'none';
 
-    // Populate input fields asynchronously
-    try {
-        let existingStore = null;
-        const storeDoc = await db.collection('merchants').doc(user.uid).get();
-        if (storeDoc.exists) {
-            existingStore = storeDoc.data();
-        } else {
-            const storeSnap = await db.collection('merchants').where('ownerUid', '==', user.uid).limit(1).get();
-            if (!storeSnap.empty) existingStore = storeSnap.docs[0].data();
-        }
-
-        try { await loadStoreCategories(); } catch(e) {}
+    if (isPending && (!existingStore || existingStore.status === 'pending')) {
+        if (form) form.style.display = 'none';
+        if (pendingView) pendingView.style.display = 'block';
+    } else {
+        if (form) form.style.display = 'block';
+        if (pendingView) pendingView.style.display = 'none';
+        
+        // Load categories for selector
+        try {
+            await loadStoreCategories();
+        } catch(catErr) { console.warn("Load store categories error:", catErr); }
 
         const titleEl = document.getElementById('createStoreModalTitle');
         const nameInput = document.getElementById('storeNameInput');
@@ -7728,7 +7758,7 @@ window.openCreateStoreModal = async function() {
 
         if (existingStore) {
             if (titleEl) titleEl.textContent = 'تعديل بيانات المتجر 🏪';
-            if (nameInput) nameInput.value = existingStore.name || existingStore.storeName || '';
+            if (nameInput) nameInput.value = existingStore.name || '';
             if (ownerInput) ownerInput.value = existingStore.ownerName || user.displayName || '';
             if (phoneInput) phoneInput.value = existingStore.phone || user.phoneNumber || '';
             if (categoryInput && (existingStore.category || existingStore.type)) {
@@ -7751,7 +7781,10 @@ window.openCreateStoreModal = async function() {
             if (phoneInput) phoneInput.value = user.phoneNumber || '';
             if (descInput) descInput.value = '';
         }
-    } catch(e) { console.warn("Check store status error:", e); }
+    }
+
+    const modal = document.getElementById('createStoreModal');
+    if (modal) modal.style.display = 'flex';
 };
 
 window.submitMerchantApplication = async function(e) {
@@ -7781,21 +7814,29 @@ window.submitMerchantApplication = async function(e) {
         return;
     }
 
-    // ⚡ INSTANT RESPONSE: Show pending view immediately without waiting for network!
     const form = document.getElementById('createStoreForm');
     const pendingView = document.getElementById('createStorePendingView');
-    if (form) form.style.display = 'none';
-    if (pendingView) pendingView.style.display = 'block';
+    const submitBtn = document.getElementById('submitStoreBtn');
 
-    if (typeof window.showToast === 'function') {
-        window.showToast("🎉 تم تقديم بيانات متجرك بنجاح! سيتم مراجعة الطلب ونشر المتجر فور موافقة الإدارة.");
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'جاري حفظ التعديلات... ⌛';
     }
-    updateMerchantButtonUI('pending');
+
+    // Check if store is already approved
+    let isAlreadyApproved = false;
+    try {
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (userDoc.exists && (userDoc.data().merchantStatus === 'approved' || userDoc.data().isMerchant === true || userDoc.data().role === 'admin')) {
+            isAlreadyApproved = true;
+        }
+    } catch(e) {}
 
     try {
         const merchantData = {
             userId: user.uid,
             ownerUid: user.uid,
+            merchantId: user.uid,
             storeName: storeName,
             name: storeName,
             ownerName: ownerName,
@@ -7805,24 +7846,54 @@ window.submitMerchantApplication = async function(e) {
             description: desc,
             email: user.email || '',
             photo: user.photoURL || '',
-            lat: latVal ? parseFloat(latVal) : null,
-            lng: lngVal ? parseFloat(lngVal) : null,
-            address: window.tempStoreAddress || desc || 'موقع محدد عبر GPS',
-            status: 'pending',
-            isApproved: false,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
 
-        // Save asynchronously
-        await db.collection('merchants').doc(user.uid).set(merchantData, { merge: true });
-        await db.collection('users').doc(user.uid).set({
-            merchantStatus: 'pending',
-            merchantStoreName: storeName,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
+        if (latVal && lngVal) {
+            merchantData.lat = parseFloat(latVal);
+            merchantData.lng = parseFloat(lngVal);
+        }
+        if (window.tempStoreAddress) {
+            merchantData.address = window.tempStoreAddress;
+        }
 
-    } catch (error) {
-        console.error("Submit merchant application error:", error);
+        if (!isAlreadyApproved) {
+            merchantData.status = 'pending';
+            merchantData.isApproved = false;
+        }
+
+        await db.collection('merchants').doc(user.uid).set(merchantData, { merge: true });
+
+        if (!isAlreadyApproved) {
+            await db.collection('users').doc(user.uid).set({
+                merchantStatus: 'pending',
+                merchantStoreName: storeName,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+
+            if (form) form.style.display = 'none';
+            if (pendingView) pendingView.style.display = 'block';
+            if (typeof window.showToast === 'function') {
+                window.showToast("🎉 تم تقديم طلب متجرك بنجاح!");
+            }
+            updateMerchantButtonUI('pending');
+        } else {
+            // Already approved store: Close modal gracefully!
+            const modal = document.getElementById('createStoreModal');
+            if (modal) modal.style.display = 'none';
+            if (typeof window.showToast === 'function') {
+                window.showToast("✅ تم تحديث بيانات وموقع متجرك بنجاح 🌟", "success");
+            }
+            if (typeof renderMerchantProducts === 'function') renderMerchantProducts();
+        }
+    } catch (err) {
+        console.error("Submit merchant application error:", err);
+        if (typeof window.showToast === 'function') showToast("❌ حدث خطأ أثناء الحفظ: " + err.message, "error");
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'حفظ ونشر بيانات المتجر 🏁';
+        }
     }
 };
 
