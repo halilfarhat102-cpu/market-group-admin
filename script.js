@@ -29,6 +29,8 @@ window.STORE_CATEGORY_TRANSLATIONS = {
     'restaurants': 'مطاعم ومأكولات 🍔',
     'food': 'مطاعم ومأكولات 🍔',
     'amlmt': 'مطاعم ومأكولات 🍔',
+    'ةlylsyd': 'صيدلية ومستلزمات طبية 💊',
+    'lylsyd': 'صيدلية ومستلزمات طبية 💊',
     'general': 'عام / منوعات 📦',
     'bakery': 'مخبوزات وحلويات 🥐',
     'veggies': 'خضروات وفواكه 🍎',
@@ -68,7 +70,7 @@ window.getStoreCategoryArabicName = function(catKey) {
     
     const keyLower = strVal.toLowerCase();
     
-    // Exact translation match
+    // 1. Exact translation match
     if (window.STORE_CATEGORY_TRANSLATIONS[keyLower]) {
         return window.STORE_CATEGORY_TRANSLATIONS[keyLower];
     }
@@ -76,17 +78,27 @@ window.getStoreCategoryArabicName = function(catKey) {
         return window.STORE_CATEGORY_TRANSLATIONS[strVal];
     }
 
-    // If string already contains Arabic characters, return as is
-    if (/[\u0600-\u06FF]/.test(strVal)) {
-        return strVal;
+    // 2. Specific keyboard typos check
+    if (keyLower.includes('lylsyd') || keyLower.includes('pharm')) {
+        return 'صيدلية ومستلزمات طبية 💊';
     }
-    
-    // Fallback for unrecognized English strings (like keyboard typos)
     if (keyLower.includes('amlmt') || keyLower.includes('rest') || keyLower.includes('food')) {
         return 'مطاعم ومأكولات 🍔';
     }
+    if (keyLower.includes('clot') || keyLower.includes('fash')) {
+        return 'ملابس وأزياء 👔';
+    }
+    if (keyLower.includes('super') || keyLower.includes('groc')) {
+        return 'سوبر ماركت ومواد غذائية 🛒';
+    }
+
+    // 3. If string is proper Arabic (and not a mixed typo like ةlylsyd), return as is
+    if (/[\u0600-\u06FF]/.test(strVal) && !/^[ةa-zA-Z]+$/.test(strVal)) {
+        return strVal;
+    }
     
-    return 'مطاعم ومأكولات 🍔';
+    // 4. Default clean Arabic fallback
+    return 'عام / منوعات 📦';
 };
 
 // ==========================================
