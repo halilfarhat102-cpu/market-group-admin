@@ -19,9 +19,11 @@ window.pendingStoreCovers = [];
 // --- Store Category Arabic Translations (Globally Available) ---
 window.STORE_CATEGORY_TRANSLATIONS = {
     'supermarket': 'سوبر ماركت ومواد غذائية 🛒',
+    'grocery': 'سوبر ماركت ومواد غذائية 🛒',
     'electronics': 'إلكترونيات وموبايلات 📱',
     'fashion': 'ملابس وأزياء 👔',
     'clothes': 'ملابس وأزياء 👔',
+    'clothing': 'ملابس وأزياء 👔',
     'pharmacy': 'صيدلية ومستلزمات طبية 💊',
     'restaurant': 'مطعم ومأكولات 🍔',
     'restaurants': 'مطاعم ومأكولات 🍔',
@@ -29,15 +31,38 @@ window.STORE_CATEGORY_TRANSLATIONS = {
     'general': 'عام / منوعات 📦',
     'bakery': 'مخبوزات وحلويات 🥐',
     'veggies': 'خضروات وفواكه 🍎',
+    'vegetables': 'خضروات وفواكه 🍎',
     'meat': 'جزارة ولحوم 🥩',
+    'butcher': 'جزارة ولحوم 🥩',
     'home': 'أدوات منزلية 🏠',
-    'offers': 'عروض مميزة 🏷️'
+    'kitchen': 'أدوات مطبخ 🍳',
+    'offers': 'عروض مميزة 🏷️',
+    'beauty': 'عطور وتجميل 💄',
+    'perfumes': 'عطور وتجميل 💄',
+    'dairy': 'ألبان وأجبان 🧀',
+    'health': 'صحة وعناية 💊',
+    'toys': 'ألعاب وأطفال 🧸',
+    'sports': 'أدوات رياضية ⚽',
+    'books': 'كتب ومكتبة 📚',
+    'stationery': 'كتب وقرطاسية 📚',
+    'gifts': 'هدايا وزهور 🎁',
+    'cleaning': 'منظفات 🧹',
+    'pets': 'مستلزمات حيوانات 🐾',
+    'other': 'منتجات عامة 📦'
 };
 
 window.getStoreCategoryArabicName = function(catKey) {
     if (!catKey) return 'نشاط تجاري 🏪';
-    const keyLower = String(catKey).trim().toLowerCase();
-    return window.STORE_CATEGORY_TRANSLATIONS[keyLower] || window.STORE_CATEGORY_TRANSLATIONS[catKey] || catKey;
+    const strVal = String(catKey).trim();
+    if (!strVal) return 'نشاط تجاري 🏪';
+    
+    // If string already contains Arabic characters, return as is
+    if (/[\u0600-\u06FF]/.test(strVal)) {
+        return strVal;
+    }
+    
+    const keyLower = strVal.toLowerCase();
+    return window.STORE_CATEGORY_TRANSLATIONS[keyLower] || window.STORE_CATEGORY_TRANSLATIONS[strVal] || strVal;
 };
 
 // ==========================================
@@ -5076,18 +5101,7 @@ window.renderMerchantProducts = async function() {
                         </div>
                         <div style="margin-top: 4px; display: flex; gap: 5px;">
                             <span style="font-size: 0.65rem; font-weight: 800; color: #64748b; background: #f8fafc; padding: 2px 8px; border-radius: 6px; border: 1px solid #f1f5f9;">
-                                ${(() => {
-                                    const translation = {
-                                        'electronics': 'إلكترونيات', 'fashion': 'أزياء وملابس', 'home': 'منزل وديكور',
-                                        'offers': 'عروض جملة', 'restaurant': 'مطاعم ومأكولات', 'bakery': 'حلويات ومخبوزات',
-                                        'supermarket': 'سوبر ماركت', 'veggies': 'خضروات وفواكه', 'meat': 'لحوم ودواجن',
-                                        'dairy': 'ألبان وأجبان', 'perfumes': 'عطور وتجميل', 'kitchen': 'مطبخ وأدوات',
-                                        'health': 'صحة وعناية', 'toys': 'ألعاب وأطفال', 'sports': 'أدوات رياضية',
-                                        'books': 'كتب ومكتبة', 'gifts': 'هدايا وزهور', 'cleaning': 'منظفات',
-                                        'pets': 'حيوانات أليفة', 'other': 'منتجات عامة'
-                                    };
-                                    return (window.allCategories && window.allCategories[p.category]) ? window.allCategories[p.category].name : (translation[p.category] || p.category || 'عام');
-                                })()}
+                                ${window.getStoreCategoryArabicName(p.category)}
                             </span>
                         </div>
                     </div>
