@@ -1366,7 +1366,7 @@
                 </div>
 
                 <!-- Merchant Settings Row -->
-                <div onclick="openCreateStoreModal()" style="display: flex; align-items: center; justify-content: space-between; padding: 14px; border-radius: 16px; cursor: pointer; transition: background 0.2s; margin-top: 4px;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                <div onclick="try { openCreateStoreModal(); } catch(err) { alert('خطأ تشغيل: ' + err.message); }" style="display: flex; align-items: center; justify-content: space-between; padding: 14px; border-radius: 16px; cursor: pointer; transition: background 0.2s; margin-top: 4px;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <div style="background: #fff7ed; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #ea580c;">
                             <i data-lucide="settings" style="width: 18px;"></i>
@@ -2442,7 +2442,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js" defer></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js" defer></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js" defer></script>
-    <script src="script.js?v=3.0.0" defer></script>
+    <script src="script.js?v=3.0.1" defer></script>
     <!-- Super Admin Direct Self-Recharge Modal -->
     <div id="superAdminRechargeModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); z-index: 100000; align-items: center; justify-content: center; padding: 20px;">
         <div style="background: linear-gradient(135deg, #0f172a, #1e293b); border-radius: 30px; padding: 35px 25px; max-width: 360px; width: 100%; box-shadow: 0 30px 60px rgba(0,0,0,0.5); border: 1px solid rgba(255,107,0,0.25); position: relative; overflow: hidden; font-family: 'Cairo', sans-serif; direction: rtl;">
