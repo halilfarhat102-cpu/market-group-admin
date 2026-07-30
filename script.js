@@ -518,50 +518,22 @@ window.getLocation = (targetAddressId = 'checkoutAddress', targetLatlngId = 'lat
                     status.textContent = `✅ تم تحديد موقعك (${accuracyMsg})`;
                     status.style.color = "#10B981";
                     
-                    // Dynamic Delivery Fee Calculation: Check if cart items belong to a specific merchant store with GPS coords
-                    let storeLat = deliveryConfig.storeLat;
-                    let storeLng = deliveryConfig.storeLng;
-                    let storeName = '';
-
-                    if (window.cart && window.cart.length > 0) {
-                        const firstItem = window.cart[0];
-                        const merchantId = firstItem.merchantId || firstItem.storeId;
-                        if (merchantId && window.merchants) {
-                            const foundStore = window.merchants.find(m => m.id === merchantId || m.ownerUid === merchantId || m.userId === merchantId);
-                            if (foundStore) {
-                                storeName = foundStore.name || foundStore.storeName || '';
-                                if (foundStore.lat && foundStore.lng) {
-                                    storeLat = parseFloat(foundStore.lat);
-                                    storeLng = parseFloat(foundStore.lng);
-                                }
-                            }
-                        }
-                    }
-
-                    if (storeLat && storeLng) {
-                        const distance = calculateDistance(storeLat, storeLng, lat, lng);
-                        // Calculate fee based on store location: 15 EGP base for 0-3km, +5 EGP for each extra km
-                        const fee = Math.ceil(15 + Math.max(0, distance - 3) * 5);
-                        window.currentDeliveryFee = fee;
-                        
-                        const feeEl = document.getElementById('deliveryFeeAmount');
-                        const feeDisplay = document.getElementById('deliveryFeeDisplay');
-                        if (feeEl) {
-                            feeEl.textContent = `${fee} ج.م`;
-                            if (feeDisplay) {
-                                const storeText = storeName ? `من متجر "${storeName}"` : 'حسب مسافة المتجر';
-                                feeDisplay.innerHTML = `🚲 مصاريف التوصيل ${storeText} (${distance.toFixed(1)} كم):`;
-                                feeDisplay.parentElement.style.display = 'flex';
-                            }
-                        }
-                        updateCheckoutTotal();
+                    // Calculate 100% accurate store-to-customer delivery fee with fresh coordinates
+                    if (typeof calculateStoreToCustomerDeliveryFee === 'function') {
+                        await calculateStoreToCustomerDeliveryFee(lat, lng);
                     }
                 }
             } else {
                 if(status) status.textContent = `✅ تم تحديد الإحداثيات (${accuracyMsg})`;
+                if (typeof calculateStoreToCustomerDeliveryFee === 'function') {
+                    await calculateStoreToCustomerDeliveryFee(lat, lng);
+                }
             }
         } catch (error) {
             if(status) status.textContent = "✅ تم تحديد الإحداثيات بنجاح";
+            if (typeof calculateStoreToCustomerDeliveryFee === 'function') {
+                await calculateStoreToCustomerDeliveryFee(lat, lng);
+            }
         }
     }, (err) => {
         let errorMsg = "❌ فشل تحديد الموقع";
@@ -1372,7 +1344,96 @@ window.closeQuickViewModal = () => {
     document.getElementById('quickViewModal').style.display = 'none';
 };
 
-window.openCheckout = () => {
+window.calculateStoreToCustomerDeliveryFee = async function(customerLat = null, customerLng = null) {
+    if (!window.cart || window.cart.length === 0) return 0;
+
+    // 1. Get Customer Coordinates
+    let cLat = customerLat;
+    let cLng = customerLng;
+
+    if (!cLat || !cLng) {
+        const latlngVal = document.getElementById('latlng')?.value;
+        if (latlngVal && latlngVal.includes(',')) {
+            const parts = latlngVal.split(',');
+            cLat = parseFloat(parts[0]);
+            cLng = parseFloat(parts[1]);
+        }
+    }
+
+    if (!cLat || !cLng) {
+        const user = getCurrentUser();
+        if (user && window.currentUserData && window.currentUserData.latlng) {
+            const parts = window.currentUserData.latlng.split(',');
+            cLat = parseFloat(parts[0]);
+            cLng = parseFloat(parts[1]);
+        }
+    }
+
+    // 2. Get Merchant Store Coordinates
+    let storeLat = deliveryConfig.storeLat || 30.0444; // Default store fallback
+    let storeLng = deliveryConfig.storeLng || 31.2357;
+    let storeName = '';
+
+    const firstItem = window.cart[0];
+    const merchantId = firstItem ? (firstItem.merchantId || firstItem.storeId) : null;
+
+    if (merchantId) {
+        // Try finding in window.merchants
+        let foundStore = (window.merchants || []).find(m => m.id === merchantId || m.ownerUid === merchantId || m.userId === merchantId);
+        
+        // If not in memory, query Firestore directly for 100% accuracy!
+        if (!foundStore) {
+            try {
+                const storeDoc = await db.collection('merchants').doc(merchantId).get();
+                if (storeDoc.exists) {
+                    foundStore = storeDoc.data();
+                } else {
+                    const snap = await db.collection('merchants').where('ownerUid', '==', merchantId).limit(1).get();
+                    if (!snap.empty) foundStore = snap.docs[0].data();
+                }
+            } catch(e) { console.warn("Fetch merchant error:", e); }
+        }
+
+        if (foundStore) {
+            storeName = foundStore.name || foundStore.storeName || '';
+            if (foundStore.lat && foundStore.lng) {
+                storeLat = parseFloat(foundStore.lat);
+                storeLng = parseFloat(foundStore.lng);
+            }
+        }
+    }
+
+    // 3. Compute Distance & Accurate Fee
+    let fee = 15; // Base delivery fee
+    let distance = 0;
+
+    if (cLat && cLng && storeLat && storeLng) {
+        distance = calculateDistance(storeLat, storeLng, cLat, cLng);
+        // Base fee: 15 EGP for 0-2km. Beyond 2km: +5 EGP per extra km
+        fee = Math.ceil(15 + Math.max(0, distance - 2) * 5);
+    }
+
+    window.currentDeliveryFee = fee;
+
+    // 4. Update UI
+    const feeEl = document.getElementById('deliveryFeeAmount');
+    const feeDisplay = document.getElementById('deliveryFeeDisplay');
+    const feeCont = document.getElementById('deliveryFeeContainer');
+
+    if (feeEl) feeEl.textContent = `${fee} ج.م`;
+    if (feeDisplay) {
+        const distText = distance > 0 ? `(${distance.toFixed(1)} كم)` : '';
+        const storeText = storeName ? `من متجر "${storeName}" ${distText}` : `حسب المسافة ${distText}`;
+        feeDisplay.innerHTML = `🚲 مصاريف التوصيل ${storeText}:`;
+    }
+    if (feeCont) feeCont.style.display = 'flex';
+
+    if (typeof updateCheckoutTotal === 'function') updateCheckoutTotal();
+
+    return fee;
+};
+
+window.openCheckout = async () => {
     if (!auth.currentUser) {
         document.getElementById('loginModal').style.display = 'flex';
         return;
@@ -1384,10 +1445,9 @@ window.openCheckout = () => {
     
     closeCart();
     document.getElementById('checkoutModal').style.display = 'flex';
-    window.currentDeliveryFee = 0; // Reset
-    const feeCont = document.getElementById('deliveryFeeContainer');
-    if (feeCont) feeCont.style.display = 'none';
-    updateCheckoutTotal();
+    
+    // Automatically calculate accurate store-to-customer delivery fee on opening!
+    await calculateStoreToCustomerDeliveryFee();
 };
 
 window.updateCheckoutTotal = () => {
