@@ -1433,9 +1433,31 @@ window.closeQuickViewModal = () => {
     document.getElementById('quickViewModal').style.display = 'none';
 };
 
+// --- Store Category Arabic Translations ---
+window.STORE_CATEGORY_TRANSLATIONS = {
+    'supermarket': 'سوبر ماركت ومواد غذائية 🛒',
+    'electronics': 'إلكترونيات وموبايلات 📱',
+    'fashion': 'ملابس وأزياء 👔',
+    'pharmacy': 'صيدلية ومستلزمات طبية 💊',
+    'restaurant': 'مطعم ومأكولات 🍔',
+    'general': 'عام / منوعات 📦',
+    'bakery': 'مخبوزات وحلويات 🥐',
+    'veggies': 'خضروات وفواكه 🍎',
+    'meat': 'جزارة ولحوم 🥩',
+    'home': 'أدوات منزلية 🏠',
+    'offers': 'عروض مميزة 🏷️'
+};
+
+window.getStoreCategoryArabicName = function(catKey) {
+    if (!catKey) return 'نشاط تجاري 🏪';
+    const keyLower = String(catKey).trim().toLowerCase();
+    return window.STORE_CATEGORY_TRANSLATIONS[keyLower] || window.STORE_CATEGORY_TRANSLATIONS[catKey] || catKey;
+};
+
 window.calculateStoreToCustomerDeliveryFee = async function(customerLat = null, customerLng = null) {
     const activeCart = (window.cart && window.cart.length > 0) ? window.cart : (typeof cart !== 'undefined' ? cart : []);
     if (!activeCart || activeCart.length === 0) {
+        window.currentDeliveryFee = 0;
         if (typeof updateCheckoutTotal === 'function') updateCheckoutTotal();
         return 0;
     }
@@ -1455,10 +1477,15 @@ window.calculateStoreToCustomerDeliveryFee = async function(customerLat = null, 
 
     if (!cLat || !cLng) {
         const user = getCurrentUser();
-        if (user && window.currentUserData && window.currentUserData.latlng) {
-            const parts = window.currentUserData.latlng.split(',');
-            cLat = parseFloat(parts[0]);
-            cLng = parseFloat(parts[1]);
+        if (user && window.currentUserData) {
+            if (window.currentUserData.latlng && window.currentUserData.latlng.includes(',')) {
+                const parts = window.currentUserData.latlng.split(',');
+                cLat = parseFloat(parts[0]);
+                cLng = parseFloat(parts[1]);
+            } else if (window.currentUserData.lat && window.currentUserData.lng) {
+                cLat = parseFloat(window.currentUserData.lat);
+                cLng = parseFloat(window.currentUserData.lng);
+            }
         }
     }
 
@@ -1471,10 +1498,8 @@ window.calculateStoreToCustomerDeliveryFee = async function(customerLat = null, 
     const merchantId = firstItem ? (firstItem.merchantId || firstItem.storeId || firstItem.ownerUid) : null;
 
     if (merchantId) {
-        // Try finding in window.merchants
         let foundStore = (window.merchants || []).find(m => m.id === merchantId || m.ownerUid === merchantId || m.userId === merchantId);
         
-        // If not in memory, query Firestore directly
         if (!foundStore) {
             try {
                 const storeDoc = await db.collection('merchants').doc(merchantId).get();
@@ -1496,15 +1521,22 @@ window.calculateStoreToCustomerDeliveryFee = async function(customerLat = null, 
         }
     }
 
-    // 3. Compute Distance & Accurate Fee
+    // 3. Compute Distance & Accurate Delivery Fee
     let fee = 15; // Base delivery fee (15 EGP)
-    let distance = 0;
+    let roadDistance = 0;
 
     if (cLat && cLng && storeLat && storeLng) {
-        distance = calculateDistance(storeLat, storeLng, cLat, cLng);
-        fee = Math.ceil(15 + Math.max(0, distance - 2) * 5);
+        const airDistance = calculateDistance(storeLat, storeLng, cLat, cLng);
+        // Real road distance in cities is ~1.25x straight-line distance
+        roadDistance = Math.round(airDistance * 1.25 * 10) / 10;
+        
+        // Fee formula: Base 15 EGP for first 2 km, +5 EGP for each extra km
+        const baseFee = (window.deliveryConfig && window.deliveryConfig.baseFee) ? parseFloat(window.deliveryConfig.baseFee) : 15;
+        const ratePerKm = (window.deliveryConfig && window.deliveryConfig.pricePerKm) ? parseFloat(window.deliveryConfig.pricePerKm) : 5;
+        
+        fee = Math.max(15, Math.ceil(baseFee + Math.max(0, roadDistance - 2) * ratePerKm));
     } else {
-        fee = 15; // Fallback minimum fee
+        fee = 15; // Fallback default minimum fee
     }
 
     window.currentDeliveryFee = fee;
@@ -1515,10 +1547,11 @@ window.calculateStoreToCustomerDeliveryFee = async function(customerLat = null, 
     const feeCont = document.getElementById('deliveryFeeContainer');
 
     if (feeDisplay) {
-        const distText = distance > 0 ? `(${distance.toFixed(1)} كم)` : '';
+        const distText = roadDistance > 0 ? `(${roadDistance.toFixed(1)} كم)` : '';
         const storeText = storeName ? `من متجر "${storeName}" ${distText}` : `حسب المسافة ${distText}`;
         feeDisplay.innerHTML = `🚲 مصاريف التوصيل ${storeText}:`;
     }
+    if (feeEl) feeEl.textContent = `${fee} ج.م`;
     if (feeCont) feeCont.style.display = 'flex';
 
     if (typeof updateCheckoutTotal === 'function') updateCheckoutTotal();
@@ -3843,7 +3876,7 @@ window.renderCategoryStores = (catId) => {
                 ` : ''}
             </div>
             <h3 class="mini-card-name" style="${!isOpen ? 'color:#94a3b8;' : ''}">${m.name}</h3>
-            <span class="mini-card-tag">${m.type || 'متجر'}</span>
+            <span class="mini-card-tag">${window.getStoreCategoryArabicName ? window.getStoreCategoryArabicName(m.category || m.type) : (m.type || 'متجر')}</span>
             <div style="display:flex; align-items:center; gap:4px; color:#fbbf24; font-size:0.8rem; font-weight:1000; margin-top:2px;">
                 <i data-lucide="star" style="width:14px; fill:currentColor;"></i>
                 <span>4.9</span>
@@ -7101,8 +7134,8 @@ window.loadMerchantPageForUser = async (user) => {
             const typeEl = document.getElementById('myStoreType');
             const logoEl = document.getElementById('myStoreLogo');
             if (nameEl) nameEl.textContent = data.name || '';
-            if (typeEl) typeEl.textContent = data.type || '';
-            if (logoEl && data.logo) logoEl.src = data.logo;
+            if (typeEl) typeEl.textContent = window.getStoreCategoryArabicName(data.category || data.type);
+            if (logoEl && (data.logo || data.image)) logoEl.src = data.logo || data.image;
         }
     } catch(e) { console.error('Error loading merchant page:', e); }
     
@@ -7227,7 +7260,7 @@ function renderStores(skipClear = false) {
                 ` : ''}
             </div>
             <h3 class="mini-card-name" style="${!isOpen ? 'color:#94a3b8;' : ''}">${m.name}</h3>
-            <span class="mini-card-tag">${m.type || 'متجر'}</span>
+            <span class="mini-card-tag">${window.getStoreCategoryArabicName ? window.getStoreCategoryArabicName(m.category || m.type) : (m.type || 'متجر')}</span>
             <div style="display:flex; align-items:center; gap:4px; color:#fbbf24; font-size:0.8rem; font-weight:1000; margin-top:2px;">
                 <i data-lucide="star" style="width:14px; fill:currentColor;"></i>
                 <span>4.9</span>
@@ -7294,7 +7327,7 @@ async function openStoreMenu(merchantId) {
     type.innerHTML = `
         <div style="display:flex; flex-direction:column; gap:4px;">
             <div style="display:flex; align-items:center; gap:8px;">
-                <span>${m.type || 'متجر منوع • توصيل سريع'}</span>
+                <span>${window.getStoreCategoryArabicName ? window.getStoreCategoryArabicName(m.category || m.type) : (m.type || 'متجر منوع • توصيل سريع')}</span>
                 <div style="display:flex; align-items:center; gap:4px; background:${isOpen ? '#10b98115' : '#ef444415'}; color:${isOpen ? '#10b981' : '#ef4444'}; padding:3px 10px; border-radius:50px; font-size:0.7rem; font-weight:900; border:1px solid ${isOpen ? '#10b98130' : '#ef444430'};">
                     <div style="width:6px; height:6px; background:currentColor; border-radius:50%; ${isOpen ? 'animation:pulse 2s infinite;' : ''}"></div>
                     ${isOpen ? 'مفتوح للطلبات' : 'مغلق حالياً'}
