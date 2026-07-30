@@ -8397,14 +8397,19 @@ window.updateMerchantButtonUI = function(status) {
     }
 };
 
-window.openCreateStoreModalSync = function() {
-    console.log("openCreateStoreModalSync clicked");
+window.openCreateStoreModalSync = function(e) {
+    if (e && typeof e.preventDefault === 'function') {
+        e.preventDefault();
+    }
+    console.log("openCreateStoreModalSync clicked 🚀");
     
     // 1. Instant synchronous modal display
     const modal = document.getElementById('createStoreModal');
     if (modal) {
         modal.style.setProperty('display', 'flex', 'important');
         modal.style.setProperty('z-index', '9999999', 'important');
+        modal.style.setProperty('visibility', 'visible', 'important');
+        modal.style.setProperty('opacity', '1', 'important');
     } else {
         alert("❌ خطأ: لم يتم العثور على النافذة 'createStoreModal' في الصفحة");
         return;
@@ -8417,9 +8422,16 @@ window.openCreateStoreModalSync = function() {
 
     // 2. Background async data populating
     if (typeof window.openCreateStoreModal === 'function') {
-        window.openCreateStoreModal().catch(err => {
-            console.warn("Async store populate error:", err);
-        });
+        try {
+            const res = window.openCreateStoreModal();
+            if (res && typeof res.catch === 'function') {
+                res.catch(err => {
+                    console.warn("Async store populate error:", err);
+                });
+            }
+        } catch(err) {
+            console.warn("Sync store populate error:", err);
+        }
     }
 };
 

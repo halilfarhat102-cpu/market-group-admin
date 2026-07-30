@@ -4159,6 +4159,8 @@ body {
 }
 .btn-edit-store:active {
     transform: translateY(0) !important;
+.btn-edit-store * {
+    pointer-events: none !important;
 }
 
 

@@ -1271,9 +1271,9 @@
                         </div>
                     </div>
                 </div>
-                <button onclick="openCreateStoreModalSync()" class="btn-edit-store">
-                    <i data-lucide="settings" style="width: 16px;"></i>
-                    <span>تعديل بيانات وموقع المتجر 🏪</span>
+                <button type="button" onclick="openCreateStoreModalSync(event)" class="btn-edit-store">
+                    <i data-lucide="settings" style="width: 16px; pointer-events: none;"></i>
+                    <span style="pointer-events: none;">تعديل بيانات وموقع المتجر 🏪</span>
                 </button>
             </div>
 
@@ -2663,17 +2663,34 @@
         </div>
     </div>
     <script>
-        window.openCreateStoreModalSync = function() {
-            console.log("Inline openCreateStoreModalSync triggered");
+        window.openCreateStoreModalSync = function(e) {
+            if (e && typeof e.preventDefault === 'function') {
+                e.preventDefault();
+            }
+            console.log("Inline openCreateStoreModalSync triggered 🚀");
             const modal = document.getElementById('createStoreModal');
             if (modal) {
                 modal.style.setProperty('display', 'flex', 'important');
                 modal.style.setProperty('z-index', '9999999', 'important');
+                modal.style.setProperty('visibility', 'visible', 'important');
+                modal.style.setProperty('opacity', '1', 'important');
             } else {
                 alert("❌ خطأ: النافذة غير موجودة في الصفحة");
             }
+            const form = document.getElementById('createStoreForm');
+            const pendingView = document.getElementById('createStorePendingView');
+            if (form) form.style.display = 'block';
+            if (pendingView) pendingView.style.display = 'none';
+
             if (typeof window.openCreateStoreModal === 'function') {
-                window.openCreateStoreModal().catch(err => console.warn(err));
+                try {
+                    const res = window.openCreateStoreModal();
+                    if (res && typeof res.catch === 'function') {
+                        res.catch(err => console.warn("Populate async store error:", err));
+                    }
+                } catch(err) {
+                    console.warn("Populate store sync error:", err);
+                }
             }
         };
     </script>
