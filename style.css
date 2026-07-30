@@ -4414,76 +4414,37 @@ body {
     justify-content: center !important;
     border: 1.5px solid white !important;
 /* ============================================
-   Edit Store Button - Premium Redesign
+   Edit Store Button - Gear Icon (Opposite Logo & Name)
    ============================================ */
-.btn-edit-store {
-    width: 100% !important;
-    margin-top: 14px !important;
-    padding: 0 !important;
-    border-radius: 18px !important;
-    background: white !important;
-    border: 1.5px solid #f1f5f9 !important;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.06) !important;
-    cursor: pointer !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 0 !important;
-    overflow: hidden !important;
-    transition: box-shadow 0.2s, transform 0.2s !important;
-    text-decoration: none !important;
-}
-
-.btn-edit-store:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: 0 8px 24px rgba(255,107,0,0.15) !important;
-    border-color: #fed7aa !important;
-}
-
-.btn-edit-store:active {
-    transform: translateY(0) !important;
-}
-
-.btn-edit-store__icon {
-    width: 52px !important;
-    height: 52px !important;
-    background: linear-gradient(135deg, #FF6B00, #ff8c33) !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    flex-shrink: 0 !important;
-    color: white !important;
-}
-
-.btn-edit-store__text {
-    flex: 1 !important;
-    padding: 0 14px !important;
-    text-align: right !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 2px !important;
-}
-
-.btn-edit-store__title {
-    font-size: 0.85rem !important;
-    font-weight: 900 !important;
-    color: #0f172a !important;
-    font-family: 'Cairo', sans-serif !important;
-}
-
-.btn-edit-store__sub {
-    font-size: 0.7rem !important;
-    color: #94a3b8 !important;
-    font-weight: 700 !important;
-}
-
-.btn-edit-store__chevron {
+.btn-edit-store-gear {
     width: 44px !important;
-    height: 52px !important;
+    height: 44px !important;
+    border-radius: 14px !important;
+    background: #fff7ed !important;
+    border: 1.5px solid #fed7aa !important;
+    color: #FF6B00 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    color: #cbd5e1 !important;
+    cursor: pointer !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 4px 12px rgba(255, 107, 0, 0.12) !important;
     flex-shrink: 0 !important;
 }
 
-.btn-edit-store * { pointer-events: none !important; }
+.btn-edit-store-gear:hover {
+    background: linear-gradient(135deg, #FF6B00, #ff8c33) !important;
+    color: white !important;
+    border-color: #FF6B00 !important;
+    transform: rotate(45deg) scale(1.08) !important;
+    box-shadow: 0 6px 20px rgba(255, 107, 0, 0.3) !important;
+}
+
+.btn-edit-store-gear:active {
+    transform: rotate(45deg) scale(0.92) !important;
+}
+
+.btn-edit-store-gear * {
+    pointer-events: none !important;
+}
+

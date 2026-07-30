@@ -512,7 +512,7 @@
             });
         }
     </script>
-    <link rel="stylesheet" href="style.css?v=3.0.7">
+    <link rel="stylesheet" href="style.css?v=3.0.8">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body style="display: block !important; visibility: visible !important; opacity: 1 !important;">
@@ -1256,7 +1256,7 @@
         <div class="container" style="max-width: 600px; margin: 0 auto; padding: 0 15px;">
             <!-- Store Profile Header Card (Matching Profile User Card) -->
             <div id="merchantExistingBanner" style="display: none; background: white; border-radius: 24px; padding: 18px; box-shadow: 0 4px 15px rgba(0,0,0,0.01); border: 1px solid #f1f5f9; margin-bottom: 15px;">
-                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
                     <div style="display: flex; align-items: center; gap: 14px;">
                         <div style="position: relative;">
                             <img id="myStoreLogo" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='58' height='58' viewBox='0 0 58 58'><rect width='100%' height='100%' fill='%23f8fafc'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='26' fill='%23FF6B00'>🏪</text></svg>" style="width: 58px; height: 58px; border-radius: 16px; object-fit: cover; background: #f8fafc; border: 2px solid #f1f5f9;" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'58\' height=\'58\' viewBox=\'0 0 58 58\'><rect width=\'100%\' height=\'100%\' fill=\'%23f8fafc\'/><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'26\' fill=\'%23FF6B00\'>🏪</text></svg>';">
@@ -1270,19 +1270,11 @@
                             <span id="myStoreType" style="font-size: 0.7rem; color: #64748b; font-weight: 700; margin-top: 2px; display: inline-block;"></span>
                         </div>
                     </div>
+                    <!-- Gear Icon Edit Button opposite Store Logo & Name -->
+                    <button type="button" onclick="openCreateStoreModalSync(event)" class="btn-edit-store-gear" title="تعديل بيانات وموقع المتجر">
+                        <i data-lucide="settings" style="width: 22px; height: 22px; pointer-events: none;"></i>
+                    </button>
                 </div>
-                <button type="button" onclick="openCreateStoreModalSync(event)" class="btn-edit-store">
-                    <div class="btn-edit-store__icon">
-                        <i data-lucide="store" style="width: 22px; height: 22px;"></i>
-                    </div>
-                    <div class="btn-edit-store__text">
-                        <span class="btn-edit-store__title">تعديل بيانات وموقع المتجر</span>
-                        <span class="btn-edit-store__sub">الصور • البيانات • الموقع الجغرافي</span>
-                    </div>
-                    <div class="btn-edit-store__chevron">
-                        <i data-lucide="chevron-left" style="width: 18px; height: 18px;"></i>
-                    </div>
-                </button>
             </div>
 
             <!-- New Merchant Setup Banner (Card block style) -->
@@ -2441,7 +2433,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js" defer></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js" defer></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js" defer></script>
-    <script src="script.js?v=3.0.7" defer></script>
+    <script src="script.js?v=3.0.8" defer></script>
     <!-- Super Admin Direct Self-Recharge Modal -->
     <div id="superAdminRechargeModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); z-index: 100000; align-items: center; justify-content: center; padding: 20px;">
         <div style="background: linear-gradient(135deg, #0f172a, #1e293b); border-radius: 30px; padding: 35px 25px; max-width: 360px; width: 100%; box-shadow: 0 30px 60px rgba(0,0,0,0.5); border: 1px solid rgba(255,107,0,0.25); position: relative; overflow: hidden; font-family: 'Cairo', sans-serif; direction: rtl;">
