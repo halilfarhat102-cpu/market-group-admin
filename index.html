@@ -1149,187 +1149,204 @@
         </div>
     </div>
 
-    <!-- Merchant Products Page -->
-    <section id="merchantPage" class="page-section">
-        <!-- Merchant Product Addition Modal -->
+    <!-- Merchant Dashboard Page (Redesigned to Match Profile Page Aesthetics) -->
+    <section id="merchantPage" class="page-section" style="background: #f8fafc; min-height: 100vh; padding-bottom: 100px;">
         <!-- Merchant Product Addition Modal (Clean Professional UI) -->
         <div id="merchantAddProductModal" style="display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.8); backdrop-filter: blur(12px); z-index: 11000; align-items: center; justify-content: center; padding: 20px;">
-            <div style="background: white; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; border-radius: 40px; padding: 35px; box-shadow: 0 40px 100px rgba(0,0,0,0.3); position: relative; animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid rgba(255,107,0,0.1);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <div style="background: white; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; border-radius: 28px; padding: 25px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); position: relative; animation: slideUp 0.3s cubic-bezier(0.165, 0.84, 0.44, 1); border: 1px solid #f1f5f9;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <div>
-                        <h3 style="font-size: 1.4rem; font-weight: 1000; color: #0f172a; margin: 0; font-family: 'Cairo', sans-serif;">منتج جديد 📦</h3>
-                        <p style="font-size: 0.8rem; color: #94a3b8; font-weight: 700; margin-top: 4px; font-family: 'Cairo', sans-serif;">أضف تفاصيل منتجك ليبدأ في الظهور</p>
+                        <h3 style="font-size: 1.2rem; font-weight: 1000; color: #0f172a; margin: 0; font-family: 'Cairo', sans-serif;">منتج جديد 📦</h3>
+                        <p style="font-size: 0.75rem; color: #94a3b8; font-weight: 700; margin-top: 2px;">أدخل بيانات المنتجات لإضافتها لمجتزك</p>
                     </div>
-                    <button onclick="document.getElementById('merchantAddProductModal').style.display='none'" style="background: #f8fafc; border: 1.5px solid #e2e8f0; width: 44px; height: 44px; border-radius: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #64748b;">
-                        <i data-lucide="x" style="width: 22px;"></i>
+                    <button onclick="document.getElementById('merchantAddProductModal').style.display='none'" style="background: #f8fafc; border: 1px solid #e2e8f0; width: 36px; height: 36px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #64748b;">
+                        <i data-lucide="x" style="width: 18px;"></i>
                     </button>
                 </div>
 
-                <form id="merchantAddProductForm" onsubmit="handleMerchantProductSubmit(event)" style="display: flex; flex-direction: column; gap: 20px;">
+                <form id="merchantAddProductForm" onsubmit="handleMerchantProductSubmit(event)" style="display: flex; flex-direction: column; gap: 14px;">
                     <div>
-                        <label style="display: block; font-size: 0.85rem; font-weight: 900; color: #1e293b; margin-bottom: 10px; font-family: 'Cairo', sans-serif;">اسم المنتج *</label>
-                        <input type="text" id="mProdName" required placeholder="ماذا تود أن تبيع؟" style="width: 100%; padding: 16px; border-radius: 18px; border: 1.5px solid #e2e8f0; font-size: 1rem; font-weight: 700; outline: none; transition: border-color 0.3s; font-family: 'Cairo', sans-serif;" onfocus="this.style.borderColor='var(--primary)'">
+                        <label style="display: block; font-size: 0.82rem; font-weight: 900; color: #1e293b; margin-bottom: 6px;">اسم المنتج *</label>
+                        <input type="text" id="mProdName" required placeholder="ماذا تود أن تبيع؟" style="width: 100%; padding: 13px 16px; border-radius: 14px; border: 1.5px solid #e2e8f0; font-size: 0.9rem; font-weight: 700; outline: none;">
                     </div>
                     <div>
-                        <label style="display: block; font-size: 0.85rem; font-weight: 900; color: #1e293b; margin-bottom: 10px; font-family: 'Cairo', sans-serif;">السعر (ج.م) *</label>
+                        <label style="display: block; font-size: 0.82rem; font-weight: 900; color: #1e293b; margin-bottom: 6px;">السعر (ج.م) *</label>
                         <div style="position: relative;">
-                            <input type="number" id="mProdPrice" required placeholder="0.00" style="width: 100%; padding: 16px 16px 16px 50px; border-radius: 18px; border: 1.5px solid #e2e8f0; font-size: 1.1rem; font-weight: 1000; outline: none; transition: border-color 0.3s; font-family: 'Cairo', sans-serif;" onfocus="this.style.borderColor='var(--primary)'">
-                            <span style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-weight: 800; color: #94a3b8; font-size: 0.8rem;">EGP</span>
+                            <input type="number" id="mProdPrice" required placeholder="0.00" style="width: 100%; padding: 13px 16px 13px 45px; border-radius: 14px; border: 1.5px solid #e2e8f0; font-size: 1rem; font-weight: 900; outline: none;">
+                            <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-weight: 800; color: #94a3b8; font-size: 0.75rem;">EGP</span>
                         </div>
                     </div>
                     <div>
-                        <label style="display: block; font-size: 0.85rem; font-weight: 900; color: #1e293b; margin-bottom: 10px; font-family: 'Cairo', sans-serif;">صورة المنتج</label>
-                        <div style="display: flex; flex-direction: column; gap: 12px;">
-                            <label class="custom-file-upload" style="background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 20px; padding: 35px 20px; text-align: center; cursor: pointer; transition: all 0.3s; display: flex; flex-direction: column; align-items: center; gap: 12px;" onmouseover="this.style.borderColor='var(--primary)'; this.style.background='rgba(255,107,0,0.02)'" onmouseout="this.style.borderColor='#cbd5e1'; this.style.background='#f8fafc'">
+                        <label style="display: block; font-size: 0.82rem; font-weight: 900; color: #1e293b; margin-bottom: 6px;">صورة المنتج</label>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <label class="custom-file-upload" style="background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 16px; padding: 25px 15px; text-align: center; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px;">
                                 <input type="file" id="mProdFile" accept="image/*" style="display: none;" onchange="previewImage(this, 'mProdPreview')">
-                                <div style="background: white; width: 50px; height: 50px; border-radius: 15px; display: flex; align-items: center; justify-content: center; color: var(--primary); box-shadow: 0 8px 20px rgba(0,0,0,0.04);">
-                                    <i data-lucide="image-plus" style="width: 28px;"></i>
+                                <div style="background: white; width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.04);">
+                                    <i data-lucide="image-plus" style="width: 22px;"></i>
                                 </div>
-                                <span style="font-size: 0.85rem; font-weight: 800; color: #64748b; font-family: 'Cairo', sans-serif;">رفع صورة المنتج</span>
+                                <span style="font-size: 0.8rem; font-weight: 800; color: #64748b;">رفع صورة المنتج</span>
                             </label>
-                            <img id="mProdPreview" style="display: none; width: 100%; height: 200px; object-fit: cover; border-radius: 22px; border: 1.5px solid #f1f5f9; background: #f8fafc;">
+                            <img id="mProdPreview" style="display: none; width: 100%; height: 160px; object-fit: cover; border-radius: 16px; border: 1.5px solid #f1f5f9; background: #f8fafc;">
                         </div>
                     </div>
                     <div>
-                        <label style="display: block; font-size: 0.85rem; font-weight: 900; color: #1e293b; margin-bottom: 10px; font-family: 'Cairo', sans-serif;">التصنيف</label>
-                        <select id="mProdCategory" style="width: 100%; padding: 16px; border-radius: 18px; border: 1.5px solid #e2e8f0; font-size: 1rem; font-weight: 700; outline: none; background: white; font-family: 'Cairo', sans-serif;">
+                        <label style="display: block; font-size: 0.82rem; font-weight: 900; color: #1e293b; margin-bottom: 6px;">التصنيف</label>
+                        <select id="mProdCategory" style="width: 100%; padding: 13px 16px; border-radius: 14px; border: 1.5px solid #e2e8f0; font-size: 0.9rem; font-weight: 700; outline: none; background: white;">
                             <option value="general">جاري التحميل...</option>
                         </select>
                     </div>
                     <div>
-                        <label style="display: block; font-size: 0.85rem; font-weight: 900; color: #1e293b; margin-bottom: 10px; font-family: 'Cairo', sans-serif;">وصف المنتج</label>
-                        <textarea id="mProdDesc" rows="3" placeholder="أدخل تفاصيل التعبئة أو الألوان المتاحة..." style="width: 100%; padding: 16px; border-radius: 18px; border: 1.5px solid #e2e8f0; font-size: 1rem; font-weight: 700; outline: none; resize: none; transition: border-color 0.3s; font-family: 'Cairo', sans-serif;" onfocus="this.style.borderColor='var(--primary)'"></textarea>
+                        <label style="display: block; font-size: 0.82rem; font-weight: 900; color: #1e293b; margin-bottom: 6px;">وصف المنتج</label>
+                        <textarea id="mProdDesc" rows="3" placeholder="أدخل تفاصيل التعبئة أو الألوان المتاحة..." style="width: 100%; padding: 13px 16px; border-radius: 14px; border: 1.5px solid #e2e8f0; font-size: 0.85rem; font-weight: 700; outline: none; resize: none; font-family: inherit;"></textarea>
                     </div>
 
-                    <button type="submit" id="mProdSubmitBtn" style="background: var(--primary); color: white; border: none; padding: 18px; border-radius: 22px; font-size: 1.1rem; font-weight: 1000; cursor: pointer; margin-top: 15px; box-shadow: 0 15px 35px rgba(255, 107, 0, 0.25); transition: all 0.3s; font-family: 'Cairo', sans-serif;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
-                        حفظ ونشر التعديلات ✅
+                    <button type="submit" id="mProdSubmitBtn" class="btn-primary" style="width: 100%; padding: 15px; border-radius: 16px; font-size: 1rem; font-weight: 1000; cursor: pointer; margin-top: 10px; box-shadow: 0 10px 20px rgba(255, 107, 0, 0.2);">
+                        حفظ ونشر المنتج ✅
                     </button>
                 </form>
             </div>
         </div>
-        <!-- Digital Dashboard Header (Premium Glass UI) -->
-        <header style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 60px 20px 45px; color: white; position: relative; overflow: hidden; border-radius: 0 0 50px 50px; box-shadow: 0 25px 50px rgba(0,0,0,0.15);">
-            <!-- Decorative Elements -->
-            <div style="position: absolute; top: -60px; right: -60px; width: 220px; height: 220px; background: var(--primary); opacity: 0.15; filter: blur(60px); border-radius: 50%;"></div>
-            <div style="position: absolute; bottom: -40px; left: -40px; width: 180px; height: 180px; background: #6366f1; opacity: 0.1; filter: blur(50px); border-radius: 50%;"></div>
-            
-            <div class="container" style="position: relative; z-index: 2;">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 35px;">
-                    <button onclick="navigateTo('contactPage')" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); color: white; width: 44px; height: 44px; border-radius: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(12px); transition: all 0.3s;">
-                        <i data-lucide="chevron-right" style="width: 24px; height: 24px;"></i>
-                    </button>
-                    <div style="text-align: center;">
-                        <h2 style="font-size: 1.6rem; font-weight: 1000; margin: 0; letter-spacing: -0.5px; font-family: 'Cairo', sans-serif;">لوحة التحكم</h2>
-                        <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 6px; background: rgba(16,185,129,0.1); padding: 4px 12px; border-radius: 50px; border: 1px solid rgba(16,185,129,0.2);">
-                            <div style="width: 6px; height: 6px; background: #10b981; border-radius: 50%; animation: pulse 2s infinite;"></div>
-                            <span style="font-size: 0.7rem; font-weight: 950; color: #10b981; letter-spacing: 0.5px;">SECURE DASHBOARD</span>
-                        </div>
-                    </div>
-                    <div onclick="renderMerchantProducts()" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); color: white; width: 44px; height: 44px; border-radius: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(12px);">
-                        <i data-lucide="refresh-cw" style="width: 20px;"></i>
-                    </div>
-                </div>
 
-                <!-- Dashboard Stats Grid (Glass Design) -->
-                <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 15px;">
-                    <div class="glass-stat-card" style="background: rgba(255,255,255,0.04); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 28px; padding: 22px; display: flex; align-items: center; gap: 15px; transition: all 0.3s;">
-                        <div style="background: linear-gradient(135deg, var(--primary), #ff8c33); width: 48px; height: 48px; border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(255,107,0,0.25);">
-                            <i data-lucide="package" style="width: 24px; color: white;"></i>
-                        </div>
-                        <div>
-                            <div style="font-size: 1.4rem; font-weight: 1000; color: white; line-height: 1;" id="merchantTotalProducts">--</div>
-                            <div style="font-size: 0.75rem; font-weight: 800; color: rgba(255,255,255,0.5); margin-top: 5px;">إجمالي المنتجات</div>
-                        </div>
-                    </div>
-                    <div class="glass-stat-card" style="background: rgba(255,255,255,0.04); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 28px; padding: 22px; display: flex; align-items: center; gap: 15px; transition: all 0.3s;">
-                        <div style="background: linear-gradient(135deg, #6366f1, #818cf8); width: 48px; height: 48px; border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(99,102,241,0.2);">
-                            <i data-lucide="shield-check" style="width: 24px; color: white;"></i>
-                        </div>
-                        <div>
-                            <div style="font-size: 1rem; font-weight: 1000; color: white; line-height: 1;">تاجر معتمد</div>
-                            <div style="font-size: 0.75rem; font-weight: 800; color: rgba(255,255,255,0.5); margin-top: 5px;">حالة الحساب</div>
-                        </div>
-                    </div>
+        <!-- Dashboard Header -->
+        <div style="background: #0f172a; padding: 35px 20px 45px; border-bottom-left-radius: 36px; border-bottom-right-radius: 36px; color: white; position: relative; overflow: hidden; margin-bottom: 20px;">
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(45deg, var(--primary) -20%, transparent 80%); opacity: 0.15;"></div>
+            <div class="container" style="max-width: 600px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 2;">
+                <button onclick="navigateTo('contactPage')" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); color: white; width: 38px; height: 38px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                    <i data-lucide="chevron-right" style="width: 20px;"></i>
+                </button>
+                <div style="text-align: center;">
+                    <h2 style="font-size: 1.2rem; font-weight: 1000; margin: 0; letter-spacing: -0.5px;">لوحة تحكم المتجر</h2>
+                    <p style="font-size: 0.7rem; color: #94a3b8; font-weight: 700; margin-top: 2px;">إدارة متجرك والمنتجات بسهولة</p>
                 </div>
+                <button onclick="renderMerchantProducts()" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); color: white; width: 38px; height: 38px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                    <i data-lucide="rotate-cw" style="width: 18px;"></i>
+                </button>
             </div>
-        </header>
+        </div>
 
-        <div class="container" style="margin-top: -30px; position: relative; z-index: 5; padding: 0 15px;">
-            <!-- Merchant Profile Card (Refined) -->
-            <div id="merchantExistingBanner" style="display: none; background: white; border-radius: 35px; padding: 25px; box-shadow: 0 15px 40px rgba(0,0,0,0.06); border: 1px solid #f1f5f9; margin-bottom: 30px; transition: all 0.3s; position: relative; overflow: hidden;">
-                <div style="position: absolute; top:0; right:0; width: 6px; height: 100%; background: var(--primary);"></div>
-                <div style="display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 2;">
-                    <div style="display: flex; align-items: center; gap: 18px;">
+        <div class="container" style="max-width: 600px; margin: 0 auto; padding: 0 15px;">
+            <!-- Store Profile Header Card (Matching Profile User Card) -->
+            <div id="merchantExistingBanner" style="display: none; background: white; border-radius: 24px; padding: 18px; box-shadow: 0 4px 15px rgba(0,0,0,0.01); border: 1px solid #f1f5f9; margin-bottom: 15px;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 14px;">
                         <div style="position: relative;">
-                            <img id="myStoreLogo" src="" style="width: 75px; height: 75px; border-radius: 24px; object-fit: cover; background: #f8fafc; border: 3px solid white; box-shadow: 0 10px 25px rgba(0,0,0,0.08);" onerror="this.src='https://via.placeholder.com/75'">
-                            <div style="position: absolute; bottom: -4px; right: -4px; width: 26px; height: 26px; background: #3b82f6; border-radius: 10px; border: 2.5px solid white; display: flex; align-items: center; justify-content: center; color: white;">
-                                <i data-lucide="check" style="width: 14px; height: 14px; stroke-width: 4;"></i>
-                            </div>
+                            <img id="myStoreLogo" src="" style="width: 58px; height: 58px; border-radius: 16px; object-fit: cover; background: #f8fafc; border: 2px solid #f1f5f9;" onerror="this.src='https://via.placeholder.com/58'">
+                            <div style="position: absolute; bottom: -2px; right: -2px; width: 18px; height: 18px; background: #10b981; border-radius: 50%; border: 2px solid white;"></div>
                         </div>
                         <div>
-                            <h3 id="myStoreName" style="font-size: 1.2rem; color: #0f172a; margin: 0 0 4px; font-weight: 1000; font-family: 'Cairo', sans-serif;"></h3>
-                            <div id="myStoreType" style="font-size: 0.75rem; color: white; background: #64748b; padding: 3px 12px; border-radius: 50px; display: inline-block; font-weight: 800; letter-spacing: 0.3px;"></div>
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <h3 id="myStoreName" style="font-size: 1.05rem; color: #0f172a; margin: 0; font-weight: 900;"></h3>
+                                <i data-lucide="check-circle-2" style="width: 16px; height: 16px; color: #1877F2; fill: #1877F2;"></i>
+                            </div>
+                            <span id="myStoreType" style="font-size: 0.7rem; color: #64748b; font-weight: 700; margin-top: 2px; display: inline-block;"></span>
                         </div>
                     </div>
-                    <button onclick="openCreateStoreModal()" style="background: #f8fafc; border: 1.5px solid #f1f5f9; width: 48px; height: 48px; border-radius: 18px; color: #475569; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
-                        <i data-lucide="settings-2" style="width: 22px;"></i>
+                    <button onclick="openCreateStoreModal()" style="background: #f8fafc; border: 1px solid #e2e8f0; width: 36px; height: 36px; border-radius: 10px; color: #475569; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="تعديل بيانات المتجر">
+                        <i data-lucide="settings" style="width: 18px;"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- New Merchant Welcome (Premium CTA) -->
-            <div id="merchantSetupBanner" style="display: none; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 40px; padding: 45px 30px; box-shadow: 0 25px 60px rgba(0,0,0,0.2); text-align: center; margin-bottom: 30px; color: white; position: relative; overflow: hidden; border: 1px solid rgba(255,107,0,0.2);">
-                <div style="position: absolute; top:0; left:0; width:100%; height:100%; background: radial-gradient(circle at top right, rgba(255,107,0,0.1), transparent); pointer-events: none;"></div>
-                <div style="background: rgba(255,107,0,0.15); width: 90px; height: 90px; border-radius: 32px; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; border: 1px solid rgba(255,107,0,0.3); backdrop-filter: blur(10px);">
-                    <i data-lucide="store" style="width: 45px; height: 45px; color: var(--primary);"></i>
+            <!-- New Merchant Setup Banner (Card block style) -->
+            <div id="merchantSetupBanner" style="display: none; background: white; border-radius: 24px; padding: 25px 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.01); border: 1px solid #f1f5f9; text-align: center; margin-bottom: 15px;">
+                <div style="background: #fff7ed; width: 50px; height: 50px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; color: var(--primary);">
+                    <i data-lucide="store" style="width: 26px;"></i>
                 </div>
-                <h3 style="font-size: 1.5rem; font-weight: 1000; margin: 0 0 12px; font-family: 'Cairo', sans-serif;">ابدأ تجارتك اليوم 🚀</h3>
-                <p style="font-size: 0.9rem; opacity: 0.7; font-weight: 700; margin: 0 0 35px; line-height: 1.7; font-family: 'Cairo', sans-serif;">حول فكرتك إلى واقع! قم بإعداد متجرك الآن وابدأ في بيع منتجاتك لآلاف العملاء في منطقتك بضغطة زر.</p>
-                <button onclick="openCreateStoreModal()" style="background: var(--primary); color: white; border: none; padding: 20px 45px; border-radius: 22px; font-size: 1.1rem; font-weight: 1000; cursor: pointer; box-shadow: 0 15px 35px rgba(255,107,0,0.3); width: 100%; transition: all 0.3s; font-family: 'Cairo', sans-serif;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
-                    أطلق متجرى الآن ✨
+                <h3 style="font-size: 1.15rem; font-weight: 900; color: #0f172a; margin: 0 0 6px;">إعداد متجرك 🚀</h3>
+                <p style="font-size: 0.8rem; color: #64748b; font-weight: 700; margin: 0 0 20px; line-height: 1.5;">قم بضبط معلومات متجرك للبدء في إضافة المنتجات والظهور للعملاء.</p>
+                <button onclick="openCreateStoreModal()" class="btn-primary" style="width: 100%; padding: 14px; border-radius: 14px; font-size: 0.95rem; font-weight: 900;">
+                    أكمل بيانات المتجر الآن ✨
                 </button>
             </div>
 
-            <!-- Quick Actions Grid (Premium Interaction Items) -->
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 40px;">
-                <button onclick="openMerchantAddProductModal()" style="background: white; border: 1.5px solid #f1f5f9; padding: 25px 10px; border-radius: 32px; display: flex; flex-direction: column; align-items: center; gap: 12px; cursor: pointer; transition: all 0.3s; box-shadow: 0 10px 25px rgba(0,0,0,0.03);" onmouseover="this.style.borderColor='var(--primary)'; this.style.transform='translateY(-3px)'" onmouseout="this.style.borderColor='#f1f5f9'; this.style.transform='translateY(0)'">
-                    <div style="background: rgba(255,107,0,0.1); width: 50px; height: 50px; border-radius: 18px; display: flex; align-items: center; justify-content: center; color: var(--primary); transition: all 0.3s;">
-                        <i data-lucide="plus-square" style="width: 26px;"></i>
+            <!-- Card Block 1: Merchant Stats Summary -->
+            <div style="background: white; border-radius: 24px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.01); border: 1px solid #f1f5f9; margin-bottom: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div style="background: #f8fafc; border-radius: 16px; padding: 12px 14px; display: flex; align-items: center; gap: 12px;">
+                    <div style="background: #eff6ff; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #2563eb;">
+                        <i data-lucide="package" style="width: 18px;"></i>
                     </div>
-                    <span style="font-size: 0.8rem; font-weight: 1000; color: #1e293b; font-family: 'Cairo', sans-serif;">إضافة منتج</span>
-                </button>
-                <button onclick="openMyStoreView()" style="background: white; border: 1.5px solid #f1f5f9; padding: 25px 10px; border-radius: 32px; display: flex; flex-direction: column; align-items: center; gap: 12px; cursor: pointer; transition: all 0.3s; box-shadow: 0 10px 25px rgba(0,0,0,0.03);" onmouseover="this.style.borderColor='rgba(59,130,246,0.5)'; this.style.transform='translateY(-3px)'" onmouseout="this.style.borderColor='#f1f5f9'; this.style.transform='translateY(0)'">
-                    <div style="background: rgba(59,130,246,0.1); width: 50px; height: 50px; border-radius: 18px; display: flex; align-items: center; justify-content: center; color: #3b82f6;">
-                        <i data-lucide="eye" style="width: 26px;"></i>
-                    </div>
-                    <span style="font-size: 0.8rem; font-weight: 1000; color: #1e293b; font-family: 'Cairo', sans-serif;">معاينة المتجر</span>
-                </button>
-                <button onclick="openMerchantRewards()" style="background: white; border: 1.5px solid #f1f5f9; padding: 25px 10px; border-radius: 32px; display: flex; flex-direction: column; align-items: center; gap: 12px; cursor: pointer; transition: all 0.3s; box-shadow: 0 10px 25px rgba(0,0,0,0.03);" onmouseover="this.style.borderColor='rgba(251,191,36,0.5)'; this.style.transform='translateY(-3px)'" onmouseout="this.style.borderColor='#f1f5f9'; this.style.transform='translateY(0)'">
-                    <div style="background: rgba(251,191,36,0.1); width: 50px; height: 50px; border-radius: 18px; display: flex; align-items: center; justify-content: center; color: #fbbf24;">
-                        <i data-lucide="award" style="width: 26px;"></i>
-                    </div>
-                    <span style="font-size: 0.8rem; font-weight: 1000; color: #1e293b; font-family: 'Cairo', sans-serif;">المكافآت</span>
-                </button>
-            </div>
-
-            <!-- Management Section (Modern List Header) -->
-            <div style="margin-bottom: 30px; padding: 0 5px;">
-                <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 25px; border-bottom: 1.5px solid #f1f5f9; padding-bottom: 15px;">
                     <div>
-                        <h3 style="font-size: 1.4rem; font-weight: 1000; color: #0f172a; margin: 0; letter-spacing: -0.3px; font-family: 'Cairo', sans-serif;">إدارة المخزون 📦</h3>
-                        <p style="font-size: 0.8rem; color: #94a3b8; font-weight: 700; margin-top: 5px; font-family: 'Cairo', sans-serif;">تعديل، حذف ومتابعة توفر منتجاتك</p>
+                        <span style="display: block; font-size: 1.1rem; font-weight: 900; color: #0f172a; line-height: 1;" id="merchantTotalProducts">0</span>
+                        <span style="font-size: 0.7rem; color: #64748b; font-weight: 700;">إجمالي المنتجات</span>
                     </div>
-                    <button onclick="renderMerchantProducts()" style="background: #f8fafc; border: 1.5px solid #e2e8f0; width: 46px; height: 46px; border-radius: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #64748b; transition: all 0.3s;">
-                        <i data-lucide="rotate-cw" style="width: 20px;"></i>
+                </div>
+
+                <div style="background: #f8fafc; border-radius: 16px; padding: 12px 14px; display: flex; align-items: center; gap: 12px;">
+                    <div style="background: #ecfdf5; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #059669;">
+                        <i data-lucide="shield-check" style="width: 18px;"></i>
+                    </div>
+                    <div>
+                        <span style="display: block; font-size: 0.85rem; font-weight: 900; color: #059669; line-height: 1;">متجر معتمد</span>
+                        <span style="font-size: 0.7rem; color: #64748b; font-weight: 700;">حالة الحساب</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Block 2: Quick Management Options (Matching Profile Menu Card Style) -->
+            <div style="background: white; border-radius: 24px; padding: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.01); border: 1px solid #f1f5f9; margin-bottom: 15px;">
+                <!-- Add Product Row -->
+                <div onclick="openMerchantAddProductModal()" style="display: flex; align-items: center; justify-content: space-between; padding: 14px; border-radius: 16px; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="background: #eff6ff; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #2563eb;">
+                            <i data-lucide="plus-circle" style="width: 18px;"></i>
+                        </div>
+                        <span style="font-size: 0.85rem; font-weight: 800; color: #334155;">إضافة منتج جديد</span>
+                    </div>
+                    <i data-lucide="chevron-left" style="color: #cbd5e1; width: 16px;"></i>
+                </div>
+
+                <!-- Preview Store Row -->
+                <div onclick="openMyStoreView()" style="display: flex; align-items: center; justify-content: space-between; padding: 14px; border-radius: 16px; cursor: pointer; transition: background 0.2s; margin-top: 4px;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="background: #f0fdf4; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #16a34a;">
+                            <i data-lucide="eye" style="width: 18px;"></i>
+                        </div>
+                        <span style="font-size: 0.85rem; font-weight: 800; color: #334155;">معاينة المتجر للعملاء</span>
+                    </div>
+                    <i data-lucide="chevron-left" style="color: #cbd5e1; width: 16px;"></i>
+                </div>
+
+                <!-- Merchant Settings Row -->
+                <div onclick="openCreateStoreModal()" style="display: flex; align-items: center; justify-content: space-between; padding: 14px; border-radius: 16px; cursor: pointer; transition: background 0.2s; margin-top: 4px;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="background: #fff7ed; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #ea580c;">
+                            <i data-lucide="settings" style="width: 18px;"></i>
+                        </div>
+                        <span style="font-size: 0.85rem; font-weight: 800; color: #334155;">إعدادات ومعلومات المتجر</span>
+                    </div>
+                    <i data-lucide="chevron-left" style="color: #cbd5e1; width: 16px;"></i>
+                </div>
+
+                <!-- Rewards Row -->
+                <div onclick="openMerchantRewards()" style="display: flex; align-items: center; justify-content: space-between; padding: 14px; border-radius: 16px; cursor: pointer; transition: background 0.2s; margin-top: 4px;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="background: #fefce8; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #ca8a04;">
+                            <i data-lucide="award" style="width: 18px;"></i>
+                        </div>
+                        <span style="font-size: 0.85rem; font-weight: 800; color: #334155;">برنامج المكافآت والحوافز</span>
+                    </div>
+                    <i data-lucide="chevron-left" style="color: #cbd5e1; width: 16px;"></i>
+                </div>
+            </div>
+
+            <!-- Card Block 3: Inventory Products Grid -->
+            <div style="background: white; border-radius: 24px; padding: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.01); border: 1px solid #f1f5f9; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="background: #f8fafc; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #64748b;">
+                            <i data-lucide="boxes" style="width: 16px;"></i>
+                        </div>
+                        <h4 style="font-size: 0.95rem; font-weight: 900; color: #0f172a; margin: 0;">إدارة المنتجات والمخزون</h4>
+                    </div>
+                    <button onclick="renderMerchantProducts()" style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; color: #475569; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                        <i data-lucide="rotate-cw" style="width: 14px;"></i> تحديث
                     </button>
                 </div>
-                
-                <div id="merchantProductsGrid" class="merchant-inventory-grid">
-                    <div style="grid-column: 1/-1; text-align: center; padding: 50px 20px; background: #f8fafc; border: 2.5px dashed #e2e8f0; border-radius: 35px;">
-                        <div style="width: 65px; height: 65px; background: #fff; border-radius: 22px; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.04);">
-                            <i data-lucide="package-search" style="width: 32px; color: #94a3b8;"></i>
-                        </div>
-                        <p style="color: #94a3b8; font-size: 0.9rem; font-weight: 800; margin: 0;">لم تقم بإضافة أي منتجات حتى الآن.</p>
+
+                <div id="merchantProductsGrid" class="products-grid">
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px 15px; color: #94a3b8;">
+                        <i data-lucide="package-search" style="width: 36px; height: 36px; margin-bottom: 10px;"></i>
+                        <p style="font-size: 0.85rem; font-weight: 700; margin: 0;">لم تقم بإضافة أي منتجات حتى الآن.</p>
                     </div>
                 </div>
             </div>

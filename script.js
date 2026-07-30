@@ -4707,26 +4707,23 @@ async function renderMerchantProducts() {
         grid.innerHTML = '';
         merchantProducts.forEach(p => {
             const card = document.createElement('div');
-            card.style.cssText = 'background: white; border-radius: 32px; padding: 18px; border: 1.5px solid #f1f5f9; position: relative; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); min-height: 220px; display: flex; flex-direction: column; box-shadow: 0 10px 20px rgba(0,0,0,0.02);';
+            card.style.cssText = 'background: white; border-radius: 20px; padding: 14px; border: 1px solid #f1f5f9; position: relative; transition: all 0.2s; min-height: 180px; display: flex; flex-direction: column; box-shadow: 0 4px 15px rgba(0,0,0,0.01);';
             card.className = 'merchant-mgmt-card fade-in';
             card.onmouseover = () => card.style.borderColor = 'var(--primary)';
             card.onmouseout = () => card.style.borderColor = '#f1f5f9';
             
             card.innerHTML = `
-                <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                <div style="display: flex; gap: 12px; margin-bottom: 12px;">
                     <div style="position: relative;">
-                        <img src="${p.image || 'https://via.placeholder.com/80'}" style="width: 80px; height: 80px; border-radius: 22px; object-fit: cover; background: #f8fafc; border: 1px solid #f1f5f9;">
-                        <div style="position: absolute; top: -5px; right: -5px; padding: 4px 8px; background: white; border-radius: 10px; font-size: 0.6rem; font-weight: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.05); color: #64748b; border: 1px solid #f1f5f9;">
-                            ID: ${p.id.slice(-4).toUpperCase()}
-                        </div>
+                        <img src="${p.image || 'https://via.placeholder.com/65'}" style="width: 65px; height: 65px; border-radius: 14px; object-fit: cover; background: #f8fafc; border: 1px solid #f1f5f9;">
                     </div>
                     <div style="overflow: hidden; flex: 1; display: flex; flex-direction: column; justify-content: center;">
-                        <h4 style="margin: 0; font-size: 1rem; font-weight: 1000; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: 'Cairo', sans-serif;">${p.name}</h4>
-                        <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
-                            <span style="font-size: 1rem; font-weight: 1000; color: var(--primary);">${p.price} <span style="font-size: 0.7rem;">ج.م</span></span>
+                        <h4 style="margin: 0; font-size: 0.9rem; font-weight: 900; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.name}</h4>
+                        <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px;">
+                            <span style="font-size: 0.95rem; font-weight: 1000; color: var(--primary);">${p.price} <span style="font-size: 0.7rem;">ج.م</span></span>
                         </div>
-                        <div style="margin-top: 8px; display: flex; gap: 5px;">
-                            <span style="font-size: 0.65rem; font-weight: 800; color: #94a3b8; background: #f8fafc; padding: 3px 10px; border-radius: 50px; border: 1px solid #f1f5f9;">
+                        <div style="margin-top: 4px; display: flex; gap: 5px;">
+                            <span style="font-size: 0.65rem; font-weight: 800; color: #64748b; background: #f8fafc; padding: 2px 8px; border-radius: 6px; border: 1px solid #f1f5f9;">
                                 ${(() => {
                                     const translation = {
                                         'electronics': 'إلكترونيات', 'fashion': 'أزياء وملابس', 'home': 'منزل وديكور',
@@ -4744,13 +4741,13 @@ async function renderMerchantProducts() {
                     </div>
                 </div>
                 
-                <div style="display: flex; gap: 10px; margin-top: auto;">
-                    <button onclick="editMerchantProduct('${p.id}')" style="flex: 2; background: #f8fafc; color: #475569; border: 1.5px solid #e2e8f0; padding: 12px; border-radius: 15px; font-size: 0.8rem; font-weight: 1000; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; font-family: 'Cairo', sans-serif;">
-                        <i data-lucide="edit-3" style="width: 16px;"></i>
+                <div style="display: flex; gap: 8px; margin-top: auto;">
+                    <button onclick="editMerchantProduct('${p.id}')" style="flex: 2; background: #f8fafc; color: #334155; border: 1px solid #e2e8f0; padding: 9px; border-radius: 12px; font-size: 0.8rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;">
+                        <i data-lucide="edit-3" style="width: 14px;"></i>
                         تعديل
                     </button>
-                    <button onclick="deleteMerchantProduct('${p.id}')" style="flex: 1; background: #fff1f2; color: #e11d48; border: 1.5px solid #ffe4e6; padding: 12px; border-radius: 15px; font-size: 0.8rem; font-weight: 1000; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; transition: all 0.2s;">
-                        <i data-lucide="trash-2" style="width: 16px;"></i>
+                    <button onclick="deleteMerchantProduct('${p.id}')" style="flex: 1; background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 9px; border-radius: 12px; font-size: 0.8rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: all 0.2s;">
+                        <i data-lucide="trash-2" style="width: 14px;"></i>
                     </button>
                 </div>
             `;
