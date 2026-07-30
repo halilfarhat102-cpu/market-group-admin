@@ -7838,6 +7838,22 @@ window.openCreateStoreModal = async function() {
         await loadStoreCategories();
     } catch(catErr) { console.warn("Load store categories error:", catErr); }
 
+    const titleEl = document.getElementById('createStoreModalTitle');
+    const nameInput = document.getElementById('storeNameInput');
+    const ownerInput = document.getElementById('storeOwnerInput');
+    const phoneInput = document.getElementById('storePhoneInput');
+    const categoryInput = document.getElementById('storeCategoryInput');
+    const descInput = document.getElementById('storeDescInput');
+    const latInput = document.getElementById('storeLatInput');
+    const lngInput = document.getElementById('storeLngInput');
+    const statusEl = document.getElementById('storeGPSStatus');
+
+    if (titleEl) titleEl.textContent = 'انضم كتاجر في مسعودي 🚀';
+    if (nameInput) nameInput.value = '';
+    if (ownerInput) ownerInput.value = user.displayName || '';
+    if (phoneInput) phoneInput.value = user.phoneNumber || '';
+    if (descInput) descInput.value = '';
+
     try {
         const userDoc = await db.collection('users').doc(user.uid).get();
         let isPending = false;
@@ -7861,16 +7877,6 @@ window.openCreateStoreModal = async function() {
             if (form) form.style.display = 'block';
             if (pendingView) pendingView.style.display = 'none';
 
-            const titleEl = document.getElementById('createStoreModalTitle');
-            const nameInput = document.getElementById('storeNameInput');
-            const ownerInput = document.getElementById('storeOwnerInput');
-            const phoneInput = document.getElementById('storePhoneInput');
-            const categoryInput = document.getElementById('storeCategoryInput');
-            const descInput = document.getElementById('storeDescInput');
-            const latInput = document.getElementById('storeLatInput');
-            const lngInput = document.getElementById('storeLngInput');
-            const statusEl = document.getElementById('storeGPSStatus');
-
             if (existingStore) {
                 if (titleEl) titleEl.textContent = 'تعديل بيانات المتجر 🏪';
                 if (nameInput) nameInput.value = existingStore.name || existingStore.storeName || '';
@@ -7889,15 +7895,13 @@ window.openCreateStoreModal = async function() {
                         statusEl.textContent = `📍 الموقع المحفوظ: (${parseFloat(existingStore.lat).toFixed(4)}, ${parseFloat(existingStore.lng).toFixed(4)})`;
                     }
                 }
-            } else {
-                if (titleEl) titleEl.textContent = 'انضم كتاجر في مسعودي 🚀';
-                if (nameInput) nameInput.value = '';
-                if (ownerInput) ownerInput.value = user.displayName || '';
-                if (phoneInput) phoneInput.value = user.phoneNumber || '';
-                if (descInput) descInput.value = '';
             }
         }
-    } catch(e) { console.warn("Check store status error:", e); }
+    } catch(e) {
+        console.warn("Check store status error:", e);
+        if (form) form.style.display = 'block';
+        if (pendingView) pendingView.style.display = 'none';
+    }
 
     if (window.lucide) lucide.createIcons();
 };
