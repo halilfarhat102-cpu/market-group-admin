@@ -1229,7 +1229,7 @@ async function loadProducts() {
             row.innerHTML = `
                 <td>
                     <div style="display:flex; align-items:center; gap:10px;">
-                        <img src="${p.image || 'https://via.placeholder.com/40'}" 
+                        <img src="${p.image || 'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'><rect width=\'100%\' height=\'100%\' fill=\'%23f1f5f9\'/><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'18\' fill=\'%2394a3b8\'>📦</text></svg>'}" 
                              onclick="openImagePreview('${p.image}', '${p.name}')"
                              style="width:40px; height:40px; border-radius:8px; object-fit:cover; cursor:zoom-in; border:1px solid #e2e8f0;">
                         <strong>${p.name || 'بدون اسم'}</strong>
@@ -1759,7 +1759,7 @@ function renderOrderPanelContent(o) {
                     </h4>
                     ${(o.items || []).map(it => `
                         <div class="item-row">
-                            <img src="${it.image || 'https://via.placeholder.com/60'}" class="item-img" onclick="openImagePreview('${it.image}')">
+                            <img src="${it.image || 'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'60\' height=\'60\' viewBox=\'0 0 60 60\'><rect width=\'100%\' height=\'100%\' fill=\'%23f1f5f9\'/><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'24\' fill=\'%2394a3b8\'>📦</text></svg>'}" class="item-img" onclick="openImagePreview('${it.image}')">
                             <div style="flex:1;">
                                 <div style="font-weight:900; font-size:1rem; color:var(--text-main, #1e293b);">${it.name || 'منتج'}</div>
                                 <div style="font-size:0.85rem; color:var(--text-muted, #94a3b8); font-weight:800; margin-top:4px;">الكمية: ${it.quantity || 1}</div>
@@ -3097,7 +3097,7 @@ function showNewOrderAlert(order) {
                         ${(order.items || []).map(it => `
                             <div style="display: flex; align-items: center; justify-content: space-between; background: white; padding: 10px 15px; border-radius: 18px; border: 1px solid #f1f5f9;">
                                 <div style="display: flex; align-items: center; gap: 10px;">
-                                    <img src="${it.image || 'https://via.placeholder.com/40'}" style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover;">
+                                    <img src="${it.image || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc0MCcgaGVpZ2h0PSc0MCc+PHJlY3Qgd2lkdGg9JzEwMCUnIGhlaWdodD0nMTAwJScgZmlsbD0nI2YxZjVmOScvPjwvc3ZnPg=='}"  style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover;">
                                     <span style="font-weight: 800; font-size: 0.9rem; color: #1e293b;">${it.name}</span>
                                 </div>
                                 <span style="font-weight: 900; color: var(--primary); font-size: 0.9rem; background: var(--primary-light); padding: 2px 10px; border-radius: 50px;">x${it.quantity}</span>

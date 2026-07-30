@@ -4369,7 +4369,7 @@ window.openManageDeliveryModal = () => {
             html += `
                 <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: #f8fafc; border-radius: 12px; margin-bottom: 10px;">
                     <div style="display: flex; align-items: center; gap: 10px;">
-                        <img src="${agent.photo || 'https://via.placeholder.com/40'}" style="width: 35px; height: 35px; border-radius: 50%;">
+                        <img src="${agent.photo || 'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'><rect width=\'100%\' height=\'100%\' fill=\'%23f1f5f9\'/><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'16\' fill=\'%2394a3b8\'>👤</text></svg>'}" style="width: 35px; height: 35px; border-radius: 50%;">
                         <div>
                             <p style="margin: 0; font-size: 0.85rem; font-weight: 800; color: #1e293b;">${agent.name || 'مجهول'}</p>
                             <p style="margin: 0; font-size: 0.7rem; color: #64748b;">${agent.email || 'بدون بريد'}</p>
@@ -5029,7 +5029,7 @@ window.renderMerchantProducts = async function() {
             card.innerHTML = `
                 <div style="display: flex; gap: 12px; margin-bottom: 12px;">
                     <div style="position: relative;">
-                        <img src="${p.image || 'https://via.placeholder.com/65'}" style="width: 65px; height: 65px; border-radius: 14px; object-fit: cover; background: #f8fafc; border: 1px solid #f1f5f9;">
+                        <img src="${p.image || 'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'65\' height=\'65\' viewBox=\'0 0 65 65\'><rect width=\'100%\' height=\'100%\' fill=\'%23f8fafc\'/><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'26\' fill=\'%2394a3b8\'>📦</text></svg>'}" style="width: 65px; height: 65px; border-radius: 14px; object-fit: cover; background: #f8fafc; border: 1px solid #f1f5f9;">
                     </div>
                     <div style="overflow: hidden; flex: 1; display: flex; flex-direction: column; justify-content: center;">
                         <h4 style="margin: 0; font-size: 0.9rem; font-weight: 900; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.name}</h4>
@@ -6391,7 +6391,7 @@ function renderActiveOrdersForDriver(orders) {
                             ${(o.items || []).map(item => `
                                 <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px; border-bottom: 1px solid #f8fafc;">
                                     <div style="display: flex; align-items: center; gap: 10px;">
-                                        <img src="${item.image || 'https://via.placeholder.com/40'}" style="width: 35px; height: 35px; object-fit: cover; border-radius: 8px; border: 1px solid #f1f5f9;">
+                                        <img src="${item.image || 'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'><rect width=\'100%\' height=\'100%\' fill=\'%23f1f5f9\'/><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'18\' fill=\'%2394a3b8\'>🛍️</text></svg>'}" style="width: 35px; height: 35px; object-fit: cover; border-radius: 8px; border: 1px solid #f1f5f9;">
                                         <div style="display: flex; flex-direction: column;">
                                             <span style="font-size: 0.82rem; font-weight: 900; color: #334155;">${item.name}</span>
                                             <span style="font-size: 0.7rem; font-weight: 700; color: #64748b;">الكمية: ${item.quantity}</span>
