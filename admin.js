@@ -4499,16 +4499,18 @@ function renderDriversList() {
     }
 
     list.innerHTML = filtered.map(d => {
-        const photo = d.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(d.name || 'D')}&background=10B981&color=fff`;
-        const onlineBadge = d.status === 'online' ? 
+        const photo = d.photo || d.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(d.name || 'D')}&background=10B981&color=fff`;
+        const isOnline = d.online === true || d.status === 'online';
+        const onlineBadge = isOnline ? 
             '<span style="background:#ECFDF5; color:#10B981; border:1px solid #A7F3D0; padding:4px 10px; border-radius:50px; font-size:0.7rem; font-weight:900;">🟢 متصل</span>' : 
             '<span style="background:#F1F5F9; color:#64748B; border:1px solid #E2E8F0; padding:4px 10px; border-radius:50px; font-size:0.7rem; font-weight:900;">🔴 غير متصل</span>';
         
-        const approvedBadge = d.isApproved ? 
+        const isApproved = d.isApproved !== false;
+        const approvedBadge = isApproved ? 
             '<span style="background:#ECFDF5; color:#10B981; border:1px solid #A7F3D0; padding:4px 10px; border-radius:50px; font-size:0.7rem; font-weight:900;">✅ نشط ومفعّل</span>' : 
             '<span style="background:#FFF7ED; color:#D97706; border:1px solid #FED7AA; padding:4px 10px; border-radius:50px; font-size:0.7rem; font-weight:900;">⏳ بانتظار التفعيل</span>';
 
-        const lastSeenStr = d.lastSeen ? (typeof d.lastSeen.toDate === 'function' ? d.lastSeen.toDate().toLocaleString('ar-EG', {hour:'2-digit', minute:'2-digit', day:'numeric', month:'short'}) : new Date(d.lastSeen).toLocaleDateString()) : '---';
+        const lastSeenStr = d.lastLocationUpdate ? (typeof d.lastLocationUpdate.toDate === 'function' ? d.lastLocationUpdate.toDate().toLocaleString('ar-EG', {hour:'2-digit', minute:'2-digit', day:'numeric', month:'short'}) : new Date(d.lastLocationUpdate).toLocaleDateString()) : (d.lastSeen ? (typeof d.lastSeen.toDate === 'function' ? d.lastSeen.toDate().toLocaleString('ar-EG', {hour:'2-digit', minute:'2-digit', day:'numeric', month:'short'}) : new Date(d.lastSeen).toLocaleDateString()) : '---');
 
         // Calculate active orders
         const activeOrdersCount = (window.allOrders || []).filter(o => o.driverId === d.id && o.status !== 'completed' && o.status !== 'cancelled' && o.status !== 'archived_received' && o.status !== 'archived_refused').length;
@@ -4711,8 +4713,10 @@ window.viewDriverDetails = function(driverId) {
     const content = document.getElementById('driverDetailsContent');
     if (!modal || !content) return;
 
-    const photo = d.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(d.name || 'D')}&background=ff6b00&color=fff`;
-    const lastSeenStr = d.lastSeen ? (typeof d.lastSeen.toDate === 'function' ? d.lastSeen.toDate().toLocaleString('ar-EG', {hour:'2-digit', minute:'2-digit', day:'numeric', month:'short'}) : new Date(d.lastSeen).toLocaleString()) : '---';
+    const photo = d.photo || d.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(d.name || 'D')}&background=ff6b00&color=fff`;
+    const isOnline = d.online === true || d.status === 'online';
+    const isApproved = d.isApproved !== false;
+    const lastSeenStr = d.lastLocationUpdate ? (typeof d.lastLocationUpdate.toDate === 'function' ? d.lastLocationUpdate.toDate().toLocaleString('ar-EG', {hour:'2-digit', minute:'2-digit', day:'numeric', month:'short'}) : new Date(d.lastLocationUpdate).toLocaleDateString()) : (d.lastSeen ? (typeof d.lastSeen.toDate === 'function' ? d.lastSeen.toDate().toLocaleString('ar-EG', {hour:'2-digit', minute:'2-digit', day:'numeric', month:'short'}) : new Date(d.lastSeen).toLocaleDateString()) : '---');
     const lastUpdateStr = d.lastLocationUpdate ? (typeof d.lastLocationUpdate.toDate === 'function' ? d.lastLocationUpdate.toDate().toLocaleString('ar-EG', {hour:'2-digit', minute:'2-digit'}) : '---') : 'لا يوجد سجل موقع';
     const createdAtStr = d.createdAt ? (typeof d.createdAt.toDate === 'function' ? d.createdAt.toDate().toLocaleDateString('ar-EG') : new Date(d.createdAt).toLocaleDateString()) : 'غير متوفر';
 
@@ -4725,8 +4729,8 @@ window.viewDriverDetails = function(driverId) {
         <div style="display: flex; align-items: center; gap: 25px; margin-bottom: 35px;">
             <div style="position: relative;">
                 <img src="${photo}" style="width: 100px; height: 100px; border-radius: 25px; object-fit: cover; border: 4px solid white; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
-                <div style="position: absolute; bottom: -5px; right: -5px; background: ${d.isApproved ? '#10b981' : '#f59e0b'}; color: white; padding: 4px; border-radius: 50%; border: 3px solid white;">
-                    <i data-lucide="${d.isApproved ? 'shield-check' : 'clock'}" style="width: 14px; height: 14px;"></i>
+                <div style="position: absolute; bottom: -5px; right: -5px; background: ${isApproved ? '#10b981' : '#f59e0b'}; color: white; padding: 4px; border-radius: 50%; border: 3px solid white;">
+                    <i data-lucide="${isApproved ? 'shield-check' : 'clock'}" style="width: 14px; height: 14px;"></i>
                 </div>
             </div>
             <div>
@@ -4773,8 +4777,8 @@ window.viewDriverDetails = function(driverId) {
                     </div>
                     <div style="display: flex; justify-content: space-between;">
                         <span style="color: #64748b; font-size: 0.8rem; font-weight: 700;">حالة العمل</span>
-                        <span style="font-weight: 1000; color: ${d.status === 'online' ? '#16a34a' : '#ef4444'};">
-                            ${d.status === 'online' ? '🟢 متصل الآن' : '🔴 غير متصل'}
+                        <span style="font-weight: 1000; color: ${isOnline ? '#16a34a' : '#ef4444'};">
+                            ${isOnline ? '🟢 متصل الآن' : '🔴 غير متصل'}
                         </span>
                     </div>
                 </div>
@@ -4791,7 +4795,15 @@ window.viewDriverDetails = function(driverId) {
                     <span style="font-size: 0.65rem; color: #94a3b8; font-weight: 700;">تحديث: ${lastUpdateStr}</span>
                 </div>
                 <div id="driverLiveMap" style="flex: 1; background: #e2e8f0; position: relative; z-index:1;">
-                    ${(!d.lat || !d.lng) ? '<div style="position: absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#64748b; font-weight:800; font-size:0.8rem; text-align:center; padding:20px;">الموقع غير متاح حالياً<br>يجب أن يكون المندوب متصلاً ومفعلاً للـ GPS</div>' : ''}
+                    ${(!d.lat || !d.lng) ? '<div style="position: absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#64748b; font-weight:800; font-size:0.8rem; text-align:center; padding:20px;">الموقع غير متاح حالياً<br>يجب أن يكون المندوب متصلاً ومفعلاً للـ GPS</div>' : `
+                        <div style="padding:20px; text-align:center; background:white; height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:12px;">
+                            <div style="font-weight:900; color:#1e293b; font-size:0.9rem;">📍 تم تحديد موقع المندوب المباشر</div>
+                            <div style="font-size:0.75rem; color:#64748b; font-weight:700;">الإحداثيات: ${d.lat.toFixed(4)}, ${d.lng.toFixed(4)}</div>
+                            <a href="https://www.google.com/maps/search/?api=1&query=${d.lat},${d.lng}" target="_blank" style="background:#10b981; color:white; padding:12px 24px; border-radius:14px; font-weight:900; font-size:0.85rem; text-decoration:none; display:inline-flex; align-items:center; gap:8px; box-shadow:0 6px 15px rgba(16,185,129,0.25);">
+                                <i data-lucide="external-link" style="width:16px;"></i> فتح خريطة المندوب المباشرة على Google Maps
+                            </a>
+                        </div>
+                    `}
                 </div>
              </div>
 
@@ -4807,7 +4819,7 @@ window.viewDriverDetails = function(driverId) {
                         <div style="background: white; padding: 12px; border-radius: 12px; border: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
                             <div>
                                 <div style="font-weight: 900; font-size: 0.8rem; color: #0f172a;">ID: ${o.id.slice(0,8).toUpperCase()}</div>
-                                <div style="font-size: 0.7rem; color: #64748b;">${o.customerName || 'عميل'} | ${o.total} ج.م</div>
+                                <div style="font-size: 0.7rem; color: #64748b;">${o.customer || o.customerName || 'عميل'} | ${o.total} ج.م</div>
                             </div>
                             <span style="background: #fff7ed; color: #c2410c; padding: 3px 8px; border-radius: 6px; font-size: 0.65rem; font-weight: 900;">${o.status === 'processing' ? 'قيد التجهيز' : o.status === 'shipped' ? 'في الطريق' : o.status}</span>
                         </div>
