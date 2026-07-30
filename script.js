@@ -5577,12 +5577,16 @@ window.submitDriverRegistration = async () => {
     }
 };
 
+window.isDriverOnline = false;
+
 function listenToDriverStatus() {
     if (driverStatusUnsub) driverStatusUnsub();
     driverStatusUnsub = driverDocRef.onSnapshot(doc => {
         if (!doc.exists) return;
         const data = doc.data();
         
+        window.isDriverOnline = data.online === true;
+
         const badge = document.getElementById('driverStatus');
         const btn = document.getElementById('toggleStatusBtn');
         const dot = document.getElementById('onlineStatusDot');
@@ -5595,6 +5599,9 @@ function listenToDriverStatus() {
             if (btn) btn.style.background = 'var(--primary)';
             if (btn) btn.style.color = 'white';
             if (dot) dot.style.background = '#10b981';
+
+            // Auto-start GPS tracking when driver is online
+            startLocationTracking();
         } else {
             if (badge) {
                 badge.textContent = 'غير متصل (متوقف)';
@@ -5603,6 +5610,12 @@ function listenToDriverStatus() {
             if (btn) btn.style.background = 'white';
             if (btn) btn.style.color = '#1e293b';
             if (dot) dot.style.background = '#94a3b8';
+
+            // Stop location watch if offline
+            if (typeof locationWatchId !== 'undefined' && locationWatchId && navigator.geolocation) {
+                navigator.geolocation.clearWatch(locationWatchId);
+                locationWatchId = null;
+            }
         }
 
         // Global stats (all time)
@@ -5866,6 +5879,25 @@ function renderAvailableOrders(orders) {
     const empty = document.getElementById('emptyOrdersMsg');
     if (!list) return;
 
+    // Block offline drivers from viewing available orders
+    if (!window.isDriverOnline) {
+        list.innerHTML = `
+            <div style="background: #fff1f2; border: 1.5px dashed #fecaca; border-radius: 24px; padding: 30px 20px; text-align: center; margin-bottom: 20px;">
+                <div style="width: 60px; height: 60px; background: #fee2e2; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; color: #ef4444;">
+                    <i data-lucide="power-off" style="width: 28px; height: 28px;"></i>
+                </div>
+                <h4 style="font-size: 1.1rem; font-weight: 900; color: #991b1b; margin: 0 0 6px; font-family: 'Cairo', sans-serif;">حسابك غير نشط حالياً (متوقف) ⏸️</h4>
+                <p style="font-size: 0.85rem; color: #7f1d1d; font-weight: 700; margin: 0 0 20px; line-height: 1.5; font-family: 'Cairo', sans-serif;">قم بتفعيل حالتك إلى "نشط ومتصل" لتتمكن من رؤية واستقبال الطلبات المتاحة للتوصيل.</p>
+                <button onclick="toggleDriverStatus()" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 14px 28px; border-radius: 16px; font-size: 0.9rem; font-weight: 900; cursor: pointer; box-shadow: 0 8px 20px rgba(16,185,129,0.3); font-family: 'Cairo', sans-serif;">
+                    ⚡ تفعيل الحالة الآن إلى (نشط ومتصل)
+                </button>
+            </div>
+        `;
+        if (empty) empty.style.display = 'none';
+        if (window.lucide) lucide.createIcons();
+        return;
+    }
+
     if (orders.length === 0) {
         list.innerHTML = '';
         if (empty) empty.style.display = 'block';
@@ -6061,6 +6093,10 @@ function renderActiveOrdersForDriver(orders) {
 
 window.acceptOrder = async (orderId) => {
     if (!currentDriver) return;
+    if (!window.isDriverOnline) {
+        alert("⚠️ حسابك غير نشط حالياً! يرجى تفعيل حالة الاستعداد أولاً لاستقبال ورؤية الطلبات.");
+        return;
+    }
     try {
         const orderRef = db.collection('orders').doc(orderId);
         const driverName = (window.currentUserData && window.currentUserData.name) || currentDriver.displayName;
@@ -6257,6 +6293,59 @@ function startLocationTracking() {
         });
     }
 }
+
+// Driver Manual / On-Demand GPS Location Update
+window.updateDriverLocationGPS = async function() {
+    const btn = document.getElementById('driverGpsBtn');
+    const text = document.getElementById('driverGpsText');
+    if (text) text.textContent = 'جاري تحديد موقعك الجغرافي... 🛰️';
+    if (btn) btn.disabled = true;
+
+    if (!navigator.geolocation) {
+        window.showToast('خدمة تحديد الموقع (GPS) غير مدعومة في متصفحك', 'error');
+        if (text) text.textContent = 'تحديد وتحديث موقعك تلقائياً (GPS) 📍';
+        if (btn) btn.disabled = false;
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        
+        try {
+            if (driverDocRef) {
+                await driverDocRef.update({
+                    lat: lat,
+                    lng: lng,
+                    lastLocationUpdate: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            } else if (currentDriver && currentDriver.uid) {
+                await db.collection('drivers').doc(currentDriver.uid).update({
+                    lat: lat,
+                    lng: lng,
+                    lastLocationUpdate: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+            window.showToast('تم تحديد وتحديث موقعك الجغرافي بنجاح! 📍', 'success');
+            if (text) text.textContent = 'تم تحديد الموقع بنجاح 📍';
+        } catch (err) {
+            console.error('Update GPS location error:', err);
+            window.showToast('حدث خطأ أثناء حفظ الموقع في قاعدة البيانات', 'error');
+            if (text) text.textContent = 'تحديد وتحديث موقعك تلقائياً (GPS) 📍';
+        } finally {
+            if (btn) btn.disabled = false;
+        }
+    }, (err) => {
+        console.error('GPS position error:', err);
+        window.showToast('تعذر الحصول على موقعك. يرجى تفعيل الـ GPS في جهازك والسماح للمتصفح 📍', 'warning');
+        if (text) text.textContent = 'تحديد وتحديث موقعك تلقائياً (GPS) 📍';
+        if (btn) btn.disabled = false;
+    }, {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+    });
+};
 
 window.openMap = (addr, latlng, locationUrl) => {
     let query = latlng;

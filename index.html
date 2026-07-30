@@ -1578,20 +1578,26 @@
                         </div>
 
                         <!-- Relocated Controls & Status Bar -->
-                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 20px; padding: 10px; background: #f8fafc; border-radius: 20px; border: 1px solid #f1f5f9;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 15px; padding: 10px; background: #f8fafc; border-radius: 20px; border: 1px solid #f1f5f9; flex-wrap: wrap;">
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <div id="dashOnlineStatus" style="display: flex; align-items: center; gap: 6px; background: #f0fdf4; color: #16a34a; padding: 6px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 1000; border: 1px solid #dcfce7;">
+                                <button id="dashOnlineStatus" onclick="toggleDriverStatus()" style="display: flex; align-items: center; gap: 6px; background: #f0fdf4; color: #16a34a; padding: 8px 14px; border-radius: 14px; font-size: 0.78rem; font-weight: 1000; border: 1px solid #dcfce7; cursor: pointer; transition: all 0.2s; font-family: 'Cairo', sans-serif;">
                                     <div style="width: 8px; height: 8px; background: #16a34a; border-radius: 50%; animation: pulse 2s infinite;"></div>
-                                    متصل الآن
-                                </div>
-                                <button onclick="navigateTo('homePage')" style="background: white; border: 1px solid #e2e8f0; color: #64748b; padding: 6px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 900; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-                                    <i data-lucide="x" style="width: 14px;"></i> خروج للرئيسية
+                                    <span id="dashStatusText">متصل الآن (نشط)</span>
+                                </button>
+                                <button onclick="navigateTo('homePage')" style="background: white; border: 1px solid #e2e8f0; color: #64748b; padding: 8px 12px; border-radius: 14px; font-size: 0.75rem; font-weight: 900; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                                    <i data-lucide="x" style="width: 14px;"></i> خروج
                                 </button>
                             </div>
-                            <button onclick="logout()" style="background: #fff1f2; color: #e11d48; border: 1px solid #ffe4e6; padding: 8px 15px; border-radius: 12px; font-size: 0.8rem; font-weight: 1000; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                                <i data-lucide="log-out" style="width: 16px;"></i> خروج نهائي
+                            <button onclick="logout()" style="background: #fff1f2; color: #e11d48; border: 1px solid #ffe4e6; padding: 8px 15px; border-radius: 14px; font-size: 0.8rem; font-weight: 1000; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                                <i data-lucide="log-out" style="width: 16px;"></i> تسجيل خروج
                             </button>
                         </div>
+                        
+                        <!-- Driver GPS Location Update Button -->
+                        <button id="driverGpsBtn" onclick="updateDriverLocationGPS()" style="background: white; border: 1.5px solid #e2e8f0; color: #1e293b; padding: 12px 16px; border-radius: 16px; font-size: 0.85rem; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); transition: all 0.2s; font-family: 'Cairo', sans-serif; width: 100%; margin-bottom: 15px;">
+                            <i data-lucide="crosshair" style="width: 18px; color: var(--primary);"></i>
+                            <span id="driverGpsText">تحديد وتحديث موقعك تلقائياً (GPS) 📍</span>
+                        </button>
                         
                         <!-- Dashboard Wallet Mini Summary -->
                         <div style="background: rgba(255,107,0,0.05); border-radius: 18px; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; border: 1px dashed rgba(255,107,0,0.2);">
