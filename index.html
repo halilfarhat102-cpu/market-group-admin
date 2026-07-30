@@ -2584,9 +2584,9 @@
                 <button onclick="closeStoreMenu()" class="btn-primary" style="padding: 10px 25px; border-radius: 12px;">متابعة التسوق</button>
             </div>
     <!-- Modal: Create Store / Merchant Application Form -->
-    <div id="createStoreModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(10px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
-        <div style="background: white; border-radius: 28px; width: 100%; max-width: 520px; padding: 30px; position: relative; animation: slideUp 0.3s cubic-bezier(0.165, 0.84, 0.44, 1); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); max-height: 90vh; overflow-y: auto;">
-            <button onclick="document.getElementById('createStoreModal').style.display='none'" style="position: absolute; top: 20px; left: 20px; background: #f1f5f9; border: none; width: 36px; height: 36px; border-radius: 12px; cursor: pointer; color: #64748b; font-weight: 900; font-size: 1.1rem; display: flex; align-items: center; justify-content: center;">✕</button>
+    <div id="createStoreModal" style="display: none !important; position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; background: rgba(15, 23, 42, 0.85) !important; backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important; z-index: 9999999 !important; align-items: center !important; justify-content: center !important; padding: 20px !important;">
+        <div style="background: white; border-radius: 28px; width: 100%; max-width: 520px; padding: 30px; position: relative; animation: slideUp 0.3s cubic-bezier(0.165, 0.84, 0.44, 1); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); max-height: 90vh; overflow-y: auto; z-index: 10000000 !important;">
+            <button onclick="document.getElementById('createStoreModal').style.setProperty('display', 'none', 'important')" style="position: absolute; top: 20px; left: 20px; background: #f1f5f9; border: none; width: 36px; height: 36px; border-radius: 12px; cursor: pointer; color: #64748b; font-weight: 900; font-size: 1.1rem; display: flex; align-items: center; justify-content: center;">✕</button>
 
             <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 25px;">
                 <div style="width: 50px; height: 50px; background: #fff7ed; border-radius: 16px; display: flex; align-items: center; justify-content: center; color: var(--primary);">

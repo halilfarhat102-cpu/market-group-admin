@@ -7822,11 +7822,12 @@ window.openCreateStoreModal = async function() {
             alert("❌ خطأ: لم يتم العثور على عنصر النافذة 'createStoreModal' في كود الصفحة (DOM missing)");
             return;
         }
-        modal.style.display = 'flex';
+        modal.style.setProperty('display', 'flex', 'important');
+        modal.style.setProperty('z-index', '9999999', 'important');
 
         const user = getCurrentUser();
         if (!user) {
-            modal.style.display = 'none';
+            modal.style.setProperty('display', 'none', 'important');
             const loginModal = document.getElementById('loginModal');
             if (loginModal) {
                 loginModal.style.display = 'flex';
