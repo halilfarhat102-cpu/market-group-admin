@@ -5394,19 +5394,31 @@ window.initDriverPortal = async () => {
 
         // Check delivery_partner role
         if (data.role !== 'delivery_partner') {
+            // Check if driver document already exists for this user in drivers collection
+            const existingDriverDoc = await db.collection('drivers').doc(user.uid).get();
+            if (existingDriverDoc.exists) {
+                console.log("Existing driver found, auto-upgrading role to delivery_partner...");
+                await db.collection('users').doc(user.uid).set({ 
+                    role: 'delivery_partner',
+                    isApproved: true 
+                }, { merge: true });
+                return initDriverPortal();
+            }
+
             // Check if admin granted permission by email before user first login
             const pendingSnap = await db.collection('pending_drivers').doc(user.email.toLowerCase()).get();
             if (pendingSnap.exists) {
                 console.log("Found pending driver permission, upgrading user...");
-                await db.collection('users').doc(user.uid).update({ 
+                await db.collection('users').doc(user.uid).set({ 
                     role: 'delivery_partner',
                     isApproved: true 
-                });
+                }, { merge: true });
                 await db.collection('pending_drivers').doc(user.email.toLowerCase()).delete();
-                // Re-run init now that role is updated
                 return initDriverPortal();
             }
-            showDriverWaiting();
+            
+            // Allow completing registration instead of blocking
+            showDriverRegistration();
             return;
         }
 
@@ -5545,10 +5557,12 @@ window.submitDriverRegistration = async () => {
             phone: phone, 
             vehicle: vehicle, 
             area: area,
+            role: 'delivery_partner',
+            isApproved: true,
             registrationCompleted: true 
         };
         
-        await db.collection('users').doc(user.uid).update(updateData);
+        await db.collection('users').doc(user.uid).set(updateData, { merge: true });
         
         // Sync with drivers collection
         await db.collection('drivers').doc(user.uid).set({
@@ -5559,6 +5573,7 @@ window.submitDriverRegistration = async () => {
             email: user.email,
             photo: user.photoURL || '',
             online: false,
+            isApproved: true,
             totalEarnings: 0,
             completedOrders: 0,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()

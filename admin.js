@@ -4602,11 +4602,18 @@ window.toggleDriverApproval = async function(id, approve) {
     if (!confirm(action)) return;
 
     try {
-        await db.collection('drivers').doc(id).update({
+        await db.collection('drivers').doc(id).set({
             isApproved: approve,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        }, { merge: true });
+
+        await db.collection('users').doc(id).set({
+            role: approve ? 'delivery_partner' : 'customer',
+            isApproved: approve
+        }, { merge: true });
+
         showToast(approve ? "🟢 تم تفعيل حساب المندوب بنجاح" : "🔴 تم إيقاف حساب المندوب");
+        if (typeof loadDrivers === 'function') loadDrivers();
     } catch (err) {
         alert("خطأ أثناء التعديل: " + err.message);
     }
