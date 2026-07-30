@@ -5464,11 +5464,20 @@ window.initDriverPortal = async () => {
     }
 };
 
-// Variables for driver listeners
 window.driverStatusUnsub = null;
 window.ordersUnsub = null;
 window.currentDriver = null;
 window.driverDocRef = null;
+
+function getDriverDocRef() {
+    if (window.driverDocRef) return window.driverDocRef;
+    const user = window.auth?.currentUser;
+    if (user && window.db) {
+        window.driverDocRef = window.db.collection('drivers').doc(user.uid);
+        return window.driverDocRef;
+    }
+    return null;
+}
 
 function showDriverLogin() {
 
@@ -5579,38 +5588,51 @@ window.submitDriverRegistration = async () => {
 
 window.isDriverOnline = false;
 
+function updateDriverStatusUI(isOnline) {
+    const badge = document.getElementById('driverStatus');
+    const btn = document.getElementById('toggleStatusBtn');
+    const dot = document.getElementById('onlineStatusDot');
+    const dashStatus = document.getElementById('dashOnlineStatus');
+    const dashStatusText = document.getElementById('dashStatusText');
+
+    if (badge) {
+        badge.textContent = isOnline ? 'متصل (نشط)' : 'غير متصل (متوقف)';
+        badge.className = isOnline ? 'status-badge online' : 'status-badge offline';
+    }
+    if (btn) {
+        btn.style.background = isOnline ? 'var(--primary)' : 'white';
+        btn.style.color = isOnline ? 'white' : '#1e293b';
+    }
+    if (dot) {
+        dot.style.background = isOnline ? '#10b981' : '#94a3b8';
+    }
+    if (dashStatus) {
+        dashStatus.style.background = isOnline ? '#f0fdf4' : '#fff1f2';
+        dashStatus.style.color = isOnline ? '#16a34a' : '#e11d48';
+        dashStatus.style.borderColor = isOnline ? '#dcfce7' : '#ffe4e6';
+    }
+    if (dashStatusText) {
+        dashStatusText.textContent = isOnline ? 'متصل الآن (نشط)' : 'غير نشط (متوقف)';
+    }
+}
+
 function listenToDriverStatus() {
     if (driverStatusUnsub) driverStatusUnsub();
-    driverStatusUnsub = driverDocRef.onSnapshot(doc => {
+    const ref = getDriverDocRef();
+    if (!ref) return;
+    
+    driverStatusUnsub = ref.onSnapshot(doc => {
         if (!doc.exists) return;
         const data = doc.data();
         
         window.isDriverOnline = data.online === true;
 
-        const badge = document.getElementById('driverStatus');
-        const btn = document.getElementById('toggleStatusBtn');
-        const dot = document.getElementById('onlineStatusDot');
+        updateDriverStatusUI(data.online === true);
         
         if (data.online) {
-            if (badge) {
-                badge.textContent = 'متصل (نشط)';
-                badge.className = 'status-badge online';
-            }
-            if (btn) btn.style.background = 'var(--primary)';
-            if (btn) btn.style.color = 'white';
-            if (dot) dot.style.background = '#10b981';
-
             // Auto-start GPS tracking when driver is online
             startLocationTracking();
         } else {
-            if (badge) {
-                badge.textContent = 'غير متصل (متوقف)';
-                badge.className = 'status-badge offline';
-            }
-            if (btn) btn.style.background = 'white';
-            if (btn) btn.style.color = '#1e293b';
-            if (dot) dot.style.background = '#94a3b8';
-
             // Stop location watch if offline
             if (typeof locationWatchId !== 'undefined' && locationWatchId && navigator.geolocation) {
                 navigator.geolocation.clearWatch(locationWatchId);
@@ -5804,12 +5826,27 @@ function listenToStatsAndHistory(uid) {
 
 window.toggleDriverStatus = async () => {
     try {
-        const doc = await driverDocRef.get();
-        const currentStatus = doc.data().online;
-        await driverDocRef.update({ online: !currentStatus });
-        window.showToast(!currentStatus ? "أنت الآن متصل وجاهز لاستلام الطلبات 🛵" : "تم إيقاف وضع الاستعداد. ارتاح قليلاً! 👋");
+        const ref = getDriverDocRef();
+        if (!ref) {
+            alert("يرجى تسجيل الدخول أولاً كطيار");
+            return;
+        }
+        const doc = await ref.get();
+        let currentStatus = false;
+        if (doc.exists) {
+            currentStatus = doc.data().online === true;
+            await ref.update({ online: !currentStatus });
+        } else {
+            await ref.set({ online: true }, { merge: true });
+        }
+        const newStatus = !currentStatus;
+        window.isDriverOnline = newStatus;
+        window.showToast(newStatus ? "أنت الآن متصل وجاهز لاستلام الطلبات 🛵" : "تم إيقاف وضع الاستعداد. ارتاح قليلاً! 👋");
+        updateDriverStatusUI(newStatus);
+        if (typeof listenToOrders === 'function') listenToOrders();
     } catch (err) {
-        console.error(err);
+        console.error('toggleDriverStatus error:', err);
+        alert('خطأ في تغيير حالة المندوب: ' + err.message);
     }
 };
 
@@ -6092,10 +6129,22 @@ function renderActiveOrdersForDriver(orders) {
 }
 
 window.acceptOrder = async (orderId) => {
-    if (!currentDriver) return;
-    if (!window.isDriverOnline) {
-        alert("⚠️ حسابك غير نشط حالياً! يرجى تفعيل حالة الاستعداد أولاً لاستقبال ورؤية الطلبات.");
+    const user = window.auth?.currentUser;
+    if (!user) {
+        alert("يرجى تسجيل الدخول أولاً كطيار");
         return;
+    }
+
+    // Direct Firestore check to guarantee driver is online before accepting order
+    try {
+        const ref = getDriverDocRef() || window.db.collection('drivers').doc(user.uid);
+        const doc = await ref.get();
+        if (!doc.exists || !doc.data().online) {
+            alert("⚠️ حسابك غير نشط حالياً (متوقف)! يجب عليك تفعيل زر الاستعداد إلى (نشط ومتصل) أولاً قبل قبول أي طلب.");
+            return;
+        }
+    } catch (e) {
+        console.error('Check driver status error before accept:', e);
     }
     try {
         const orderRef = db.collection('orders').doc(orderId);
@@ -6298,11 +6347,19 @@ function startLocationTracking() {
 window.updateDriverLocationGPS = async function() {
     const btn = document.getElementById('driverGpsBtn');
     const text = document.getElementById('driverGpsText');
-    if (text) text.textContent = 'جاري تحديد موقعك الجغرافي... 🛰️';
+    if (text) text.textContent = 'جاري تحديد موقعك الجغرافي (GPS)... 🛰️';
     if (btn) btn.disabled = true;
 
+    const user = window.auth?.currentUser;
+    if (!user) {
+        alert("يرجى تسجيل الدخول أولاً كطيار");
+        if (text) text.textContent = 'تحديد وتحديث موقعك تلقائياً (GPS) 📍';
+        if (btn) btn.disabled = false;
+        return;
+    }
+
     if (!navigator.geolocation) {
-        window.showToast('خدمة تحديد الموقع (GPS) غير مدعومة في متصفحك', 'error');
+        alert('خدمة تحديد الموقع (GPS) غير مدعومة في متصفحك أو جهازك');
         if (text) text.textContent = 'تحديد وتحديث موقعك تلقائياً (GPS) 📍';
         if (btn) btn.disabled = false;
         return;
@@ -6313,36 +6370,34 @@ window.updateDriverLocationGPS = async function() {
         const lng = pos.coords.longitude;
         
         try {
-            if (driverDocRef) {
-                await driverDocRef.update({
-                    lat: lat,
-                    lng: lng,
-                    lastLocationUpdate: firebase.firestore.FieldValue.serverTimestamp()
-                });
-            } else if (currentDriver && currentDriver.uid) {
-                await db.collection('drivers').doc(currentDriver.uid).update({
-                    lat: lat,
-                    lng: lng,
-                    lastLocationUpdate: firebase.firestore.FieldValue.serverTimestamp()
-                });
-            }
-            window.showToast('تم تحديد وتحديث موقعك الجغرافي بنجاح! 📍', 'success');
-            if (text) text.textContent = 'تم تحديد الموقع بنجاح 📍';
+            const ref = getDriverDocRef() || window.db.collection('drivers').doc(user.uid);
+            await ref.set({
+                lat: lat,
+                lng: lng,
+                lastLocationUpdate: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+
+            window.showToast(`تم تحديد وتحديث موقعك الجغرافي بنجاح! 📍 (Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)})`, 'success');
+            if (text) text.textContent = `تم تحديد الموقع بنجاح 📍 (${lat.toFixed(3)}, ${lng.toFixed(3)})`;
         } catch (err) {
             console.error('Update GPS location error:', err);
-            window.showToast('حدث خطأ أثناء حفظ الموقع في قاعدة البيانات', 'error');
+            alert('حدث خطأ أثناء حفظ الموقع في قاعدة البيانات: ' + err.message);
             if (text) text.textContent = 'تحديد وتحديث موقعك تلقائياً (GPS) 📍';
         } finally {
             if (btn) btn.disabled = false;
         }
     }, (err) => {
         console.error('GPS position error:', err);
-        window.showToast('تعذر الحصول على موقعك. يرجى تفعيل الـ GPS في جهازك والسماح للمتصفح 📍', 'warning');
+        let msg = 'تعذر الحصول على موقعك الجغرافي.';
+        if (err.code === 1) msg = 'تنبيه: تم رفض إذن تحديد الموقع (GPS). يرجى تفعيل إذن الجغرافيا لهذا الموقع في إعدادات المتصفح/الهاتف.';
+        else if (err.code === 2) msg = 'تنبيه: تعذر الاتصال بـ GPS. يرجى تفعيل خدمة الموقع الجغرافي في جهازك.';
+        else if (err.code === 3) msg = 'تنبيه: انتهت مهلة تحديد الموقع. حاول مرة أخرى.';
+        alert('⚠️ ' + msg);
         if (text) text.textContent = 'تحديد وتحديث موقعك تلقائياً (GPS) 📍';
         if (btn) btn.disabled = false;
     }, {
         enableHighAccuracy: true,
-        timeout: 10000,
+        timeout: 15000,
         maximumAge: 0
     });
 };
