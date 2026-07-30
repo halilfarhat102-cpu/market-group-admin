@@ -1420,41 +1420,14 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
     const phone = document.getElementById('checkoutPhone').value;
     const latlng = document.getElementById('latlng').value;
     const payment = document.getElementById('paymentMethod').value;
-    const receiptFile = document.getElementById('paymentReceipt').files[0];
-    const senderDigits = document.getElementById('senderLastDigits').value;
+    const receiptFile = document.getElementById('paymentReceipt')?.files?.[0];
+    const senderDigits = document.getElementById('senderLastDigits')?.value || '';
 
-    // Enforce Map Pin Location Selection
+    // Location is optional - notify but don't block
     if (!latlng || latlng.trim() === '') {
-        alert("⚠️ خطوة مطلوبة: يرجى الضغط على زر الدبوس (الخريطة 📍) بجانب العنوان لتحديد موقعك الجغرافي وحساب تكلفة التوصيل المناسبة.");
-        
-        // Visual wiggle feedback to grab user's attention
-        const mapBtn = document.querySelector("button[onclick*='getLocation']");
-        if (mapBtn) {
-            mapBtn.focus();
-            if (!document.getElementById('map-shake-style')) {
-                const style = document.createElement('style');
-                style.id = 'map-shake-style';
-                style.innerHTML = `
-                    @keyframes mapWiggle {
-                        0%, 100% { transform: scale(1.1) rotate(0deg); }
-                        20%, 60% { transform: scale(1.1) rotate(-8deg); }
-                        40%, 80% { transform: scale(1.1) rotate(8deg); }
-                    }
-                `;
-                document.head.appendChild(style);
-            }
-            mapBtn.style.animation = "mapWiggle 0.4s ease infinite";
-            mapBtn.style.border = "2px solid #ef4444";
-            mapBtn.style.boxShadow = "0 0 15px rgba(239, 68, 68, 0.4)";
-            
-            setTimeout(() => {
-                mapBtn.style.animation = "";
-                mapBtn.style.border = "";
-                mapBtn.style.boxShadow = "";
-            }, 3500);
-        }
-        return;
+        console.log("No GPS location provided - proceeding without it");
     }
+
 
     // Robust Phone Validation (Egyptian Format)
     const phoneRegex = /^01[0125][0-9]{8}$/;
