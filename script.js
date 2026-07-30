@@ -518,18 +518,39 @@ window.getLocation = (targetAddressId = 'checkoutAddress', targetLatlngId = 'lat
                     status.textContent = `✅ تم تحديد موقعك (${accuracyMsg})`;
                     status.style.color = "#10B981";
                     
-                    // Force update delivery fee with fresh coords
-                    if (deliveryConfig.storeLat && deliveryConfig.storeLng) {
-                        const distance = calculateDistance(deliveryConfig.storeLat, deliveryConfig.storeLng, lat, lng);
-                        const fee = Math.ceil(distance * deliveryConfig.pricePerKm);
+                    // Dynamic Delivery Fee Calculation: Check if cart items belong to a specific merchant store with GPS coords
+                    let storeLat = deliveryConfig.storeLat;
+                    let storeLng = deliveryConfig.storeLng;
+                    let storeName = '';
+
+                    if (window.cart && window.cart.length > 0) {
+                        const firstItem = window.cart[0];
+                        const merchantId = firstItem.merchantId || firstItem.storeId;
+                        if (merchantId && window.merchants) {
+                            const foundStore = window.merchants.find(m => m.id === merchantId || m.ownerUid === merchantId || m.userId === merchantId);
+                            if (foundStore) {
+                                storeName = foundStore.name || foundStore.storeName || '';
+                                if (foundStore.lat && foundStore.lng) {
+                                    storeLat = parseFloat(foundStore.lat);
+                                    storeLng = parseFloat(foundStore.lng);
+                                }
+                            }
+                        }
+                    }
+
+                    if (storeLat && storeLng) {
+                        const distance = calculateDistance(storeLat, storeLng, lat, lng);
+                        // Calculate fee based on store location: 15 EGP base for 0-3km, +5 EGP for each extra km
+                        const fee = Math.ceil(15 + Math.max(0, distance - 3) * 5);
                         window.currentDeliveryFee = fee;
                         
                         const feeEl = document.getElementById('deliveryFeeAmount');
                         const feeDisplay = document.getElementById('deliveryFeeDisplay');
                         if (feeEl) {
                             feeEl.textContent = `${fee} ج.م`;
-                            if(feeDisplay) {
-                                feeDisplay.innerHTML = `🚲 مصاريف التوصيل (${distance.toFixed(1)} كم):`;
+                            if (feeDisplay) {
+                                const storeText = storeName ? `من متجر "${storeName}"` : 'حسب مسافة المتجر';
+                                feeDisplay.innerHTML = `🚲 مصاريف التوصيل ${storeText} (${distance.toFixed(1)} كم):`;
                                 feeDisplay.parentElement.style.display = 'flex';
                             }
                         }
@@ -6990,6 +7011,19 @@ async function openStoreMenu(merchantId) {
         }
     }
 
+    let locationHTML = '';
+    if (m.lat && m.lng) {
+        locationHTML = `
+            <div style="display:flex; align-items:center; gap:6px; margin-top:6px; font-size:0.75rem; color:#475569; font-weight:700;">
+                <i data-lucide="map-pin" style="width:14px; height:14px; color:var(--primary); flex-shrink:0;"></i>
+                <span>${m.address || 'موقع المتجر محدد بالـ GPS 📍'}</span>
+                <a href="https://www.google.com/maps?q=${m.lat},${m.lng}" target="_blank" style="color:#2563eb; font-weight:800; text-decoration:none; margin-right:4px; background:#eff6ff; padding:2px 8px; border-radius:6px; border:1px solid #bfdbfe;">
+                    [خريطة Google 🗺️]
+                </a>
+            </div>
+        `;
+    }
+
     type.innerHTML = `
         <div style="display:flex; flex-direction:column; gap:4px;">
             <div style="display:flex; align-items:center; gap:8px;">
@@ -6999,6 +7033,7 @@ async function openStoreMenu(merchantId) {
                     ${isOpen ? 'مفتوح للطلبات' : 'مغلق حالياً'}
                 </div>
             </div>
+            ${locationHTML}
             ${hoursHTML}
         </div>
     `;
@@ -7433,6 +7468,212 @@ window.handleMultiCoverPreview = (input) => {
     if (!window.pendingStoreCovers) window.pendingStoreCovers = [];
     
     const newFiles = Array.from(input.files);
+window.getMerchantStoreGPSLocation = function() {
+    const statusEl = document.getElementById('storeGPSStatus');
+    const latInput = document.getElementById('storeLatInput');
+    const lngInput = document.getElementById('storeLngInput');
+
+    if (!navigator.geolocation) {
+        if (statusEl) {
+            statusEl.style.display = 'block';
+            statusEl.style.color = '#ef4444';
+            statusEl.textContent = "❌ متصفحك لا يدعم خاصية تحديد الموقع الجغرافي";
+        }
+        return;
+    }
+
+    if (statusEl) {
+        statusEl.style.display = 'block';
+        statusEl.style.color = '#2563eb';
+        statusEl.textContent = "⏳ جاري تحديد موقع متجرك بالـ GPS... (يرجى السماح بالموقع)";
+    }
+
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+
+        if (latInput) latInput.value = lat;
+        if (lngInput) lngInput.value = lng;
+        window.tempStoreLat = lat;
+        window.tempStoreLng = lng;
+
+        let addressText = '';
+        try {
+            const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&accept-language=ar`);
+            const data = await resp.json();
+            if (data && data.display_name) {
+                addressText = data.display_name;
+                window.tempStoreAddress = addressText;
+            }
+        } catch(e) {}
+
+        if (statusEl) {
+            statusEl.style.display = 'block';
+            statusEl.style.color = '#10b981';
+            statusEl.textContent = `✅ تم تحديد موقع المتجر بنجاح 📍 (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+        }
+        if (typeof showToast === 'function') showToast('📍 تم تحديد موقع متجرك الجغرافي بنجاح!', 'success');
+    }, (err) => {
+        if (statusEl) {
+            statusEl.style.display = 'block';
+            statusEl.style.color = '#ef4444';
+            statusEl.textContent = "❌ تعذر الوصول للموقع. يرجى السماح بالوصول للـ GPS.";
+        }
+    }, { enableHighAccuracy: true, timeout: 15000 });
+};
+
+window.openCreateStoreModal = async function() {
+    const user = getCurrentUser();
+    if (!user) {
+        alert("يرجى تسجيل الدخول أولاً كعميل لتقديم طلب إنشاء متجر");
+        return;
+    }
+    
+    // Check user status and existing store
+    let isPending = false;
+    let existingStore = null;
+
+    try {
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (userDoc.exists && userDoc.data().merchantStatus === 'pending') {
+            isPending = true;
+        }
+
+        // Fetch existing store data for pre-filling
+        const storeSnap = await db.collection('merchants').where('ownerUid', '==', user.uid).limit(1).get();
+        if (!storeSnap.empty) {
+            existingStore = storeSnap.docs[0].data();
+        } else {
+            const storeDoc = await db.collection('merchants').doc(user.uid).get();
+            if (storeDoc.exists) existingStore = storeDoc.data();
+        }
+    } catch(e) { console.warn("Check store status error:", e); }
+
+    const form = document.getElementById('createStoreForm');
+    const pendingView = document.getElementById('createStorePendingView');
+
+    if (isPending && (!existingStore || existingStore.status === 'pending')) {
+        if (form) form.style.display = 'none';
+        if (pendingView) pendingView.style.display = 'block';
+    } else {
+        if (form) form.style.display = 'block';
+        if (pendingView) pendingView.style.display = 'none';
+        
+        // Load categories for selector
+        await loadStoreCategories();
+
+        const titleEl = document.getElementById('createStoreModalTitle');
+        const nameInput = document.getElementById('storeNameInput');
+        const ownerInput = document.getElementById('storeOwnerInput');
+        const phoneInput = document.getElementById('storePhoneInput');
+        const categoryInput = document.getElementById('storeCategoryInput');
+        const descInput = document.getElementById('storeDescInput');
+        const latInput = document.getElementById('storeLatInput');
+        const lngInput = document.getElementById('storeLngInput');
+        const statusEl = document.getElementById('storeGPSStatus');
+
+        if (existingStore) {
+            if (titleEl) titleEl.textContent = 'تعديل بيانات المتجر 🏪';
+            if (nameInput) nameInput.value = existingStore.name || '';
+            if (ownerInput) ownerInput.value = existingStore.ownerName || user.displayName || '';
+            if (phoneInput) phoneInput.value = existingStore.phone || user.phoneNumber || '';
+            if (categoryInput && (existingStore.category || existingStore.type)) {
+                categoryInput.value = existingStore.category || existingStore.type;
+            }
+            if (descInput) descInput.value = existingStore.description || '';
+            if (existingStore.lat && existingStore.lng) {
+                if (latInput) latInput.value = existingStore.lat;
+                if (lngInput) lngInput.value = existingStore.lng;
+                if (statusEl) {
+                    statusEl.style.display = 'block';
+                    statusEl.style.color = '#10b981';
+                    statusEl.textContent = `📍 الموقع المحفوظ: (${parseFloat(existingStore.lat).toFixed(4)}, ${parseFloat(existingStore.lng).toFixed(4)})`;
+                }
+            }
+        } else {
+            if (titleEl) titleEl.textContent = 'انضم كتاجر في مسعودي 🚀';
+            if (nameInput) nameInput.value = '';
+            if (ownerInput) ownerInput.value = user.displayName || '';
+            if (phoneInput) phoneInput.value = user.phoneNumber || '';
+            if (descInput) descInput.value = '';
+        }
+    }
+
+    const modal = document.getElementById('createStoreModal');
+    if (modal) modal.style.display = 'flex';
+};
+
+window.submitMerchantApplication = async function(e) {
+    e.preventDefault();
+    const user = getCurrentUser();
+    if (!user) {
+        alert("يرجى تسجيل الدخول أولاً");
+        return;
+    }
+
+    const storeName = document.getElementById('storeNameInput')?.value.trim() || '';
+    const ownerName = document.getElementById('storeOwnerInput')?.value.trim() || '';
+    const phone = document.getElementById('storePhoneInput')?.value.trim() || '';
+    const categorySelect = document.getElementById('storeCategoryInput');
+    const category = categorySelect ? categorySelect.value : 'supermarket';
+    const desc = document.getElementById('storeDescInput')?.value.trim() || '';
+    const latVal = document.getElementById('storeLatInput')?.value || window.tempStoreLat;
+    const lngVal = document.getElementById('storeLngInput')?.value || window.tempStoreLng;
+
+    if (!storeName || !ownerName || !phone) {
+        alert("يرجى إدخال كافة البيانات الأساسية المطلوبة (اسم المتجر، اسم المسؤول، رقم التواصل)");
+        return;
+    }
+
+    if (!category) {
+        alert("يرجى اختيار نوع النشاط التجاري لمتجرك");
+        return;
+    }
+
+    // ⚡ INSTANT RESPONSE: Show pending view immediately without waiting for network!
+    const form = document.getElementById('createStoreForm');
+    const pendingView = document.getElementById('createStorePendingView');
+    if (form) form.style.display = 'none';
+    if (pendingView) pendingView.style.display = 'block';
+
+    if (typeof window.showToast === 'function') {
+        window.showToast("🎉 تم تقديم بيانات متجرك بنجاح! سيتم مراجعة الطلب ونشر المتجر فور موافقة الإدارة.");
+    }
+    updateMerchantButtonUI('pending');
+
+    try {
+        const merchantData = {
+            userId: user.uid,
+            ownerUid: user.uid,
+            storeName: storeName,
+            name: storeName,
+            ownerName: ownerName,
+            phone: phone,
+            category: category,
+            type: category,
+            description: desc,
+            email: user.email || '',
+            photo: user.photoURL || '',
+            lat: latVal ? parseFloat(latVal) : null,
+            lng: lngVal ? parseFloat(lngVal) : null,
+            address: window.tempStoreAddress || desc || 'موقع محدد عبر GPS',
+            status: 'pending',
+            isApproved: false,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        // Save asynchronously
+        await db.collection('merchants').doc(user.uid).set(merchantData, { merge: true });
+        await db.collection('users').doc(user.uid).set({
+            merchantStatus: 'pending',
+            merchantStoreName: storeName,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+
+    } catch (error) {
+        console.error("Submit merchant application error:", error);
+    }
+};
     newFiles.forEach(file => {
         if (window.pendingStoreCovers.length < 5) {
             window.pendingStoreCovers.push({ type: 'file', data: file });

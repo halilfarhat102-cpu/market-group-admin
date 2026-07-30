@@ -2791,6 +2791,16 @@
                     </div>
 
                     <div>
+                        <label style="display: block; font-size: 0.82rem; font-weight: 900; color: #1e293b; margin-bottom: 6px;">موقع المتجر الجغرافي (GPS) 📍</label>
+                        <button type="button" onclick="getMerchantStoreGPSLocation()" style="background: #eff6ff; color: #2563eb; border: 1.5px solid #bfdbfe; padding: 13px 15px; border-radius: 14px; font-weight: 900; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; transition: all 0.2s;">
+                            <i data-lucide="map-pin" style="width: 18px;"></i> تحديد موقع المتجر تلقائياً بالـ GPS 📍
+                        </button>
+                        <div id="storeGPSStatus" style="font-size: 0.75rem; font-weight: 800; color: #059669; display: none; text-align: center; margin-top: 6px;"></div>
+                        <input type="hidden" id="storeLatInput">
+                        <input type="hidden" id="storeLngInput">
+                    </div>
+
+                    <div>
                         <label style="display: block; font-size: 0.82rem; font-weight: 900; color: #1e293b; margin-bottom: 6px;">نبذة عن المتجر والعنوان</label>
                         <textarea id="storeDescInput" rows="3" placeholder="اكتب نبذة مختصرة عن المنتجات والعنوان التفصيلي للمتجر..." style="width: 100%; padding: 14px; border-radius: 14px; border: 1.5px solid #e2e8f0; font-weight: 700; font-size: 0.85rem; outline: none; font-family: inherit; resize: none;"></textarea>
                     </div>
