@@ -6831,7 +6831,17 @@ async function loadMerchants() {
         const snap = await db.collection('merchants').get();
         // Filter ONLY approved merchants so pending/unapproved stores are hidden from public view
         window.merchants = snap.docs
-            .map(doc => ({ id: doc.id, ...doc.data() }))
+            .map(doc => {
+                const data = doc.data();
+                const rawCategory = data.category || data.type || '';
+                const arName = window.getStoreCategoryArabicName(rawCategory);
+                return { 
+                    id: doc.id, 
+                    ...data,
+                    category: arName,
+                    type: arName
+                };
+            })
             .filter(m => m.status === 'approved' || m.isApproved === true || m.approved === true);
         renderStores();
     } catch (err) { console.error("Error loading merchants:", err); }
