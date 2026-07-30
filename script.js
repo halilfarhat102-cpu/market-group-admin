@@ -8200,6 +8200,12 @@ window.saveShoppingLists = () => {
     localStorage.setItem('masoudi_shopping_lists', JSON.stringify(window.myShoppingLists));
 };
 
+window.updateShoppingListsUI = function() {
+    if (typeof window.renderShoppingLists === 'function') {
+        window.renderShoppingLists();
+    }
+};
+
 window.renderShoppingLists = () => {
     const container = document.getElementById('shoppingListsContainer');
     const emptyView = document.getElementById('emptyListsView');
