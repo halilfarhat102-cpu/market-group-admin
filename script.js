@@ -21,6 +21,22 @@ window.pendingStoreCovers = [];
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
     .catch(err => console.error("Persistence Error:", err));
 
+// Instant Profile Cache Loader (0ms Delay on Page Refresh)
+document.addEventListener('DOMContentLoaded', () => {
+    try {
+        const cached = JSON.parse(localStorage.getItem('masoudi_cached_user') || 'null');
+        if (cached) {
+            const nameEl = document.getElementById('profileUserName');
+            const emailEl = document.getElementById('profileUserEmail');
+            const imgEl = document.getElementById('profileUserImg');
+
+            if (nameEl && cached.name) nameEl.textContent = cached.name;
+            if (emailEl && cached.email) emailEl.textContent = cached.email;
+            if (imgEl && cached.photo) imgEl.src = cached.photo;
+        }
+    } catch(e) {}
+});
+
 // --- Robust Data Parsers ---
 function parseCurrency(val) {
     if (typeof val === 'number') return val;
@@ -3908,6 +3924,16 @@ async function loadUserProfile(user) {
             // 1. Sync User Name & Real Email in Real-time from Firestore
             const displayName = data.name || user.displayName || (user.email ? user.email.split('@')[0] : 'عميل مسعودي 👤');
             const displayEmail = data.email || user.email || user.phoneNumber || 'لا يوجد بريد مسجل';
+            const firestorePhoto = data.photo || data.photoURL || user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=FF6B00&color=fff&rounded=true&bold=true`;
+
+            // Cache profile locally for 0ms instant load on refresh!
+            try {
+                localStorage.setItem('masoudi_cached_user', JSON.stringify({
+                    name: displayName,
+                    email: displayEmail,
+                    photo: firestorePhoto
+                }));
+            } catch(e) {}
 
             if (document.getElementById('profileUserName')) {
                 document.getElementById('profileUserName').textContent = displayName;
@@ -3917,7 +3943,6 @@ async function loadUserProfile(user) {
             }
 
             // 2. Sync User Profile & Header Images in Real-time from Firestore
-            const firestorePhoto = data.photo || data.photoURL || user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=FF6B00&color=fff&rounded=true&bold=true`;
             if (document.getElementById('profileUserImg')) {
                 document.getElementById('profileUserImg').src = firestorePhoto;
             }
