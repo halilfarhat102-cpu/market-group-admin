@@ -8396,6 +8396,17 @@ window.updateMerchantButtonUI = function(status) {
     }
 };
 
+window.openCreateStoreModalSync = function() {
+    console.log("openCreateStoreModalSync clicked");
+    if (typeof window.openCreateStoreModal === 'function') {
+        window.openCreateStoreModal().catch(err => {
+            alert("🚨 خطأ أثناء فتح شاشة المتجر:\n" + err.message);
+        });
+    } else {
+        alert("❌ خطأ: دالة openCreateStoreModal غير معرّفة على الكائن window!");
+    }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         window.renderShoppingLists();
