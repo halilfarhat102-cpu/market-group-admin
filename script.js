@@ -3096,13 +3096,16 @@ auth.onAuthStateChanged(async (user) => {
                     driverBtn.style.display = 'none';
                 }
 
-                if (userData.isMerchant || isSuperAdmin) {
+                if (userData.isMerchant || userData.merchantStatus === 'approved' || isSuperAdmin) {
                     isMerchantUser = true; // Sync global flag for navigation
-                    if (merchantEntryBtn) merchantEntryBtn.style.display = 'flex';
+                    updateMerchantButtonUI('approved');
                     if (typeof loadMerchantPageForUser === 'function') loadMerchantPageForUser(user);
-                } else if (merchantEntryBtn) {
+                } else if (userData.merchantStatus === 'pending') {
                     isMerchantUser = false;
-                    merchantEntryBtn.style.display = 'none';
+                    updateMerchantButtonUI('pending');
+                } else {
+                    isMerchantUser = false;
+                    updateMerchantButtonUI('none');
                 }
             } else {
                 // Secure atomic creation of user profile
@@ -3945,12 +3948,15 @@ async function loadUserProfile(user) {
             // Store globally for quick access in notify functions
             window.userNotifSettings = settings;
 
-            // Update Merchant Status
-            isMerchantUser = data.isMerchant === true;
-            const merchantEntryBtn = document.getElementById('merchantEntryBtn');
-            // Show only if merchant or super admin (checked later)
-            if (merchantEntryBtn) merchantEntryBtn.style.display = 'none'; 
-            if (isMerchantUser && merchantEntryBtn) merchantEntryBtn.style.display = 'flex';
+            // Update Merchant Status & Button State
+            isMerchantUser = data.isMerchant === true || data.merchantStatus === 'approved';
+            if (isMerchantUser) {
+                updateMerchantButtonUI('approved');
+            } else if (data.merchantStatus === 'pending') {
+                updateMerchantButtonUI('pending');
+            } else {
+                updateMerchantButtonUI('none');
+            }
 
             // Fill profile inputs if they exist (legacy support)
             if (document.getElementById('profilePhone')) document.getElementById('profilePhone').value = data.phone || '';
@@ -7687,7 +7693,119 @@ window.toggleItemInList = (listId, productId, element) => {
         window.saveShoppingLists();
         window.renderShoppingLists();
         
-        window.openAddToListModal(productId);
+// --- Merchant Onboarding & Registration Functions ---
+window.updateMerchantButtonUI = function(status) {
+    const createBtn = document.getElementById('createStoreBtn');
+    const merchantBtn = document.getElementById('merchantEntryBtn');
+    const textEl = document.getElementById('createStoreText');
+    const subtextEl = document.getElementById('createStoreSubtext');
+
+    if (status === 'approved' || status === true) {
+        if (createBtn) createBtn.style.display = 'none';
+        if (merchantBtn) merchantBtn.style.display = 'flex';
+    } else if (status === 'pending') {
+        if (merchantBtn) merchantBtn.style.display = 'none';
+        if (createBtn) {
+            createBtn.style.display = 'flex';
+            if (textEl) textEl.textContent = 'طلب متجرك قيد المراجعة ⏳';
+            if (subtextEl) subtextEl.textContent = 'يقوم آدمن الموقع بمراجعة طلبك حالياً للتفعيل';
+        }
+    } else {
+        if (merchantBtn) merchantBtn.style.display = 'none';
+        if (createBtn) {
+            createBtn.style.display = 'flex';
+            if (textEl) textEl.textContent = 'أنشئ متجرك الآن 🏪';
+            if (subtextEl) subtextEl.textContent = 'قدّم طلب انضمام كتاجر وابدأ البيع';
+        }
+    }
+};
+
+window.openCreateStoreModal = function() {
+    const user = getCurrentUser();
+    if (!user) {
+        alert("يرجى تسجيل الدخول أولاً كعميل لتقديم طلب إنشاء متجر");
+        return;
+    }
+    
+    // Auto fill available user details
+    const ownerInput = document.getElementById('storeOwnerInput');
+    const phoneInput = document.getElementById('storePhoneInput');
+    if (ownerInput && user.displayName) ownerInput.value = user.displayName;
+    if (phoneInput && user.phoneNumber) phoneInput.value = user.phoneNumber;
+
+    const modal = document.getElementById('createStoreModal');
+    if (modal) modal.style.display = 'flex';
+};
+
+window.submitMerchantApplication = async function(e) {
+    e.preventDefault();
+    const user = getCurrentUser();
+    if (!user) {
+        alert("يرجى تسجيل الدخول أولاً");
+        return;
+    }
+
+    const storeName = document.getElementById('storeNameInput').value.trim();
+    const ownerName = document.getElementById('storeOwnerInput').value.trim();
+    const phone = document.getElementById('storePhoneInput').value.trim();
+    const category = document.getElementById('storeCategoryInput').value;
+    const desc = document.getElementById('storeDescInput').value.trim();
+
+    if (!storeName || !ownerName || !phone) {
+        alert("يرجى إدخال كافة البيانات الأساسية المطلوبة");
+        return;
+    }
+
+    const submitBtn = document.getElementById('submitStoreBtn');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'جاري إرسال الطلب... ⌛';
+    }
+
+    try {
+        const merchantData = {
+            userId: user.uid,
+            storeName: storeName,
+            name: storeName,
+            ownerName: ownerName,
+            phone: phone,
+            category: category,
+            description: desc,
+            email: user.email || '',
+            photo: user.photoURL || '',
+            status: 'pending',
+            isApproved: false,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        // Save in merchants collection
+        await db.collection('merchants').doc(user.uid).set(merchantData, { merge: true });
+
+        // Update user doc
+        await db.collection('users').doc(user.uid).set({
+            merchantStatus: 'pending',
+            merchantStoreName: storeName,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+
+        const modal = document.getElementById('createStoreModal');
+        if (modal) modal.style.display = 'none';
+
+        if (typeof window.showToast === 'function') {
+            window.showToast("🎉 تم إرسال طلب إنشاء متجرك بنجاح! سيتم مراجعة الطلب من الإدارة والموافقة عليه.");
+        } else {
+            alert("🎉 تم إرسال طلب إنشاء متجرك بنجاح! سيتم مراجعة الطلب من الإدارة والموافقة عليه.");
+        }
+        
+        updateMerchantButtonUI('pending');
+    } catch (err) {
+        console.error("Submit merchant application error:", err);
+        alert("فشل إرسال الطلب: " + err.message);
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'إرسال طلب الانضمام كتاجر 🏁';
+        }
     }
 };
 

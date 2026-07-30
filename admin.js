@@ -3490,15 +3490,24 @@ window.blockCustomer = async (phone) => {
 
 window.toggleMerchantStatus = async (userId, currentStatus) => {
     const newStatus = !currentStatus;
-    if(!confirm(`هل تريد ${newStatus ? 'ترقية هذا العميل لتاجر؟' : 'إلغاء صفة التاجر عن هذا العميل؟'}`)) return;
+    if(!confirm(`هل تريد ${newStatus ? 'ترقية هذا العميل لتاجر والموافقة على متجره؟' : 'إلغاء صفة التاجر عن هذا العميل؟'}`)) return;
     
     try {
-        await db.collection('users').doc(userId).update({
+        await db.collection('users').doc(userId).set({
             isMerchant: newStatus,
+            merchantStatus: newStatus ? 'approved' : 'rejected',
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        showToast(`✅ تم ${newStatus ? 'الترقية لتاجر' : 'إلغاء صفة التاجر'} بنجاح`);
-        loadCustomers();
+        }, { merge: true });
+
+        await db.collection('merchants').doc(userId).set({
+            status: newStatus ? 'approved' : 'rejected',
+            isApproved: newStatus,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+
+        showToast(`✅ تم ${newStatus ? 'الترقية وتفعيل المتجر' : 'إلغاء صفة التاجر'} بنجاح`);
+        if (typeof loadCustomers === 'function') loadCustomers();
+        if (typeof loadMerchants === 'function') loadMerchants();
     } catch(err) {
         alert("فشل التحديث: " + err.message);
     }
