@@ -45,18 +45,22 @@ service cloud.firestore {
       // Admins can do anything
       allow read, write: if isAdmin();
       
-      // Users can read their own orders, and approved drivers can read pending/assigned orders
+      // Users can read their own orders, merchants can read orders for their store, and approved drivers can read pending/assigned orders
       allow read: if request.auth != null && (
         resource.data.userId == request.auth.uid || 
+        resource.data.merchantId == request.auth.uid ||
+        resource.data.storeId == request.auth.uid ||
         isApprovedDriver()
       );
       
       // Users can create orders
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
       
-      // Approved drivers can update orders to accept them or complete them
+      // Approved drivers & merchants can update orders
       allow update: if request.auth != null && (
-        (isApprovedDriver() && (resource.data.status == 'pending' || resource.data.driverId == request.auth.uid))
+        (isApprovedDriver() && (resource.data.status == 'pending' || resource.data.driverId == request.auth.uid)) ||
+        resource.data.merchantId == request.auth.uid ||
+        resource.data.storeId == request.auth.uid
       );
       
       allow delete: if false;
@@ -65,7 +69,6 @@ service cloud.firestore {
     // --- Products Collection ---
     match /products/{productId} {
       allow read: if true;
-      allow write: if isAdmin();
       allow create: if request.auth != null && (
         request.resource.data.merchantId == request.auth.uid || 
         request.resource.data.storeId == request.auth.uid ||
@@ -78,6 +81,7 @@ service cloud.firestore {
         resource.data.ownerUid == request.auth.uid ||
         isAdmin()
       );
+      allow write: if isAdmin();
     }
     
     match /merchantProducts/{productId} {
@@ -143,11 +147,19 @@ service cloud.firestore {
 
     match /merchants/{merchantId} {
       allow read: if true;
-      // Admin can do anything
       allow write: if isAdmin();
-      // Merchants can create or update ONLY their own store
-      allow create: if request.auth != null && request.resource.data.ownerUid == request.auth.uid;
-      allow update: if request.auth != null && resource.data.ownerUid == request.auth.uid;
+      allow create, update: if request.auth != null && (
+        merchantId == request.auth.uid ||
+        request.resource.data.ownerUid == request.auth.uid ||
+        request.resource.data.userId == request.auth.uid ||
+        request.resource.data.merchantId == request.auth.uid ||
+        (resource != null && (
+          resource.data.ownerUid == request.auth.uid ||
+          resource.data.userId == request.auth.uid ||
+          resource.data.merchantId == request.auth.uid
+        ))
+      );
+      allow delete: if isAdmin();
     }
 
     // --- Drivers Collection ---

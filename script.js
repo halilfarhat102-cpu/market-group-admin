@@ -4850,6 +4850,9 @@ window.getMerchantDashboardGPSLocation = function() {
 
         try {
             await db.collection('merchants').doc(user.uid).set({
+                ownerUid: user.uid,
+                userId: user.uid,
+                merchantId: user.uid,
                 lat: lat,
                 lng: lng,
                 address: address,
