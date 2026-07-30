@@ -7679,7 +7679,7 @@ window.openAddToListModal = (productId) => {
 };
 
 window.toggleItemInList = (listId, productId, element) => {
-    const list = window.myShoppingLists.find(l => l.id === listId);
+    const list = window.myShoppingLists ? window.myShoppingLists.find(l => l.id === listId) : null;
     if(list) {
         const itemIndex = list.items.indexOf(productId);
         if(itemIndex === -1) {
@@ -7690,9 +7690,10 @@ window.toggleItemInList = (listId, productId, element) => {
             if(window.showToast) window.showToast("تمت ازالة المنتج من القائمة");
         }
         list.updatedAt = new Date().toISOString();
-        window.saveShoppingLists();
-        window.renderShoppingLists();
-        
+        if (typeof window.saveShoppingLists === 'function') window.saveShoppingLists();
+        if (typeof window.renderShoppingLists === 'function') window.renderShoppingLists();
+    }
+};
 // --- Merchant Onboarding & Registration Functions ---
 window.updateMerchantButtonUI = function(status) {
     const createBtn = document.getElementById('createStoreBtn');
