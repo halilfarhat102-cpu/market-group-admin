@@ -6437,7 +6437,10 @@ window.merchants = [];
 async function loadMerchants() {
     try {
         const snap = await db.collection('merchants').get();
-        window.merchants = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        // Filter ONLY approved merchants so pending/unapproved stores are hidden from public view
+        window.merchants = snap.docs
+            .map(doc => ({ id: doc.id, ...doc.data() }))
+            .filter(m => m.status === 'approved' || m.isApproved === true || m.approved === true);
         renderStores();
     } catch (err) { console.error("Error loading merchants:", err); }
 }
@@ -6716,6 +6719,8 @@ window.saveMyStore = async () => {
         }
         const coverUrl = coversArray[0] || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800';
 
+        const isAlreadyApproved = existingData ? (existingData.status === 'approved' || existingData.isApproved === true) : false;
+
         const storeData = {
             name,
             type,
@@ -6728,18 +6733,27 @@ window.saveMyStore = async () => {
             workingHours: workingHours,
             ownerUid: user.uid,
             ownerEmail: user.email || '',
+            status: isAlreadyApproved ? 'approved' : 'pending',
+            isApproved: isAlreadyApproved,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
         
         console.log("Finalizing Firestore write for store data...");
         if (existingData) {
-            await db.collection('merchants').doc(existingSnap.docs[0].id).update(storeData);
+            await db.collection('merchants').doc(existingSnap.docs[0].id).set(storeData, { merge: true });
             console.log("Store updated successfully");
         } else {
             storeData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-            await db.collection('merchants').add(storeData);
+            await db.collection('merchants').doc(user.uid).set(storeData, { merge: true });
             console.log("New store created successfully");
         }
+
+        // Also update user status doc to sync
+        await db.collection('users').doc(user.uid).set({
+            merchantStatus: isAlreadyApproved ? 'approved' : 'pending',
+            merchantStoreName: name,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
         
         const modal = document.getElementById('createStoreModal');
         if (modal) modal.style.display = 'none';
@@ -6748,7 +6762,11 @@ window.saveMyStore = async () => {
         await loadMerchants(); 
         await loadMerchantPageForUser(user);
         
-        showToast('✅ تم نشر متجرك بنجاح! يظهر الآن للعملاء.');
+        if (isAlreadyApproved) {
+            showToast('✅ تم تحديث ونشر متجرك بنجاح!');
+        } else {
+            showToast('⏳ تم تقديم بيانات متجرك! سيتم مراجعة المتجر ونشره للعملاء بعد الموافقة عليه من لوحة التحكم.');
+        }
     } catch(err) {
         console.error("Save Store Critical Error:", err);
         alert("حدث خطأ أثناء حفظ المتجر: " + err.message);
