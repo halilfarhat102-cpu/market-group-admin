@@ -16,6 +16,30 @@ window.auth = auth;
 window.db = db;
 window.pendingStoreCovers = [];
 
+// --- Store Category Arabic Translations (Globally Available) ---
+window.STORE_CATEGORY_TRANSLATIONS = {
+    'supermarket': 'سوبر ماركت ومواد غذائية 🛒',
+    'electronics': 'إلكترونيات وموبايلات 📱',
+    'fashion': 'ملابس وأزياء 👔',
+    'clothes': 'ملابس وأزياء 👔',
+    'pharmacy': 'صيدلية ومستلزمات طبية 💊',
+    'restaurant': 'مطعم ومأكولات 🍔',
+    'restaurants': 'مطاعم ومأكولات 🍔',
+    'food': 'مطاعم ومأكولات 🍔',
+    'general': 'عام / منوعات 📦',
+    'bakery': 'مخبوزات وحلويات 🥐',
+    'veggies': 'خضروات وفواكه 🍎',
+    'meat': 'جزارة ولحوم 🥩',
+    'home': 'أدوات منزلية 🏠',
+    'offers': 'عروض مميزة 🏷️'
+};
+
+window.getStoreCategoryArabicName = function(catKey) {
+    if (!catKey) return 'نشاط تجاري 🏪';
+    const keyLower = String(catKey).trim().toLowerCase();
+    return window.STORE_CATEGORY_TRANSLATIONS[keyLower] || window.STORE_CATEGORY_TRANSLATIONS[catKey] || catKey;
+};
+
 // ==========================================
 // 🔍 GLOBAL DIAGNOSTIC & BUTTON TRACKER SYSTEM
 // ==========================================
@@ -763,7 +787,7 @@ function createProductCardHTML(p) {
             <img src="${p.image}" alt="${p.name}" loading="lazy">
         </div>
         <div class="product-info">
-            <span class="category-label">${p.category || 'عام'}</span>
+            <span class="category-label">${window.getStoreCategoryArabicName(p.category)}</span>
             <h3>${p.name}</h3>
             <div class="rating-bar">
                 <div class="rating-stars">
@@ -1026,7 +1050,7 @@ function updateWishlistUI() {
                     <img src="${p.image}" alt="${p.name}" loading="lazy">
                 </div>
                 <div class="product-info">
-                    <span class="category-label">${p.category || 'عام'}</span>
+                    <span class="category-label">${window.getStoreCategoryArabicName(p.category)}</span>
                     <h3>${p.name}</h3>
                     <div class="price-container">
                         <div class="price-wrapper">
@@ -1433,26 +1457,7 @@ window.closeQuickViewModal = () => {
     document.getElementById('quickViewModal').style.display = 'none';
 };
 
-// --- Store Category Arabic Translations ---
-window.STORE_CATEGORY_TRANSLATIONS = {
-    'supermarket': 'سوبر ماركت ومواد غذائية 🛒',
-    'electronics': 'إلكترونيات وموبايلات 📱',
-    'fashion': 'ملابس وأزياء 👔',
-    'pharmacy': 'صيدلية ومستلزمات طبية 💊',
-    'restaurant': 'مطعم ومأكولات 🍔',
-    'general': 'عام / منوعات 📦',
-    'bakery': 'مخبوزات وحلويات 🥐',
-    'veggies': 'خضروات وفواكه 🍎',
-    'meat': 'جزارة ولحوم 🥩',
-    'home': 'أدوات منزلية 🏠',
-    'offers': 'عروض مميزة 🏷️'
-};
-
-window.getStoreCategoryArabicName = function(catKey) {
-    if (!catKey) return 'نشاط تجاري 🏪';
-    const keyLower = String(catKey).trim().toLowerCase();
-    return window.STORE_CATEGORY_TRANSLATIONS[keyLower] || window.STORE_CATEGORY_TRANSLATIONS[catKey] || catKey;
-};
+// --- Helper: Delivery Fee Calculation ---
 
 window.calculateStoreToCustomerDeliveryFee = async function(customerLat = null, customerLng = null) {
     const activeCart = (window.cart && window.cart.length > 0) ? window.cart : (typeof cart !== 'undefined' ? cart : []);
